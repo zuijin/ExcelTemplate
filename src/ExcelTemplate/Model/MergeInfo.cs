@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ExcelTemplate
+namespace ExcelTemplate.Model
 {
     public class MergeInfo
     {

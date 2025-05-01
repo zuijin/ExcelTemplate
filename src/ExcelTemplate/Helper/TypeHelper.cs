@@ -14,7 +14,7 @@ namespace ExcelTemplate.Helper
         /// <returns></returns>
         public static bool IsSimpleType(Type type)
         {
-            if (type == typeof(string))
+            if (type == typeof(string) || type == typeof(DateTime))
                 return true;
 
             if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
@@ -86,6 +86,33 @@ namespace ExcelTemplate.Helper
 
             // 非泛型集合（如ArrayList）返回object
             return typeof(object);
+        }
+
+        /// <summary>
+        /// 检查是否派生自泛型类
+        /// </summary>
+        /// <param name="genericBaseType"></param>
+        /// <param name="typeToCheck"></param>
+        /// <returns></returns>
+        public static bool IsSubclassOfRawGeneric(Type genericBaseType, Type typeToCheck)
+        {
+            if (genericBaseType == null || typeToCheck == null)
+                return false;
+
+            // 检查当前类型
+            if (typeToCheck.IsGenericType && typeToCheck.GetGenericTypeDefinition() == genericBaseType)
+            {
+                return true;
+            }
+
+            // 检查基类
+            if (typeToCheck.BaseType != null && IsSubclassOfRawGeneric(genericBaseType, typeToCheck.BaseType))
+            {
+                return true;
+            }
+
+            // 检查实现的接口
+            return typeToCheck.GetInterfaces().Any(interfaceType => interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == genericBaseType);
         }
     }
 }

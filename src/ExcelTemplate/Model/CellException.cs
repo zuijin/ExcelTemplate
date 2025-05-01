@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ExcelTemplate
+namespace ExcelTemplate.Model
 {
     /// <summary>
     /// 单元格异常

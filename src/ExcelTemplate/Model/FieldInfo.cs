@@ -2,7 +2,7 @@
 using System.Reflection;
 using ExcelTemplate.Attributes;
 
-namespace ExcelTemplate
+namespace ExcelTemplate.Model
 {
     /// <summary>
     /// excel字段定义
