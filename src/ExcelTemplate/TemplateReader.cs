@@ -2,30 +2,19 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Text;
-using ExcelTemplate.Attributes;
 using ExcelTemplate.Helper;
 using ExcelTemplate.Model;
-using NPOI.HSSF.Model;
-using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
 using NPOI.Util;
-using NPOI.XSSF.UserModel;
-using FieldInfo = ExcelTemplate.Model.FieldInfo;
 
 namespace ExcelTemplate
 {
     public class TemplateReader
     {
         IWorkbook _workbook;
-        List<FieldInfo> _fieldInfos = new List<FieldInfo>();
         TemplateDesign _design;
-        ExcelType _excelType;
         Type _type;
-        object _data;
-
 
         List<CellException> _exceptionList = new List<CellException>();
 
@@ -37,50 +26,15 @@ namespace ExcelTemplate
             _workbook = workbook;
             _design = TypeDesignAnalysis.DesignAnalysis(type);
             _type = type;
-            _data = Activator.CreateInstance(type);
-
-            if (workbook is XSSFWorkbook)
-            {
-                _excelType = ExcelType.Xlsx;
-            }
-            else if (workbook is HSSFWorkbook)
-            {
-                _excelType = ExcelType.Xls;
-            }
-            else
-            {
-                throw new Exception("不支持的文件类型");
-            }
-
-            Read();
         }
 
         /// <summary>
         /// 从文件中生成 ExcelWrap
         /// </summary>
-        public static TemplateReader FromFile(Stream file, string fileName, Type type)
+        public static TemplateReader FromFile(Stream file, Type type)
         {
-            MemoryStream ms = new MemoryStream();
-            file.CopyTo(ms);
-            ms.Seek(0, SeekOrigin.Begin);
-
-            IWorkbook book;
-
-            string fileExt = Path.GetExtension(fileName).ToLower();
-            if (fileExt == ".xlsx")
-            {
-                book = new XSSFWorkbook(ms);
-            }
-            else if (fileExt == ".xls")
-            {
-                book = new HSSFWorkbook(ms);
-            }
-            else
-            {
-                throw new Exception("不支持的文件类型");
-            }
-
-            return new TemplateReader(book, type);
+            var workbook = WorkbookFactory.Create(file);
+            return new TemplateReader(workbook, type);
         }
 
         /// <summary>
@@ -95,12 +49,13 @@ namespace ExcelTemplate
         /// <returns></returns>
         public object GetData()
         {
+            var obj = Read();
             if (IsError)
             {
                 throw _exceptionList[0];
             }
 
-            return _data;
+            return obj;
         }
 
         /// <summary>
@@ -164,8 +119,9 @@ namespace ExcelTemplate
         /// <summary>
         /// 读取表单数据
         /// </summary>
-        private void Read()
+        private object Read()
         {
+            var data = Activator.CreateInstance(_type);
             var sheet = _workbook.GetSheetAt(0);
             var valueBlocks = _design.Where(a => a.BlockType == BlockType.Variable);
             var props = _type.GetProperties();
@@ -176,7 +132,7 @@ namespace ExcelTemplate
                 var cell = row.GetCell(block.Position.Col, MissingCellPolicy.CREATE_NULL_AS_BLANK);
                 var cellVal = GetCellValue(cell);
 
-                ObjectHelper.SetObjectValue(_data, block.ValuePath, cellVal);
+                ObjectHelper.SetObjectValue(data, block.ValuePath, cellVal);
             }
 
             var arrBlocks = _design.Where(a => a.BlockType == BlockType.Array);
@@ -192,21 +148,12 @@ namespace ExcelTemplate
                         throw new Exception("只支持 List<T> 类型的集合");
                     }
 
-                    //var tmp = prop.GetValue(_data);
-                    //if (tmp == null) //如果值为空，则自动生成一个值，因为这里是列表
-                    //{
-                    //    tmp = Activator.CreateInstance(prop.PropertyType);
-                    //    prop.SetValue(_data, tmp);
-                    //}
-
-                    //var subType = tmp.GetType().GenericTypeArguments[0];
-
-
                     var list = ReadList(sheet, group.ToList(), prop.PropertyType);
-                    prop.SetValue(_data, list);
+                    prop.SetValue(data, list);
                 }
             }
 
+            return data;
         }
 
         /// <summary>
@@ -237,7 +184,8 @@ namespace ExcelTemplate
                     var val = GetCellValue(cell);
                     if (val != null)
                     {
-                        ObjectHelper.SetObjectValue(obj, block.ValuePath, val);
+                        var fieldPath = block.ValuePath.Substring(block.ValuePath.IndexOf('.') + 1);
+                        ObjectHelper.SetObjectValue(obj, fieldPath, val);
                     }
                 }
 

@@ -198,13 +198,6 @@ namespace ExcelTemplate.Helper
 
             public List<HeaderNode> Children { get; set; } = new List<HeaderNode>();
         }
-
-        private enum HeaderNodeType
-        {
-            Root = 0,
-            Leaf = 1,
-            Normal = 2,
-        }
     }
 
 

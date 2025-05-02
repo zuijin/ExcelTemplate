@@ -21,25 +21,28 @@ namespace ExcelTemplate.Helper
             {
                 var props = currObj.GetType().GetProperties();
                 var prop = props.FirstOrDefault(a => a.Name == fieldArr[i]);
-                if (prop != null)
+                if (prop == null)
                 {
-                    if (i < (fieldArr.Length - 1))
-                    {
-                        var tmp = prop.GetValue(currObj);
-                        if (tmp == null)
-                        {
-                            tmp = Activator.CreateInstance(prop.PropertyType);
-                            prop.SetValue(currObj, tmp);
-                        }
-
-                        currObj = tmp;
-                    }
-                    else
-                    {
-                        val = Convert.ChangeType(val, prop.PropertyType);
-                        prop.SetValue(currObj, val);
-                    }
+                    throw new Exception($"类型 {obj.GetType().Name} 内找不到字段 {fieldPath}");
                 }
+
+                if (i < (fieldArr.Length - 1))
+                {
+                    var tmp = prop.GetValue(currObj);
+                    if (tmp == null)
+                    {
+                        tmp = Activator.CreateInstance(prop.PropertyType);
+                        prop.SetValue(currObj, tmp);
+                    }
+
+                    currObj = tmp;
+                }
+                else
+                {
+                    val = Convert.ChangeType(val, prop.PropertyType);
+                    prop.SetValue(currObj, val);
+                }
+
             }
         }
 
