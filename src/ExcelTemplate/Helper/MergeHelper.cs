@@ -10,7 +10,7 @@ namespace ExcelTemplate.Helper
     public static class MergeHelper
     {
 
-        public static List<Block> MergeHeader(Position position, List<HeaderBlock> headerBlocks)
+        public static List<TableHeaderBlock> MergeHeader(Position position, List<TypeRawHeader> headerBlocks)
         {
             headerBlocks = headerBlocks.OrderBy(a => a.Block.Position.Col).ToList();
             var maxMergeRows = headerBlocks.Max(a => a.MergeTitles.Length + 1);
@@ -28,7 +28,7 @@ namespace ExcelTemplate.Helper
         /// <param name="headerBlocks"></param>
         /// <param name="maxHeight"></param>
         /// <returns></returns>
-        private static HeaderNode BuildNodeTree(List<HeaderBlock> headerBlocks, int maxHeight)
+        private static HeaderNode BuildNodeTree(List<TypeRawHeader> headerBlocks, int maxHeight)
         {
             var rootNode = new HeaderNode();
             foreach (var block in headerBlocks)
@@ -53,7 +53,7 @@ namespace ExcelTemplate.Helper
                 {
                     Width = 1,
                     Height = (maxHeight - height),
-                    Title = block.Block.Value?.ToString() ?? "",
+                    Title = block.Block.Text?.ToString() ?? "",
                     Block = block.Block,
                 });
             }
@@ -135,16 +135,15 @@ namespace ExcelTemplate.Helper
         /// <param name="position"></param>
         /// <param name="heightOffset"></param>
         /// <returns></returns>
-        private static List<Block> GetAllBlocks(HeaderNode node, Position position, int heightOffset = 0, int widthOffset = 0)
+        private static List<TableHeaderBlock> GetAllBlocks(HeaderNode node, Position position, int heightOffset = 0, int widthOffset = 0)
         {
-            var blocks = new List<Block>();
+            var blocks = new List<TableHeaderBlock>();
             if (node.Width > 0 && node.Height > 0 && node.Children.Count > 0) //非根节点，非叶子节点
             {
-                var block = new Block()
+                var block = new TableHeaderBlock()
                 {
-                    BlockType = BlockType.Constant,
                     Position = position.GetOffset(heightOffset, widthOffset),
-                    Value = node.Title,
+                    Text = node.Title,
                 };
 
                 if (node.Width > 1 || node.Height > 1)
@@ -194,7 +193,7 @@ namespace ExcelTemplate.Helper
             /// <summary>
             /// 叶子节点才会有值，挂载原始的区块定义
             /// </summary>
-            public Block Block { get; set; }
+            public TableHeaderBlock Block { get; set; }
 
             public List<HeaderNode> Children { get; set; } = new List<HeaderNode>();
         }

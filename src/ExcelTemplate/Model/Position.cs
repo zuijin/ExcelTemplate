@@ -47,19 +47,27 @@ namespace ExcelTemplate.Model
         /// </summary>
         public string Letter { get; private set; } = "A1";
 
-        public Position GetNextRow(int rowOffset = 1)
-        {
-            return new Position(Row + rowOffset, Col);
-        }
-
-        public Position GetNextCol(int colOffset = 1)
-        {
-            return new Position(Row, Col + colOffset);
-        }
-
+        /// <summary>
+        /// 获取一个新的偏移位置
+        /// </summary>
+        /// <param name="rowOffset"></param>
+        /// <param name="colOffset"></param>
+        /// <returns></returns>
         public Position GetOffset(int rowOffset, int colOffset)
         {
             return new Position(Row + rowOffset, Col + colOffset);
+        }
+
+        /// <summary>
+        /// 使当前位置信息进行偏移
+        /// </summary>
+        /// <param name="rowOffset"></param>
+        /// <param name="colOffset"></param>
+        public void ApplyOffset(int rowOffset = 0, int colOffset = 0)
+        {
+            this.Row += rowOffset;
+            this.Col += colOffset;
+            this.Letter = LetterHelper.GetLetter(this.Row, this.Col);
         }
 
         public static bool IsPositionLetter(string letter)

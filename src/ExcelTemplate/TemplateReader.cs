@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using ExcelTemplate.Helper;
 using ExcelTemplate.Model;
+using NPOI.SS.Formula;
 using NPOI.SS.UserModel;
 using NPOI.Util;
 
@@ -123,34 +124,40 @@ namespace ExcelTemplate
         {
             var data = Activator.CreateInstance(_type);
             var sheet = _workbook.GetSheetAt(0);
-            var valueBlocks = _design.Where(a => a.BlockType == BlockType.Variable);
-            var props = _type.GetProperties();
+            var currentPage = _design.BlockPage;
 
-            foreach (var block in valueBlocks)
+            while (currentPage != null)
             {
-                var row = sheet.GetRow(block.Position.Row);
-                var cell = row.GetCell(block.Position.Col, MissingCellPolicy.CREATE_NULL_AS_BLANK);
-                var cellVal = GetCellValue(cell);
+                var blocks = currentPage.RowBlocks;
+                var valueBlocks = blocks.Where(a => a is ValueBlock);
+                var props = _type.GetProperties();
 
-                ObjectHelper.SetObjectValue(data, block.ValuePath, cellVal);
-            }
-
-            var arrBlocks = _design.Where(a => a.BlockType == BlockType.Array);
-            var groupBlocks = arrBlocks.GroupBy(a => a.ValuePath.Split('.')[0]);
-            foreach (var group in groupBlocks)
-            {
-                var fieldName = group.Key;
-                var prop = props.FirstOrDefault(a => a.Name == fieldName);
-                if (prop != null)
+                foreach (ValueBlock block in valueBlocks)
                 {
-                    if (!TypeHelper.IsSubclassOfRawGeneric(typeof(List<>), prop.PropertyType))
-                    {
-                        throw new Exception("只支持 List<T> 类型的集合");
-                    }
+                    var row = sheet.GetRow(block.Position.Row);
+                    var cell = row.GetCell(block.Position.Col, MissingCellPolicy.CREATE_NULL_AS_BLANK);
+                    var cellVal = GetCellValue(cell);
 
-                    var list = ReadList(sheet, group.ToList(), prop.PropertyType);
-                    prop.SetValue(data, list);
+                    ObjectHelper.SetObjectValue(data, block.FieldPath, cellVal);
                 }
+
+                var tableBlocks = blocks.Where(a => a is TableBlock).Select(a => (TableBlock)a);
+                foreach (var table in tableBlocks)
+                {
+                    var prop = props.FirstOrDefault(a => a.Name == table.TableName);
+                    if (prop != null)
+                    {
+                        if (!TypeHelper.IsSubclassOfRawGeneric(typeof(List<>), prop.PropertyType))
+                        {
+                            throw new Exception("只支持 List<T> 类型的集合");
+                        }
+
+                        var list = ReadList(sheet, table.Body, prop.PropertyType);
+                        prop.SetValue(data, list);
+                    }
+                }
+
+                currentPage = currentPage.Next;
             }
 
             return data;
@@ -163,11 +170,11 @@ namespace ExcelTemplate
         /// <param name="blocks"></param>
         /// <param name="listType"></param>
         /// <returns></returns>
-        private object ReadList(ISheet sheet, List<Block> blocks, Type listType)
+        private object ReadList(ISheet sheet, List<TableBodyBlock> blocks, Type listType)
         {
             object listObj = Activator.CreateInstance(listType);
             Type elementType = listType.GenericTypeArguments[0];
-            var rowIndex = blocks.Max(a => Math.Max(a.Position.Row, a.MergeTo?.Row ?? 0)) + 1;
+            var rowIndex = blocks.First().Position.Row;
 
             while (true)
             {
@@ -184,7 +191,7 @@ namespace ExcelTemplate
                     var val = GetCellValue(cell);
                     if (val != null)
                     {
-                        var fieldPath = block.ValuePath.Substring(block.ValuePath.IndexOf('.') + 1);
+                        var fieldPath = block.FieldPath.Substring(block.FieldPath.IndexOf('.') + 1);
                         ObjectHelper.SetObjectValue(obj, fieldPath, val);
                     }
                 }

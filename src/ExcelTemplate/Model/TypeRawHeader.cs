@@ -1,8 +1,8 @@
 ﻿namespace ExcelTemplate.Model
 {
-    public class HeaderBlock
+    public class TypeRawHeader
     {
-        public Block Block { get; set; }
+        public TableHeaderBlock Block { get; set; }
 
         public string[] MergeTitles { get; set; }
     }

@@ -13,7 +13,7 @@ namespace ExcelTemplate
     {
         public static TemplateDesign DesignAnalysis(Type type, List<PropertyInfo>? parents = null)
         {
-            var blocks = new TemplateDesign();
+            var blocks = new List<IBlock>();
             var props = type.GetProperties();
             foreach (PropertyInfo prop in props)
             {
@@ -24,7 +24,7 @@ namespace ExcelTemplate
                 }
                 else if (IsSpecialCollectionType(propType))
                 {
-                    blocks.AddRange(GetCollectionTypeBlocks(prop, parents));
+                    blocks.Add(GetCollectionTypeBlocks(prop, parents));
                 }
                 else
                 {
@@ -32,7 +32,9 @@ namespace ExcelTemplate
                 }
             }
 
-            return blocks;
+            var page = ReorganizePage(blocks);
+
+            return new TemplateDesign(DesignSourceType.Object, page);
         }
 
 
@@ -59,17 +61,16 @@ namespace ExcelTemplate
         /// <param name="prop"></param>
         /// <param name="parent"></param>
         /// <returns></returns>
-        private static List<Block> GetSimpleTypeBlocks(PropertyInfo prop, List<PropertyInfo>? parents = null)
+        private static List<IBlock> GetSimpleTypeBlocks(PropertyInfo prop, List<PropertyInfo>? parents = null)
         {
-            var blocks = new List<Block>();
+            var blocks = new List<IBlock>();
             var titleAttr = prop.GetCustomAttribute<TitleAttribute>();
             if (titleAttr != null)
             {
-                blocks.Add(new Block()
+                blocks.Add(new TextBlock()
                 {
-                    BlockType = BlockType.Constant,
                     Position = titleAttr.Position,
-                    Value = titleAttr.Title,
+                    Text = titleAttr.Title,
                     MergeTo = titleAttr.MergeTo,
                 });
             }
@@ -77,12 +78,11 @@ namespace ExcelTemplate
             var valueAttr = prop.GetCustomAttribute<ValueAttribute>();
             if (valueAttr != null)
             {
-                blocks.Add(new Block()
+                blocks.Add(new ValueBlock()
                 {
-                    BlockType = BlockType.Variable,
                     Position = valueAttr.Position,
                     MergeTo = valueAttr.MergeTo,
-                    ValuePath = PathCombine(parents?.Select(a => a.Name), prop.Name)
+                    FieldPath = PathCombine(parents?.Select(a => a.Name), prop.Name)
                 });
             }
 
@@ -95,13 +95,12 @@ namespace ExcelTemplate
         /// <param name="prop"></param>
         /// <param name="parent"></param>
         /// <returns></returns>
-        private static List<Block> GetCollectionTypeBlocks(PropertyInfo prop, List<PropertyInfo>? parents = null)
+        private static TableBlock GetCollectionTypeBlocks(PropertyInfo prop, List<PropertyInfo>? parents = null)
         {
-            var blocks = new List<Block>();
             var valueAttr = prop.GetCustomAttribute<ValueAttribute>();
             if (valueAttr == null)
             {
-                return blocks;
+                return null;
             }
 
             if (string.IsNullOrWhiteSpace(valueAttr.Position) || !Position.IsPositionLetter(valueAttr.Position))
@@ -109,9 +108,11 @@ namespace ExcelTemplate
                 throw new Exception("集合的位置格式不正确");
             }
 
+            var tablePosition = valueAttr.Position;
             var elementType = TypeHelper.GetCollectionElementType(prop.PropertyType);
             var subProps = elementType.GetProperties();
-            var tmpList = new List<HeaderBlock>();
+            var tmpList = new List<TypeRawHeader>();
+            var dicMapper = new Dictionary<TableHeaderBlock, TableBodyBlock>();
 
             foreach (var subProp in subProps)
             {
@@ -125,12 +126,17 @@ namespace ExcelTemplate
                 var titleAttr = subProp.GetCustomAttribute<TitleAttribute>();
                 if (titleAttr != null)
                 {
-                    var block = new Block()
+                    var headerBlock = new TableHeaderBlock()
                     {
-                        BlockType = BlockType.Array,
                         Position = titleAttr.Position,
-                        ValuePath = path,
-                        Value = titleAttr.Title,
+                        Text = titleAttr.Title,
+                    };
+
+                    //表体默认为表头的下一行
+                    var bodyBlock = new TableBodyBlock()
+                    {
+                        Position = headerBlock.Position.GetOffset(1, 0),
+                        FieldPath = path,
                     };
 
                     string[] mergeTitles = new string[0];
@@ -140,13 +146,56 @@ namespace ExcelTemplate
                         mergeTitles = mergeAttr.Titles;
                     }
 
-                    tmpList.Add(new HeaderBlock() { Block = block, MergeTitles = mergeTitles });
+                    dicMapper.Add(headerBlock, bodyBlock);
+                    tmpList.Add(new TypeRawHeader() { Block = headerBlock, MergeTitles = mergeTitles });
                 }
             }
 
-            blocks = MergeHelper.MergeHeader(valueAttr.Position, tmpList);
 
-            return blocks;
+            var headers = MergeHelper.MergeHeader(tablePosition, tmpList);
+            foreach (var item in dicMapper)
+            {
+                item.Value.Position = item.Key.Position.GetOffset(1, 0);
+            }
+
+            var bodys = dicMapper.Select(item => item.Value).ToList();
+
+            return new TableBlock()
+            {
+                TableName = PathCombine(parents?.Select(a => a.Name), prop.Name),
+                Position = tablePosition,
+                Header = headers,
+                Body = bodys,
+            };
+        }
+
+        /// <summary>
+        /// 重新整理Block顺序，按照层叠式结构处理
+        /// </summary>
+        /// <param name="blocks"></param>
+        /// <returns></returns>
+        public static BlockPage ReorganizePage(List<IBlock> blocks)
+        {
+            if (blocks == null || !blocks.Any())
+            {
+                return null;
+            }
+
+            var groups = blocks.GroupBy(a => a.Position.Row).OrderBy(a => a.Key);
+            var page = new BlockPage();
+            var current = page;
+            foreach (var rowBlocks in groups)
+            {
+                var tmp = new BlockPage()
+                {
+                    RowBlocks = rowBlocks.ToList(),
+                };
+
+                current.Next = tmp;
+                current = tmp;
+            }
+
+            return page.Next;
         }
 
         private static string PathCombine(params string?[] paths)
