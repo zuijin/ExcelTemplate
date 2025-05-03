@@ -87,6 +87,11 @@ namespace ExcelTemplate.Model
             return true;
         }
 
+        public override string ToString()
+        {
+            return this.Letter;
+        }
+
         public static implicit operator Position((int, int) v)
         {
             return new Position(v.Item1, v.Item2);

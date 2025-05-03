@@ -19,13 +19,13 @@ namespace ExcelTemplate.Test
 
             object[][] tmp =
             [
-                new object[]{123,456,"eeee",DateTime.Parse("2000/5/6") },
-                new object[]{124,457,"aa",DateTime.Parse("2000/5/7") },
-                new object[]{125,458,"bb",DateTime.Parse("2000/5/8") },
-                new object[]{126,459,"cc",DateTime.Parse("2000/5/9") },
-                new object[]{127,460,"dd",DateTime.Parse("2000/5/10") },
-                new object[]{128,461,"eeee",DateTime.Parse("2000/5/11") },
-                new object[]{129,462,"ff",DateTime.Parse("2000/5/12") },
+                [123,456,"eeee",DateTime.Parse("2000/5/6")],
+                [124,457,"aa",DateTime.Parse("2000/5/7")],
+                [125,458,"bb",DateTime.Parse("2000/5/8")],
+                [126,459,"cc",DateTime.Parse("2000/5/9")],
+                [127,460,"dd",DateTime.Parse("2000/5/10")],
+                [128,461,"eeee",DateTime.Parse("2000/5/11")],
+                [129,462,"ff",DateTime.Parse("2000/5/12")],
             ];
 
             for (int i = 0; i < data.Children.Count; i++)
@@ -36,8 +36,6 @@ namespace ExcelTemplate.Test
                 Assert.Equal(item.Field_3, tmp[i][2]);
                 Assert.Equal(item.Field_4, tmp[i][3]);
             }
-
-
         }
 
         /// <summary>
@@ -55,13 +53,13 @@ namespace ExcelTemplate.Test
 
             object[][] tmp =
             [
-                new object[]{123,456,"1111",DateTime.Parse("2000/5/6") },
-                new object[]{124,457,"aa",DateTime.Parse("2000/5/7") },
-                new object[]{125,458,"bb",DateTime.Parse("2000/5/8") },
-                new object[]{126,459,"cc",DateTime.Parse("2000/5/9") },
-                new object[]{127,460,"dd",DateTime.Parse("2000/5/10") },
-                new object[]{128,461,"eeee",DateTime.Parse("2000/5/11") },
-                new object[]{129,462,"ff",DateTime.Parse("2000/5/12") },
+                [123,456,"1111",DateTime.Parse("2000/5/6")],
+                [124,457,"aa",DateTime.Parse("2000/5/7")],
+                [125,458,"bb",DateTime.Parse("2000/5/8")],
+                [126,459,"cc",DateTime.Parse("2000/5/9")],
+                [127,460,"dd",DateTime.Parse("2000/5/10")],
+                [128,461,"eeee",DateTime.Parse("2000/5/11")],
+                [129,462,"ff",DateTime.Parse("2000/5/12")],
             ];
 
             for (int i = 0; i < data.Children.Count; i++)
@@ -72,7 +70,6 @@ namespace ExcelTemplate.Test
                 Assert.Equal(item.Field_3, tmp[i][2]);
                 Assert.Equal(item.Field_4, tmp[i][3]);
             }
-
 
         }
     }
