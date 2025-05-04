@@ -11,7 +11,7 @@ namespace ExcelTemplate.Test
             var file = File.Open(filePath, FileMode.Open);
             var template = TemplateReader.Create(file, typeof(FromModel));
 
-            dynamic data = template.GetData();
+            dynamic data = template.Read();
             Assert.Equal(data.Field_1, 123);
             Assert.Equal(data.Field_2, 456);
             Assert.Equal(data.Field_3, "aabcc");

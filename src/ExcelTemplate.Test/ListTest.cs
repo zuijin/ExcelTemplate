@@ -14,7 +14,7 @@ namespace ExcelTemplate.Test
             var file = File.Open(filePath, FileMode.Open);
             var template = TemplateReader.Create(file, typeof(ListModel));
 
-            dynamic data = template.GetData();
+            dynamic data = template.Read();
             Assert.Equal(data.Children.Count, 7);
 
             object[][] tmp =
@@ -48,7 +48,7 @@ namespace ExcelTemplate.Test
             var file = File.Open(filePath, FileMode.Open);
             var template = TemplateReader.Create(file, typeof(MergeHeaderListModel));
 
-            dynamic data = template.GetData();
+            dynamic data = template.Read();
             Assert.Equal(data.Children.Count, 7);
 
             object[][] tmp =

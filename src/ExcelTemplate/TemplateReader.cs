@@ -48,10 +48,10 @@ namespace ExcelTemplate
         }
 
         /// <summary>
-        /// 获取数据
+        /// 读取数据
         /// </summary>
         /// <returns></returns>
-        public object GetData()
+        public object Read()
         {
             var obj = Read(_workbook, _type, _design);
             return obj;
