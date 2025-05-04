@@ -65,13 +65,14 @@ namespace ExcelTemplate
             var data = Activator.CreateInstance(type);
             var sheet = workBook.GetSheetAt(0);
             var current = (BlockSection)design.BlockSection.Clone();
-            int lastRow = 0;
+            int nextRow = 0;
 
             while (current != null)
             {
                 // 重新匹配区块位置，原因是，如果上一个区块是 Table 的话，
                 // 受到 Table 的数据影响，本身会占用更多的行，导致下一个区块的实际位置会跟模版定义时的位置不符
-                ReMatchingPosition(current, sheet, lastRow + 1);
+                ReMatchingPosition(current, sheet, nextRow);
+                var lastRow = 0;
 
                 if (DesignInspector.IsTableSection(current))
                 {
@@ -83,6 +84,7 @@ namespace ExcelTemplate
                 }
 
                 current = current.Next;
+                nextRow = lastRow + 1;
             }
 
             return data;
