@@ -69,7 +69,9 @@ namespace ExcelTemplate
 
             while (current != null)
             {
-                ReMatchingPosition(current, sheet, lastRow);
+                // 重新匹配区块位置，原因是，如果上一个区块是 Table 的话，
+                // 受到 Table 的数据影响，本身会占用更多的行，导致下一个区块的实际位置会跟模版定义时的位置不符
+                ReMatchingPosition(current, sheet, lastRow + 1);
 
                 if (DesignInspector.IsTableSection(current))
                 {
@@ -102,10 +104,10 @@ namespace ExcelTemplate
             {
                 var row = sheet.GetRow(block.Position.Row);
                 var cell = row.GetCell(block.Position.Col, MissingCellPolicy.CREATE_NULL_AS_BLANK);
-                var cellVal = GetCellValue(cell);
 
                 try
                 {
+                    var cellVal = GetCellValue(cell);
                     ObjectHelper.SetObjectValue(data, block.FieldPath, cellVal);
                 }
                 catch (Exception ex)
@@ -143,7 +145,7 @@ namespace ExcelTemplate
 
                     int itemCount;
                     var list = ReadOneList(sheet, table.Body, prop.PropertyType, out itemCount);
-                    var tableLastRow = table.Header.Max(a => a.MergeTo?.Row ?? a.Position.Row) + itemCount; //列表最后一行 = 表头最后一行 + 表体行数
+                    var tableLastRow = table.Header.Max(a => a.MergeTo?.Row ?? a.Position.Row) + itemCount; //列表最后一行 = 表头最后一行 + 表体数据行数
                     lastRow = Math.Max(lastRow, tableLastRow);
 
                     prop.SetValue(data, list);
@@ -159,6 +161,7 @@ namespace ExcelTemplate
         /// <param name="sheet"></param>
         /// <param name="blocks"></param>
         /// <param name="listType"></param>
+        /// <param name="itemCount">数据行数</param>
         /// <returns></returns>
         private object ReadOneList(ISheet sheet, List<TableBodyBlock> blocks, Type listType, out int itemCount)
         {
@@ -182,19 +185,20 @@ namespace ExcelTemplate
                 foreach (var block in blocks)
                 {
                     var cell = row.GetCell(block.Position.Col, MissingCellPolicy.CREATE_NULL_AS_BLANK);
-                    var val = GetCellValue(cell);
-                    if (val != null)
-                    {
-                        var fieldPath = block.FieldPath.Substring(block.FieldPath.IndexOf('.') + 1);
 
-                        try
+                    try
+                    {
+                        var val = GetCellValue(cell);
+                        if (val != null)
                         {
+                            var fieldPath = block.FieldPath.Substring(block.FieldPath.IndexOf('.') + 1);
+
                             ObjectHelper.SetObjectValue(obj, fieldPath, val);
                         }
-                        catch (Exception ex)
-                        {
-                            _exceptions.Add(new CellException(cell.RowIndex, cell.ColumnIndex, ex.Message, ex));
-                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _exceptions.Add(new CellException(cell.RowIndex, cell.ColumnIndex, ex.Message, ex));
                     }
                 }
 
