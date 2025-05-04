@@ -21,4 +21,6 @@ jobs:
       with:
         dotnet-version: 8.0.x
     - name: Test
-      run: cd src & dotnet test --no-build --verbosity normal
+      run: 
+        cd src
+        dotnet test --no-build --verbosity normal
