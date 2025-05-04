@@ -2,12 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using ExcelTemplate.Extensions;
 using ExcelTemplate.Helper;
 using ExcelTemplate.Model;
-using NPOI.HSSF.Record.PivotTable;
 using NPOI.SS.UserModel;
-using static NPOI.HSSF.Util.HSSFColor;
 
 namespace ExcelTemplate
 {
