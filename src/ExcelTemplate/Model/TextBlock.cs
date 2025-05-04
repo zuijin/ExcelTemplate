@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ExcelTemplate.Model
+﻿namespace ExcelTemplate.Model
 {
     public class TextBlock : BlockBase
     {
