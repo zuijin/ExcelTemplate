@@ -10,7 +10,7 @@ namespace ExcelTemplate.Test.Model
 {
     internal class MergeHeaderListModel
     {
-        [Value("B6")]
+        [Position("B6")]
         public List<ListItem> Children { get; set; }
 
 

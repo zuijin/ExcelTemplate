@@ -75,7 +75,7 @@ namespace ExcelTemplate
                 });
             }
 
-            var valueAttr = prop.GetCustomAttribute<ValueAttribute>();
+            var valueAttr = prop.GetCustomAttribute<PositionAttribute>();
             if (valueAttr != null)
             {
                 blocks.Add(new ValueBlock()
@@ -97,7 +97,7 @@ namespace ExcelTemplate
         /// <returns></returns>
         private static TableBlock GetCollectionTypeBlocks(PropertyInfo prop, List<PropertyInfo>? parents = null)
         {
-            var valueAttr = prop.GetCustomAttribute<ValueAttribute>();
+            var valueAttr = prop.GetCustomAttribute<PositionAttribute>();
             if (valueAttr == null)
             {
                 return null;

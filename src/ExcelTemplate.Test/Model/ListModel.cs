@@ -10,7 +10,7 @@ namespace ExcelTemplate.Test.Model
 {
     internal class ListModel
     {
-        [Value("C5")]
+        [Position("C5")]
         public List<ListItem> Children { get; set; }
 
 
