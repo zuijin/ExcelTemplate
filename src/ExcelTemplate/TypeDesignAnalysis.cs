@@ -5,6 +5,7 @@ using System.Reflection;
 using ExcelTemplate.Attributes;
 using ExcelTemplate.Helper;
 using ExcelTemplate.Model;
+using NPOI.SS.Formula.Functions;
 
 namespace ExcelTemplate
 {
@@ -31,9 +32,12 @@ namespace ExcelTemplate
                 }
             }
 
-            var page = ReorganizePage(blocks);
+            var section = ReorganizeSection(blocks);
 
-            return new TemplateDesign(DesignSourceType.Object, page);
+            //合并
+            MergeSection(section);
+
+            return new TemplateDesign(DesignSourceType.Object, section);
         }
 
 
@@ -172,7 +176,7 @@ namespace ExcelTemplate
         /// </summary>
         /// <param name="blocks"></param>
         /// <returns></returns>
-        public static BlockPage ReorganizePage(List<IBlock> blocks)
+        public static BlockSection ReorganizeSection(List<IBlock> blocks)
         {
             if (blocks == null || !blocks.Any())
             {
@@ -180,20 +184,44 @@ namespace ExcelTemplate
             }
 
             var groups = blocks.GroupBy(a => a.Position.Row).OrderBy(a => a.Key);
-            var page = new BlockPage();
-            var current = page;
+            var section = new BlockSection();
+            var current = section;
             foreach (var rowBlocks in groups)
             {
-                var tmp = new BlockPage()
+                var tmp = new BlockSection()
                 {
-                    RowBlocks = rowBlocks.ToList(),
+                    Blocks = rowBlocks.ToList(),
                 };
 
                 current.Next = tmp;
                 current = tmp;
             }
 
-            return page.Next;
+            return section.Next;
+        }
+
+        /// <summary>
+        /// 将部分可以合并的区块，尽量合并起来
+        /// </summary>
+        /// <param name="section"></param>
+        /// <returns></returns>
+        public static void MergeSection(BlockSection section)
+        {
+            var preSection = section;
+            var preIsTable = DesignInspector.IsTableSection(section);
+            var current = section.Next;
+
+            while (current != null)
+            {
+                var isTable = DesignInspector.IsTableSection(current);
+                if (!isTable && !preIsTable) // 两个非列表区块，可以合并
+                {
+                    preSection.Blocks.AddRange(current.Blocks);
+                    preSection.Next = current.Next;
+                }
+
+                current = current.Next;
+            }
         }
 
         private static string PathCombine(params string?[] paths)

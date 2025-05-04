@@ -13,6 +13,11 @@
 
         public void ApplyOffset(int rowOffset = 0, int colOffset = 0)
         {
+            if (rowOffset == 0 && colOffset == 0)
+            {
+                return;
+            }
+
             this.Position.ApplyOffset(rowOffset, colOffset);
             if (this.MergeTo != null)
             {

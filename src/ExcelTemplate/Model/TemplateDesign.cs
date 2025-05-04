@@ -6,15 +6,15 @@
     public class TemplateDesign
     {
         public TemplateDesign() { }
-        public TemplateDesign(DesignSourceType sourceType, BlockPage blockPage)
+        public TemplateDesign(DesignSourceType sourceType, BlockSection BlockSection)
         {
             this.SourceType = sourceType;
-            this.BlockPage = blockPage;
+            this.BlockSection = BlockSection;
         }
 
         public DesignSourceType SourceType { get; set; }
 
-        public BlockPage BlockPage { get; set; }
+        public BlockSection BlockSection { get; set; }
     }
 
     public enum DesignSourceType

@@ -2,14 +2,22 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using ExcelTemplate.Extensions;
 using ExcelTemplate.Helper;
 using ExcelTemplate.Model;
+using NPOI.HSSF.Record.PivotTable;
 using NPOI.SS.UserModel;
+using static NPOI.HSSF.Util.HSSFColor;
 
 namespace ExcelTemplate
 {
     public class TemplateReader
     {
+        /// <summary>
+        /// 自适应伸缩区块位置时，最大查找行数
+        /// </summary>
+        const int FIND_MAX_ROW = 100;
+
         IWorkbook _workbook;
         TemplateDesign _design;
         Type _type;
@@ -28,6 +36,8 @@ namespace ExcelTemplate
             _workbook = workbook;
             _design = design;
             _type = type;
+
+            DesignInspector.Check(design);
         }
 
         /// <summary>
@@ -57,48 +67,93 @@ namespace ExcelTemplate
         {
             var data = Activator.CreateInstance(type);
             var sheet = workBook.GetSheetAt(0);
-            var currentPage = (BlockPage)design.BlockPage.Clone();
+            var current = (BlockSection)design.BlockSection.Clone();
+            int lastRow = 0;
 
-            while (currentPage != null)
+            while (current != null)
             {
-                var blocks = currentPage.RowBlocks;
-                var props = type.GetProperties();
+                ReMatchingPosition(current, sheet, lastRow);
 
-                foreach (var block in blocks.OfType<ValueBlock>())
+                if (DesignInspector.IsTableSection(current))
                 {
-                    var row = sheet.GetRow(block.Position.Row);
-                    var cell = row.GetCell(block.Position.Col, MissingCellPolicy.CREATE_NULL_AS_BLANK);
-                    var cellVal = GetCellValue(cell);
-
-                    try
-                    {
-                        ObjectHelper.SetObjectValue(data, block.FieldPath, cellVal);
-                    }
-                    catch (Exception ex)
-                    {
-                        _exceptions.Add(new CellException(cell.RowIndex, cell.ColumnIndex, ex.Message, ex));
-                    }
+                    lastRow = ReadTable(current, sheet, ref data);
+                }
+                else
+                {
+                    lastRow = ReadForm(current, sheet, ref data);
                 }
 
-                foreach (var table in blocks.OfType<TableBlock>())
-                {
-                    var prop = props.FirstOrDefault(a => a.Name == table.TableName);
-                    if (prop != null)
-                    {
-                        if (!TypeHelper.IsSubclassOfRawGeneric(typeof(List<>), prop.PropertyType))
-                        {
-                            throw new Exception("只支持 List<T> 类型的集合");
-                        }
-
-                        var list = ReadList(sheet, table.Body, prop.PropertyType);
-                        prop.SetValue(data, list);
-                    }
-                }
-
-                currentPage = currentPage.Next;
+                current = current.Next;
             }
 
             return data;
+        }
+
+        /// <summary>
+        /// 读取表单数据
+        /// </summary>
+        /// <param name="section"></param>
+        /// <param name="sheet"></param>
+        /// <param name="data"></param>
+        /// <returns>返回最后一行的下标</returns>
+        private int ReadForm(BlockSection section, ISheet sheet, ref object data)
+        {
+            var blocks = section.Blocks;
+            var props = data.GetType().GetProperties();
+
+            foreach (var block in blocks.OfType<ValueBlock>())
+            {
+                var row = sheet.GetRow(block.Position.Row);
+                var cell = row.GetCell(block.Position.Col, MissingCellPolicy.CREATE_NULL_AS_BLANK);
+                var cellVal = GetCellValue(cell);
+
+                try
+                {
+                    ObjectHelper.SetObjectValue(data, block.FieldPath, cellVal);
+                }
+                catch (Exception ex)
+                {
+                    _exceptions.Add(new CellException(cell.RowIndex, cell.ColumnIndex, ex.Message, ex));
+                }
+            }
+
+            return blocks.Max(a => a.Position.Row);
+        }
+
+        /// <summary>
+        /// 读取列表数据
+        /// </summary>
+        /// <param name="section"></param>
+        /// <param name="sheet"></param>
+        /// <param name="data"></param>
+        /// <returns>返回最后一行的下标</returns>
+        /// <exception cref="Exception"></exception>
+        private int ReadTable(BlockSection section, ISheet sheet, ref object data)
+        {
+            var tables = section.Blocks.OfType<TableBlock>();
+            var props = data.GetType().GetProperties();
+            var lastRow = section.BeginRow;
+
+            foreach (var table in tables)
+            {
+                var prop = props.FirstOrDefault(a => a.Name == table.TableName);
+                if (prop != null)
+                {
+                    if (!TypeHelper.IsSubclassOfRawGeneric(typeof(List<>), prop.PropertyType))
+                    {
+                        throw new Exception("只支持 List<T> 类型的集合");
+                    }
+
+                    int itemCount;
+                    var list = ReadOneList(sheet, table.Body, prop.PropertyType, out itemCount);
+                    var tableLastRow = table.Header.Max(a => a.MergeTo?.Row ?? a.Position.Row) + itemCount; //列表最后一行 = 表头最后一行 + 表体行数
+                    lastRow = Math.Max(lastRow, tableLastRow);
+
+                    prop.SetValue(data, list);
+                }
+            }
+
+            return lastRow;
         }
 
         /// <summary>
@@ -108,16 +163,20 @@ namespace ExcelTemplate
         /// <param name="blocks"></param>
         /// <param name="listType"></param>
         /// <returns></returns>
-        private object ReadList(ISheet sheet, List<TableBodyBlock> blocks, Type listType)
+        private object ReadOneList(ISheet sheet, List<TableBodyBlock> blocks, Type listType, out int itemCount)
         {
             object listObj = Activator.CreateInstance(listType);
             Type elementType = listType.GenericTypeArguments[0];
             var rowIndex = blocks.First().Position.Row;
+            var beginCol = blocks.Min(a => a.Position.Col);
+            var endCol = blocks.Max(a => a.Position.Col);
+
+            itemCount = 0;
 
             while (true)
             {
                 var row = sheet.GetRow(rowIndex);
-                if (IsEmptyRow(row))
+                if (IsEmptyRow(row, beginCol, endCol))
                 {
                     break;
                 }
@@ -144,6 +203,7 @@ namespace ExcelTemplate
 
                 ObjectHelper.AddItemToList(listObj, obj);
                 rowIndex++;
+                itemCount++;
             }
 
             return listObj;
@@ -153,8 +213,10 @@ namespace ExcelTemplate
         /// 判断是否空行
         /// </summary>
         /// <param name="row"></param>
+        /// <param name="beginCol">限定起始列</param>
+        /// <param name="endCol">限定结束列</param>
         /// <returns></returns>
-        private static bool IsEmptyRow(IRow row)
+        private static bool IsEmptyRow(IRow row, int beginCol = 0, int endCol = 0)
         {
             if (row == null)
             {
@@ -164,7 +226,18 @@ namespace ExcelTemplate
             var enumerator = row.GetEnumerator();
             while (enumerator.MoveNext())
             {
-                if (enumerator.Current != null && !string.IsNullOrWhiteSpace(enumerator.Current.ToString()))
+                var current = enumerator.Current;
+                if (current.ColumnIndex < beginCol)
+                {
+                    continue;
+                }
+
+                if (endCol > 0 && current.ColumnIndex > endCol)
+                {
+                    continue;
+                }
+
+                if (!string.IsNullOrWhiteSpace(enumerator.Current.ToString()))
                 {
                     return false;
                 }
@@ -173,6 +246,11 @@ namespace ExcelTemplate
             return true;
         }
 
+        /// <summary>
+        /// 获取单元格的值
+        /// </summary>
+        /// <param name="cell"></param>
+        /// <returns></returns>
         object GetCellValue(ICell cell)
         {
             object val = null;
@@ -199,9 +277,50 @@ namespace ExcelTemplate
             return val;
         }
 
-        private int FindNext(BlockPage page)
+        /// <summary>
+        /// 重新匹配区块位置
+        /// </summary>
+        /// <param name="section"></param>
+        /// <param name="sheet"></param>
+        /// <param name="beginRow"></param>
+        /// <exception cref="Exception"></exception>
+        private void ReMatchingPosition(BlockSection section, ISheet sheet, int beginRow)
         {
-            throw new NotImplementedException();
+            if (section == null)
+            {
+                return;
+            }
+
+            // 重新设定起始行
+            var currentRow = beginRow;
+            var minRow = section.BeginRow;
+            if (minRow < currentRow)
+            {
+                section.ApplyOffset(currentRow - minRow, 0);
+            }
+            else
+            {
+                currentRow = minRow;
+            }
+
+            // 开始查找，跳过空行
+            int offsetRow = 0;
+            while (true)
+            {
+                var row = sheet.GetRow(currentRow);
+                if (!IsEmptyRow(row))
+                {
+                    section.ApplyOffset(offsetRow, 0);
+                    break;
+                }
+
+                currentRow++;
+                offsetRow++;
+                if (offsetRow >= FIND_MAX_ROW)
+                {
+                    throw new Exception($"已查找达到{FIND_MAX_ROW}行，未找到下一个模版区块");
+                }
+            }
         }
 
 

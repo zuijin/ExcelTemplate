@@ -92,6 +92,11 @@ namespace ExcelTemplate.Model
         /// <param name="colOffset"></param>
         public void ApplyOffset(int rowOffset = 0, int colOffset = 0)
         {
+            if (rowOffset == 0 && colOffset == 0)
+            {
+                return;
+            }
+
             this.Row += rowOffset;
             this.Col += colOffset;
             this.Letter = LetterHelper.GetLetter(this.Row, this.Col);

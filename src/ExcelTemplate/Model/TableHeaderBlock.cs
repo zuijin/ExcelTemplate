@@ -1,7 +1,7 @@
 ﻿namespace ExcelTemplate.Model
 {
-    public class TableHeaderBlock : BlockBase
+    public class TableHeaderBlock : TextBlock
     {
-        public string Text { get; set; }
+
     }
 }

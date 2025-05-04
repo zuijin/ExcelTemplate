@@ -1,7 +1,7 @@
 ﻿namespace ExcelTemplate.Model
 {
-    public class TableBodyBlock : BlockBase
+    public class TableBodyBlock : ValueBlock
     {
-        public string FieldPath { get; set; }
+
     }
 }
