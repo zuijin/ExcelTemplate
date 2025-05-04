@@ -8,7 +8,7 @@ namespace ExcelTemplate.Attributes
         {
         }
 
-        public PositionAttribute(string position, string? mergeTo)
+        public PositionAttribute(string position, string mergeTo)
         {
             this.Position = position;
             this.MergeTo = mergeTo;
@@ -16,6 +16,6 @@ namespace ExcelTemplate.Attributes
 
         public string Position { get; set; }
 
-        public string? MergeTo { get; set; }
+        public string MergeTo { get; set; }
     }
 }
