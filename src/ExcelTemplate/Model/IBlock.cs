@@ -1,6 +1,8 @@
-﻿namespace ExcelTemplate.Model
+﻿using System;
+
+namespace ExcelTemplate.Model
 {
-    public interface IBlock
+    public interface IBlock : ICloneable
     {
         Position Position { get; set; }
 
@@ -27,6 +29,18 @@
             {
                 this.MergeTo.ApplyOffset(rowOffset, colOffset);
             }
+        }
+
+        public virtual object Clone()
+        {
+            var obj = (BlockBase)this.MemberwiseClone();
+            obj.Position = (Position)this.Position.Clone();
+            if (this.MergeTo != null)
+            {
+                obj.MergeTo = (Position)this.MergeTo.Clone();
+            }
+
+            return obj;
         }
     }
 

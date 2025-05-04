@@ -8,44 +8,75 @@ using NPOI.SS.Formula.Functions;
 
 namespace ExcelTemplate.Model
 {
-    public class Position
+    public partial class Position : ICloneable
     {
         const string LETTER_FORMAT = "^([A-Z]+)([0-9]+)$";
 
+        int _row = 0;
+        int _col = 0;
+        string _letter = "A1";
+
         public Position(int row, int col)
         {
-            if (row < 0)
-                throw new Exception("row不能小于0");
-            if (col < 0)
-                throw new Exception("col不能小于0");
-
             this.Row = row;
             this.Col = col;
-            this.Letter = LetterHelper.GetLetter(row, col);
         }
 
         public Position(string letter)
         {
-            if (!IsPositionLetter(letter))
-                throw new Exception("letter格式错误");
-
             this.Letter = letter;
-            this.Col = LetterHelper.ParseCol(letter);
-            this.Row = LetterHelper.ParseRow(letter);
         }
 
         /// <summary>
         /// 行下标，从 0 开始
         /// </summary>
-        public int Row { get; private set; }
+        public int Row
+        {
+            get => _row;
+            set => SetRowCol(value, this._col);
+        }
+
         /// <summary>
         /// 列下标，从 0 开始
         /// </summary>
-        public int Col { get; private set; }
+        public int Col
+        {
+            get => _col;
+            set => SetRowCol(this._row, value);
+        }
+
         /// <summary>
         /// 字符表示的单元格位置，例如 A1 表示第一行第一列
         /// </summary>
-        public string Letter { get; private set; } = "A1";
+        public string Letter
+        {
+            get => _letter;
+            set => SetLetter(value);
+        }
+    }
+
+
+
+    public partial class Position
+    {
+        private void SetLetter(string letter)
+        {
+            if (!IsPositionLetter(letter)) throw new Exception("letter格式错误");
+
+            _letter = letter;
+            _col = LetterHelper.ParseCol(letter);
+            _row = LetterHelper.ParseRow(letter);
+        }
+
+        private void SetRowCol(int row, int col)
+        {
+            if (row < 0) throw new Exception("row不能小于0");
+            if (col < 0) throw new Exception("col不能小于0");
+
+            _row = row;
+            _col = col;
+            _letter = LetterHelper.GetLetter(row, col);
+        }
 
         /// <summary>
         /// 获取一个新的偏移位置
@@ -70,6 +101,11 @@ namespace ExcelTemplate.Model
             this.Letter = LetterHelper.GetLetter(this.Row, this.Col);
         }
 
+        /// <summary>
+        /// 判断是否符合位置格式的字符
+        /// </summary>
+        /// <param name="letter"></param>
+        /// <returns></returns>
         public static bool IsPositionLetter(string letter)
         {
             return Regex.IsMatch(letter, LETTER_FORMAT);
@@ -97,7 +133,7 @@ namespace ExcelTemplate.Model
             return new Position(v.Item1, v.Item2);
         }
 
-        public static implicit operator Position?(string? v)
+        public static implicit operator Position(string v)
         {
             if (string.IsNullOrWhiteSpace(v))
             {
@@ -105,6 +141,11 @@ namespace ExcelTemplate.Model
             }
 
             return new Position(v);
+        }
+
+        public object Clone()
+        {
+            return this.GetOffset(0, 0);
         }
     }
 

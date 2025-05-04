@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Xml.Serialization;
+using ExcelTemplate.Extensions;
 using ExcelTemplate.Helper;
 using ExcelTemplate.Model;
 using NPOI.SS.Formula;
@@ -16,123 +18,58 @@ namespace ExcelTemplate
         IWorkbook _workbook;
         TemplateDesign _design;
         Type _type;
+        List<CellException> _exceptions = new List<CellException>();
 
-        List<CellException> _exceptionList = new List<CellException>();
+        public IWorkbook WorkBook { get => _workbook; }
+        public TemplateDesign Design { get => _design; }
+        public Type Type { get => _type; }
+        public List<CellException> Exceptions { get => _exceptions; }
 
         /// <summary>
         /// 
         /// </summary>
-        public TemplateReader(IWorkbook workbook, Type type)
+        public TemplateReader(IWorkbook workbook, Type type, TemplateDesign design)
         {
             _workbook = workbook;
-            _design = TypeDesignAnalysis.DesignAnalysis(type);
+            _design = design;
             _type = type;
         }
 
         /// <summary>
-        /// 从文件中生成 ExcelWrap
+        /// 创建 TemplateReader
         /// </summary>
-        public static TemplateReader FromFile(Stream file, Type type)
+        public static TemplateReader Create(Stream file, Type type)
         {
             var workbook = WorkbookFactory.Create(file);
-            return new TemplateReader(workbook, type);
+            var design = TypeDesignAnalysis.DesignAnalysis(type);
+            return new TemplateReader(workbook, type, design);
         }
 
         /// <summary>
-        /// 是否存在转换错误
-        /// </summary>
-        /// <returns></returns>
-        public bool IsError => _exceptionList.Any();
-
-        /// <summary>
-        /// 获取数据集合
+        /// 获取数据
         /// </summary>
         /// <returns></returns>
         public object GetData()
         {
-            var obj = Read();
-            if (IsError)
-            {
-                throw _exceptionList[0];
-            }
-
+            var obj = Read(_workbook, _type, _design);
             return obj;
-        }
-
-        /// <summary>
-        /// 生成错误提示Excel
-        /// </summary>
-        /// <returns></returns>
-        public IWorkbook BuildErrorExcel()
-        {
-            var newWorkbook = _workbook.Copy();
-            var sheet = newWorkbook.GetSheetAt(0);
-            var drawing = sheet.CreateDrawingPatriarch();
-            var helper = _workbook.GetCreationHelper();
-
-            foreach (var ex in _exceptionList)
-            {
-                var cell = sheet.GetRow(ex.Row).GetCell(ex.Column);
-                var anchor = helper.CreateClientAnchor();
-                var comment = drawing.CreateCellComment(anchor);
-                comment.String = helper.CreateRichTextString(ex.Message);
-                cell.CellComment = comment;
-            }
-
-            return newWorkbook;
-        }
-
-        /// <summary>
-        /// 生成错误提示
-        /// </summary>
-        /// <returns></returns>
-        public string BuildErrorMessage()
-        {
-            if (!IsError)
-            {
-                return string.Empty;
-            }
-
-            StringBuilder sb = new StringBuilder(500);
-            foreach (var ex in _exceptionList.OrderBy(a => a.Row))
-            {
-                sb.AppendLine(ex.Message);
-            }
-
-            return sb.ToString();
-        }
-
-        /// <summary>
-        /// 生成错误提示文件
-        /// </summary>
-        /// <returns></returns>
-        public byte[] BuildErrorFile()
-        {
-            using (var ms = new MemoryStream())
-            {
-                var book = BuildErrorExcel();
-                book.Write(ms);
-
-                return ms.ToArray();
-            }
         }
 
         /// <summary>
         /// 读取表单数据
         /// </summary>
-        private object Read()
+        private object Read(IWorkbook workBook, Type type, TemplateDesign design)
         {
-            var data = Activator.CreateInstance(_type);
-            var sheet = _workbook.GetSheetAt(0);
-            var currentPage = _design.BlockPage;
+            var data = Activator.CreateInstance(type);
+            var sheet = workBook.GetSheetAt(0);
+            var currentPage = (BlockPage)design.BlockPage.Clone();
 
             while (currentPage != null)
             {
                 var blocks = currentPage.RowBlocks;
-                var valueBlocks = blocks.Where(a => a is ValueBlock);
-                var props = _type.GetProperties();
+                var props = type.GetProperties();
 
-                foreach (ValueBlock block in valueBlocks)
+                foreach (var block in blocks.OfType<ValueBlock>())
                 {
                     var row = sheet.GetRow(block.Position.Row);
                     var cell = row.GetCell(block.Position.Col, MissingCellPolicy.CREATE_NULL_AS_BLANK);
@@ -141,8 +78,7 @@ namespace ExcelTemplate
                     ObjectHelper.SetObjectValue(data, block.FieldPath, cellVal);
                 }
 
-                var tableBlocks = blocks.Where(a => a is TableBlock).Select(a => (TableBlock)a);
-                foreach (var table in tableBlocks)
+                foreach (var table in blocks.OfType<TableBlock>())
                 {
                     var prop = props.FirstOrDefault(a => a.Name == table.TableName);
                     if (prop != null)
@@ -263,26 +199,6 @@ namespace ExcelTemplate
         {
             return !type.IsValueType
                 || type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
-        }
-
-
-
-
-
-        /// <summary>
-        /// 添加错误提示
-        /// </summary>
-        /// <param name="rowIndex"></param>
-        /// <param name="colName"></param>
-        /// <param name="message"></param>
-        /// <exception cref="NotImplementedException"></exception>
-        public void AddError(string colName, string message)
-        {
-            //var col = _fieldInfos.Find(a => a.FieldName == colName || a.Title == colName);
-            //int colIndex = col?.ColIndex ?? -1;
-            //int rowIndexd = col?.RowIndex ?? -1;
-
-            //_exceptionList.Add(new CellException(rowIndexd, colIndex, message));
         }
     }
 }

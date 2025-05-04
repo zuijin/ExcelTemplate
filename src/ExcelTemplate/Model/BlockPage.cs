@@ -5,7 +5,7 @@ using NPOI.SS.Formula.Functions;
 
 namespace ExcelTemplate.Model
 {
-    public class BlockPage
+    public class BlockPage : ICloneable
     {
         /// <summary>
         /// 当前行的Block
@@ -37,6 +37,26 @@ namespace ExcelTemplate.Model
             {
                 this.Next.ApplyOffset(rowOffset, colOffset);
             }
+        }
+
+        public object Clone()
+        {
+            var obj = (BlockPage)this.MemberwiseClone();
+            if (this.RowBlocks != null)
+            {
+                obj.RowBlocks = new List<IBlock>();
+                foreach (var item in this.RowBlocks)
+                {
+                    obj.RowBlocks.Add((IBlock)item.Clone());
+                }
+            }
+
+            if (this.Next != null)
+            {
+                obj.Next = (BlockPage)this.Next.Clone();
+            }
+
+            return obj;
         }
     }
 }

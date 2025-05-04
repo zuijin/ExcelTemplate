@@ -12,7 +12,7 @@ namespace ExcelTemplate.Test
         {
             var filePath = "Files/List.xlsx";
             var file = File.Open(filePath, FileMode.Open);
-            var template = TemplateReader.FromFile(file, typeof(ListModel));
+            var template = TemplateReader.Create(file, typeof(ListModel));
 
             dynamic data = template.GetData();
             Assert.Equal(data.Children.Count, 7);
@@ -46,7 +46,7 @@ namespace ExcelTemplate.Test
         {
             var filePath = "Files/MergeHeaderList.xlsx";
             var file = File.Open(filePath, FileMode.Open);
-            var template = TemplateReader.FromFile(file, typeof(MergeHeaderListModel));
+            var template = TemplateReader.Create(file, typeof(MergeHeaderListModel));
 
             dynamic data = template.GetData();
             Assert.Equal(data.Children.Count, 7);
