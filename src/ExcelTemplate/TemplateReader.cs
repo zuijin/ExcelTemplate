@@ -75,7 +75,14 @@ namespace ExcelTemplate
                     var cell = row.GetCell(block.Position.Col, MissingCellPolicy.CREATE_NULL_AS_BLANK);
                     var cellVal = GetCellValue(cell);
 
-                    ObjectHelper.SetObjectValue(data, block.FieldPath, cellVal);
+                    try
+                    {
+                        ObjectHelper.SetObjectValue(data, block.FieldPath, cellVal);
+                    }
+                    catch (Exception ex)
+                    {
+                        _exceptions.Add(new CellException(cell.RowIndex, cell.ColumnIndex, ex.Message, ex));
+                    }
                 }
 
                 foreach (var table in blocks.OfType<TableBlock>())
@@ -128,7 +135,15 @@ namespace ExcelTemplate
                     if (val != null)
                     {
                         var fieldPath = block.FieldPath.Substring(block.FieldPath.IndexOf('.') + 1);
-                        ObjectHelper.SetObjectValue(obj, fieldPath, val);
+
+                        try
+                        {
+                            ObjectHelper.SetObjectValue(obj, fieldPath, val);
+                        }
+                        catch (Exception ex)
+                        {
+                            _exceptions.Add(new CellException(cell.RowIndex, cell.ColumnIndex, ex.Message, ex));
+                        }
                     }
                 }
 
@@ -187,6 +202,11 @@ namespace ExcelTemplate
             //return System.Convert.ChangeType(val, type);
 
             return val;
+        }
+
+        private int FindNext(BlockPage page)
+        {
+            throw new NotImplementedException();
         }
 
 

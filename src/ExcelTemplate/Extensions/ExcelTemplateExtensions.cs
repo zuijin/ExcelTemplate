@@ -13,6 +13,15 @@ namespace ExcelTemplate.Extensions
     public static class ExcelTemplateExtensions
     {
         /// <summary>
+        /// 是否存在异常
+        /// </summary>
+        /// <returns></returns>
+        public static bool HasError(this TemplateReader template)
+        {
+            return template.Exceptions.Any();
+        }
+
+        /// <summary>
         /// 生成错误提示Excel
         /// </summary>
         /// <returns></returns>
@@ -25,7 +34,7 @@ namespace ExcelTemplate.Extensions
 
             foreach (var ex in template.Exceptions)
             {
-                var cell = sheet.GetRow(ex.Row).GetCell(ex.Column);
+                var cell = sheet.GetRow(ex.Position.Row).GetCell(ex.Position.Col);
                 var anchor = helper.CreateClientAnchor();
                 var comment = drawing.CreateCellComment(anchor);
                 comment.String = helper.CreateRichTextString(ex.Message);
@@ -47,7 +56,7 @@ namespace ExcelTemplate.Extensions
             }
 
             StringBuilder sb = new StringBuilder(500);
-            foreach (var ex in template.Exceptions.OrderBy(a => a.Row))
+            foreach (var ex in template.Exceptions.OrderBy(a => a.Position.Row))
             {
                 sb.AppendLine(ex.Message);
             }

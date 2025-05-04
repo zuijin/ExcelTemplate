@@ -7,30 +7,26 @@ namespace ExcelTemplate.Model
     /// </summary>
     public class CellException : Exception
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        public CellException(int row, int column, string message) : base(message)
+        public CellException(int row, int col, string message) : base(message)
         {
-            Row = row;
-            Column = column;
+            this.Position = new Position(row, col);
         }
 
-        public CellException(int row, int column, string message, Exception inner) : base(message, inner)
+        public CellException(int row, int col, string message, Exception) : base(message, inner)
         {
-            Row = row;
-            Column = column;
+            this.Position = new Position(row, col);
         }
 
-        /// <summary>
-        /// 行号
-        /// </summary>
-        public int Row { get; set; }
+        public CellException(string letter, string message) : base(message)
+        {
+            this.Position = letter;
+        }
 
-        /// <summary>
-        /// 列号
-        /// </summary>
-        public int Column { get; set; }
+        public CellException(string letter, string message, Exception) : base(message, inner)
+        {
+            this.Position = letter;
+        }
 
+        public Position Position { get; set; }
     }
 }
