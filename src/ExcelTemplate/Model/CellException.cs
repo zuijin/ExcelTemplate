@@ -12,7 +12,7 @@ namespace ExcelTemplate.Model
             this.Position = new Position(row, col);
         }
 
-        public CellException(int row, int col, string message, Exception) : base(message, inner)
+        public CellException(int row, int col, string message, Exception inner) : base(message, inner)
         {
             this.Position = new Position(row, col);
         }
@@ -22,7 +22,7 @@ namespace ExcelTemplate.Model
             this.Position = letter;
         }
 
-        public CellException(string letter, string message, Exception) : base(message, inner)
+        public CellException(string letter, string message, Exception inner) : base(message, inner)
         {
             this.Position = letter;
         }
