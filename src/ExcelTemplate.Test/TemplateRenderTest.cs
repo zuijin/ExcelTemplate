@@ -95,7 +95,7 @@ namespace ExcelTemplate.Test
             var props = typeof(ListModel).GetProperties();
             var childrenProp = props.First(a => a.Name == nameof(data.Children));
             var titleRowCount = typeof(ListModel.ListItem).GetProperties().Select(a => a.GetCustomAttribute<MergeAttribute>()).Max(a => a?.Titles.Length ?? 0) + 1;
-            var currentRow = new Position(childrenProp.GetCustomAttribute<PositionAttribute>().Position).Row + titleRowCount;
+            var currentRow = childrenProp.GetCustomAttribute<PositionAttribute>().Position.Row + titleRowCount;
 
             foreach (var item in data.Children)
             {
@@ -103,13 +103,16 @@ namespace ExcelTemplate.Test
 
                 foreach (var prop in item.GetType().GetProperties())
                 {
-                    var titleAttr = prop.GetCustomAttribute<TitleAttribute>();
-                    var col = new Position(titleAttr.Position).Col;
-                    var cell = sheet.GetCell(currentRow, col);
-                    var cellValue = Convert.ChangeType(cell.GetValue(), prop.PropertyType);
-                    var objValue = prop.GetValue(item);
+                    var colAttr = prop.GetCustomAttribute<ColAttribute>();
+                    if (colAttr != null)
+                    {
+                        var col = colAttr.Position.Col;
+                        var cell = sheet.GetCell(currentRow, col);
+                        var cellValue = Convert.ChangeType(cell.GetValue(), prop.PropertyType);
+                        var objValue = prop.GetValue(item);
 
-                    Assert.Equal(objValue, cellValue);
+                        Assert.Equal(objValue, cellValue);
+                    }
                 }
 
                 currentRow++;
@@ -158,7 +161,7 @@ namespace ExcelTemplate.Test
             var props = typeof(MergeHeaderListModel).GetProperties();
             var childrenProp = props.First(a => a.Name == nameof(data.Children));
             var titleRowCount = typeof(MergeHeaderListModel.ListItem).GetProperties().Select(a => a.GetCustomAttribute<MergeAttribute>()).Max(a => a?.Titles.Length ?? 0) + 1;
-            var currentRow = new Position(childrenProp.GetCustomAttribute<PositionAttribute>().Position).Row + titleRowCount;
+            var currentRow = childrenProp.GetCustomAttribute<PositionAttribute>().Position.Row + titleRowCount;
 
             foreach (var item in data.Children)
             {
@@ -166,13 +169,16 @@ namespace ExcelTemplate.Test
 
                 foreach (var prop in item.GetType().GetProperties())
                 {
-                    var titleAttr = prop.GetCustomAttribute<TitleAttribute>();
-                    var col = new Position(titleAttr.Position).Col;
-                    var cell = sheet.GetCell(currentRow, col);
-                    var cellValue = Convert.ChangeType(cell.GetValue(), prop.PropertyType);
-                    var objValue = prop.GetValue(item);
+                    var colAttr = prop.GetCustomAttribute<ColAttribute>();
+                    if (colAttr != null)
+                    {
+                        var col = colAttr.Position.Col;
+                        var cell = sheet.GetCell(currentRow, col);
+                        var cellValue = Convert.ChangeType(cell.GetValue(), prop.PropertyType);
+                        var objValue = prop.GetValue(item);
 
-                    Assert.Equal(objValue, cellValue);
+                        Assert.Equal(objValue, cellValue);
+                    }
                 }
 
                 currentRow++;

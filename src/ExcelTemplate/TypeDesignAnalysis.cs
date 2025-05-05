@@ -113,11 +113,6 @@ namespace ExcelTemplate
                 return null;
             }
 
-            if (string.IsNullOrWhiteSpace(valueAttr.Position) || !Position.IsPositionLetter(valueAttr.Position))
-            {
-                throw new Exception("集合的位置格式不正确");
-            }
-
             var tablePosition = valueAttr.Position;
             var elementType = TypeHelper.GetCollectionElementType(prop.PropertyType);
             var subProps = elementType.GetProperties();
@@ -133,13 +128,13 @@ namespace ExcelTemplate
                     throw new Exception($"集合内不支持任何复杂类型：{path}");
                 }
 
-                var titleAttr = subProp.GetCustomAttribute<TitleAttribute>();
-                if (titleAttr != null)
+                var colAttr = subProp.GetCustomAttribute<ColAttribute>();
+                if (colAttr != null)
                 {
                     var headerBlock = new TableHeaderBlock()
                     {
-                        Position = titleAttr.Position,
-                        Text = titleAttr.Title,
+                        Position = colAttr.Position,
+                        Text = colAttr.HeaderText,
                     };
 
                     //表体默认为表头的下一行

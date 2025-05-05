@@ -17,18 +17,18 @@ namespace ExcelTemplate.Test.Model
         internal class ListItem
         {
             [Merge("第一级", "第二级")]
-            [Title("列1", "B8")]
+            [Col("列1", "B8")]
             public int Field_1 { get; set; }
 
             [Merge("第一级", "第二级")]
-            [Title("列2：", "C8")]
+            [Col("列2：", "C8")]
             public int Field_2 { get; set; }
 
             [Merge("第一级")]
-            [Title("列3", "D7")]
+            [Col("列3", "D7")]
             public string Field_3 { get; set; }
 
-            [Title("列4", "E6")]
+            [Col("列4", "E6")]
             public DateTime Field_4 { get; set; }
         }
     }

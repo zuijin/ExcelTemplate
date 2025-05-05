@@ -16,16 +16,16 @@ namespace ExcelTemplate.Test.Model
 
         internal class ListItem
         {
-            [Title("列1", "C5")]
+            [Col("列1", "C5")]
             public int Field_1 { get; set; }
 
-            [Title("列2", "D5")]
+            [Col("列2", "D5")]
             public int Field_2 { get; set; }
 
-            [Title("列3", "E5")]
+            [Col("列3", "E5")]
             public string Field_3 { get; set; }
 
-            [Title("列4", "F5")]
+            [Col("列4", "F5")]
             public DateTime Field_4 { get; set; }
         }
     }
