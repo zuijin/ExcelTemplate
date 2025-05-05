@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace ExcelTemplate.Helper
 {
-    internal class TypeHelper
+    public class TypeHelper
     {
         /// <summary>
         /// 判断是否简单类型

@@ -9,7 +9,7 @@ namespace ExcelTemplate.Test
         {
             var filePath = "Files/Form.xlsx";
             var file = File.Open(filePath, FileMode.Open);
-            var template = TemplateReader.Create(file, typeof(FromModel));
+            var template = TemplateReader.Create(file, typeof(FormModel));
 
             dynamic data = template.Read();
             Assert.Equal(data.Field_1, 123);

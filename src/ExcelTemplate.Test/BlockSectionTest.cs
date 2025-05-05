@@ -9,7 +9,7 @@ namespace ExcelTemplate.Test
         [Fact]
         public void TestBlockSectionClone()
         {
-            var design = TypeDesignAnalysis.DesignAnalysis(typeof(FromModel));
+            var design = TypeDesignAnalysis.DesignAnalysis(typeof(FormModel));
             var clone = (BlockSection)design.BlockSection.Clone();
 
             var currentClone = clone;

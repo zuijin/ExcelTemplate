@@ -14,8 +14,8 @@ namespace ExcelTemplate.Attributes
             this.MergeTo = mergeTo;
         }
 
-        public string Position { get; set; }
+        public string Position { get; private set; }
 
-        public string MergeTo { get; set; }
+        public string MergeTo { get; private set; }
     }
 }

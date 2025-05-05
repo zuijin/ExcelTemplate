@@ -19,7 +19,7 @@ namespace ExcelTemplate.Test.Model
             [Title("列1", "C5")]
             public int Field_1 { get; set; }
 
-            [Title("列2：", "D5")]
+            [Title("列2", "D5")]
             public int Field_2 { get; set; }
 
             [Title("列3", "E5")]

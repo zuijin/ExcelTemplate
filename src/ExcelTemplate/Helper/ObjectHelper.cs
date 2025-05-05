@@ -45,6 +45,40 @@ namespace ExcelTemplate.Helper
             }
         }
 
+        public static object GetObjectValue(object obj, string fieldPath)
+        {
+            var currObj = obj;
+            var fieldArr = fieldPath.Split('.');
+
+            for (int i = 0; i < fieldArr.Length; i++)
+            {
+                var props = currObj.GetType().GetProperties();
+                var prop = props.FirstOrDefault(a => a.Name == fieldArr[i]);
+                if (prop == null)
+                {
+                    throw new Exception($"类型 {obj.GetType().Name} 内找不到字段 {fieldPath}");
+                }
+
+                if (i < (fieldArr.Length - 1))
+                {
+                    var tmp = prop.GetValue(currObj);
+                    if (tmp == null)
+                    {
+                        tmp = Activator.CreateInstance(prop.PropertyType);
+                        prop.SetValue(currObj, tmp);
+                    }
+
+                    currObj = tmp;
+                }
+                else
+                {
+                    return prop.GetValue(currObj);
+                }
+            }
+
+            return null;
+        }
+
         public static void AddItemToList(object list, object item)
         {
             if (list == null) throw new ArgumentNullException(nameof(list));

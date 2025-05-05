@@ -1,5 +1,4 @@
 using ExcelTemplate.Model;
-using ExcelTemplate.Test.Model;
 using NPOI.SS.Formula.Functions;
 
 namespace ExcelTemplate.Test
