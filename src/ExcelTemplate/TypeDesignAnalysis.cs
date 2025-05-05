@@ -11,6 +11,13 @@ namespace ExcelTemplate
 {
     public static class TypeDesignAnalysis
     {
+        /// <summary>
+        /// 从类型中的字段特性（Attribute）定义，提取对应的模版设计信息
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="parents"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public static TemplateDesign DesignAnalysis(Type type, List<PropertyInfo>? parents = null)
         {
             var blocks = new List<IBlock>();
@@ -144,7 +151,7 @@ namespace ExcelTemplate
 
                     string[] mergeTitles = new string[0];
                     var mergeAttr = subProp.GetCustomAttribute<MergeAttribute>();
-                    if (mergeAttr != null)
+                    if (mergeAttr != null && mergeAttr.Titles != null)
                     {
                         mergeTitles = mergeAttr.Titles;
                     }
@@ -157,7 +164,7 @@ namespace ExcelTemplate
             var headers = MergeHelper.MergeHeader(tablePosition, tmpList);
             foreach (var item in dicMapper)
             {
-                item.Value.Position = item.Key.Position.GetOffset(1, 0);
+                item.Value.Position = (item.Key.MergeTo ?? item.Key.Position).GetOffset(1, 0);
             }
 
             var bodys = dicMapper.Select(item => item.Value).ToList();
@@ -224,14 +231,14 @@ namespace ExcelTemplate
             }
         }
 
-        private static string PathCombine(params string?[] paths)
+        private static string PathCombine(params string[] paths)
         {
             return string.Join(".", paths.Where(a => !string.IsNullOrWhiteSpace(a)));
         }
 
-        private static string PathCombine(IEnumerable<string?>? paths1, params string?[] paths2)
+        private static string PathCombine(IEnumerable<string> paths1, params string[] paths2)
         {
-            List<string?> paths = new List<string?>();
+            List<string> paths = new List<string>();
             if (paths1 != null)
             {
                 paths.AddRange(paths1);

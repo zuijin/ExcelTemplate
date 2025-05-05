@@ -9,10 +9,7 @@ namespace ExcelTemplate.Helper
 
         public static List<TableHeaderBlock> MergeHeader(Position position, List<TypeRawHeader> headerBlocks)
         {
-            headerBlocks = headerBlocks.OrderBy(a => a.Block.Position.Col).ToList();
-            var maxMergeRows = headerBlocks.Max(a => a.MergeTitles.Length + 1);
-
-            var rootNode = BuildNodeTree(headerBlocks, maxMergeRows);
+            var rootNode = BuildNodeTree(headerBlocks);
             HorizontalMerge(rootNode);
             VerticalMerge(rootNode);
 
@@ -25,8 +22,9 @@ namespace ExcelTemplate.Helper
         /// <param name="headerBlocks"></param>
         /// <param name="maxHeight"></param>
         /// <returns></returns>
-        private static HeaderNode BuildNodeTree(List<TypeRawHeader> headerBlocks, int maxHeight)
+        private static HeaderNode BuildNodeTree(List<TypeRawHeader> headerBlocks)
         {
+            var headerHeight = headerBlocks.Max(a => a.MergeTitles.Length + 1); //表头高度
             var rootNode = new HeaderNode();
             foreach (var block in headerBlocks)
             {
@@ -49,7 +47,7 @@ namespace ExcelTemplate.Helper
                 preNode.Children.Add(new HeaderNode()
                 {
                     Width = 1,
-                    Height = (maxHeight - height),
+                    Height = (headerHeight - height),
                     Title = block.Block.Text?.ToString() ?? "",
                     Block = block.Block,
                 });
@@ -155,15 +153,13 @@ namespace ExcelTemplate.Helper
             if (node.Block != null) //叶子节点
             {
                 var tmp = node.Block;
-                var newPosition = position.GetOffset(heightOffset, widthOffset);
-                if (tmp.MergeTo != null)
+                tmp.Position = position.GetOffset(heightOffset, widthOffset);
+
+                if (node.Width > 1 || node.Height > 1)
                 {
-                    var width = tmp.MergeTo.Col - tmp.Position.Col;
-                    var height = tmp.MergeTo.Row - tmp.Position.Row;
-                    tmp.MergeTo = newPosition.GetOffset(height, width);
+                    tmp.MergeTo = tmp.Position.GetOffset(node.Height - 1, node.Width - 1);
                 }
 
-                tmp.Position = newPosition;
                 blocks.Add(tmp);
             }
 

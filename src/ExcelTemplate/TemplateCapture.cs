@@ -8,6 +8,9 @@ using NPOI.SS.UserModel;
 
 namespace ExcelTemplate
 {
+    /// <summary>
+    /// 负责按照模版定义从Excel中抓取数据
+    /// </summary>
     public class TemplateCapture
     {
         /// <summary>
@@ -39,8 +42,6 @@ namespace ExcelTemplate
             return new TemplateCapture(design);
         }
 
-
-
         public T Capture<T>(Stream stream)
         {
             var workbook = WorkbookFactory.Create(stream);
@@ -61,12 +62,19 @@ namespace ExcelTemplate
 
         public object Capture(IWorkbook workbook, Type type)
         {
+            _exceptions.Clear();
             var obj = Read(workbook, type, _design);
+
+            if (_exceptions.Any())
+            {
+                throw _exceptions.First();
+            }
+
             return obj;
         }
 
         /// <summary>
-        /// 读取表单数据
+        /// 读取数据
         /// </summary>
         private object Read(IWorkbook workBook, Type type, TemplateDesign design)
         {
@@ -150,7 +158,7 @@ namespace ExcelTemplate
                 {
                     if (!TypeHelper.IsSubclassOfRawGeneric(typeof(List<>), prop.PropertyType))
                     {
-                        throw new Exception("只支持 List<T> 类型的集合");
+                        throw new Exception($"只支持 List<T> 类型的集合，{table.TableName}");
                     }
 
                     int itemCount;

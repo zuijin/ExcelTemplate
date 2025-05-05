@@ -10,6 +10,9 @@ using NPOI.XSSF.UserModel;
 
 namespace ExcelTemplate
 {
+    /// <summary>
+    /// 负责按照模版定义，把数据写入到Excel中
+    /// </summary>
     public class TemplateRender
     {
         TemplateDesign _design;
@@ -46,6 +49,16 @@ namespace ExcelTemplate
             Write(_design, workbook, data);
 
             return workbook;
+        }
+
+        public void Render(object data, IWorkbook workbook)
+        {
+            if (workbook.NumberOfSheets == 0)
+            {
+                workbook.CreateSheet();
+            }
+
+            Write(_design, workbook, data);
         }
 
         /// <summary>
