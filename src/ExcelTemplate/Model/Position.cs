@@ -6,7 +6,7 @@ namespace ExcelTemplate.Model
 {
     public partial class Position : ICloneable
     {
-        const string LETTER_FORMAT = "^([A-Z]+)([0-9]+)$";
+        const string LETTER_FORMAT = "^([a-zA-Z]+)([0-9]+)$";
 
         int _row = 0;
         int _col = 0;
@@ -59,9 +59,9 @@ namespace ExcelTemplate.Model
         {
             if (!IsPositionLetter(letter)) throw new Exception("letter格式错误");
 
-            _letter = letter;
-            _col = LetterHelper.ParseCol(letter);
-            _row = LetterHelper.ParseRow(letter);
+            _letter = letter.ToUpper(); ;
+            _col = LetterHelper.ParseCol(_letter);
+            _row = LetterHelper.ParseRow(_letter);
         }
 
         private void SetRowCol(int row, int col)

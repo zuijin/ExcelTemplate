@@ -14,6 +14,7 @@ namespace ExcelTemplate.Helper
         /// <exception cref="Exception"></exception>
         public static int ParseRow(string letter)
         {
+            letter = letter?.ToUpper();
             var match = Regex.Match(letter, LETTER_FORMAT);
             if (match.Groups.Count != 3)
             {
@@ -25,6 +26,7 @@ namespace ExcelTemplate.Helper
 
         public static int ParseCol(string letter)
         {
+            letter = letter?.ToUpper();
             var match = Regex.Match(letter, LETTER_FORMAT);
             if (match.Groups.Count != 3)
             {
@@ -69,6 +71,7 @@ namespace ExcelTemplate.Helper
                 throw new ArgumentException("letter不能为空");
             }
 
+            letter = letter.ToUpper();
             int result = 0;
             for (int i = 0; i < letter.Length; i++)
             {
