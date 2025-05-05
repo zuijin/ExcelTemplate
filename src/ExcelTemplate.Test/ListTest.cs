@@ -12,9 +12,9 @@ namespace ExcelTemplate.Test
         {
             var filePath = "Files/List.xlsx";
             var file = File.Open(filePath, FileMode.Open);
-            var template = TemplateReader.Create(file, typeof(ListModel));
+            var template = TemplateCapture.Create(typeof(ListModel));
 
-            dynamic data = template.Read();
+            dynamic data = template.Capture<ListModel>(file);
             Assert.Equal(data.Children.Count, 7);
 
             object[][] tmp =
@@ -46,9 +46,9 @@ namespace ExcelTemplate.Test
         {
             var filePath = "Files/MergeHeaderList.xlsx";
             var file = File.Open(filePath, FileMode.Open);
-            var template = TemplateReader.Create(file, typeof(MergeHeaderListModel));
+            var template = TemplateCapture.Create(typeof(MergeHeaderListModel));
 
-            dynamic data = template.Read();
+            dynamic data = template.Capture<MergeHeaderListModel>(file);
             Assert.Equal(data.Children.Count, 7);
 
             object[][] tmp =

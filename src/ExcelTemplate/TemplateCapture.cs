@@ -8,52 +8,60 @@ using NPOI.SS.UserModel;
 
 namespace ExcelTemplate
 {
-    public class TemplateReader
+    public class TemplateCapture
     {
         /// <summary>
         /// 自适应伸缩区块位置时，最大查找行数
         /// </summary>
         const int FIND_MAX_ROW = 100;
 
-        IWorkbook _workbook;
         TemplateDesign _design;
-        Type _type;
         List<CellException> _exceptions = new List<CellException>();
 
-        public IWorkbook WorkBook { get => _workbook; }
         public TemplateDesign Design { get => _design; }
-        public Type Type { get => _type; }
         public List<CellException> Exceptions { get => _exceptions; }
 
         /// <summary>
         /// 
         /// </summary>
-        public TemplateReader(IWorkbook workbook, Type type, TemplateDesign design)
+        public TemplateCapture(TemplateDesign design)
         {
-            _workbook = workbook;
             _design = design;
-            _type = type;
-
             DesignInspector.Check(design);
         }
 
         /// <summary>
-        /// 创建 TemplateReader
+        /// 创建
         /// </summary>
-        public static TemplateReader Create(Stream file, Type type)
+        public static TemplateCapture Create(Type type)
         {
-            var workbook = WorkbookFactory.Create(file);
             var design = TypeDesignAnalysis.DesignAnalysis(type);
-            return new TemplateReader(workbook, type, design);
+            return new TemplateCapture(design);
         }
 
-        /// <summary>
-        /// 读取数据
-        /// </summary>
-        /// <returns></returns>
-        public object Read()
+
+
+        public T Capture<T>(Stream stream)
         {
-            var obj = Read(_workbook, _type, _design);
+            var workbook = WorkbookFactory.Create(stream);
+            return Capture<T>(workbook);
+        }
+
+        public T Capture<T>(IWorkbook workbook)
+        {
+            var obj = (T)Capture(workbook, typeof(T));
+            return obj;
+        }
+
+        public object Capture(Stream stream, Type type)
+        {
+            var workbook = WorkbookFactory.Create(stream);
+            return Capture(workbook, type);
+        }
+
+        public object Capture(IWorkbook workbook, Type type)
+        {
+            var obj = Read(workbook, type, _design);
             return obj;
         }
 

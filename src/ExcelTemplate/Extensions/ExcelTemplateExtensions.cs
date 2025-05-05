@@ -1,6 +1,8 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
+using ExcelTemplate.Model;
 using NPOI.SS.UserModel;
 using NPOI.Util;
 
@@ -12,7 +14,7 @@ namespace ExcelTemplate.Extensions
         /// 是否存在异常
         /// </summary>
         /// <returns></returns>
-        public static bool HasError(this TemplateReader template)
+        public static bool HasError(this TemplateCapture template)
         {
             return template.Exceptions.Any();
         }
@@ -21,14 +23,14 @@ namespace ExcelTemplate.Extensions
         /// 生成错误提示Excel
         /// </summary>
         /// <returns></returns>
-        public static IWorkbook BuildErrorExcel(this TemplateReader template)
+        public static IWorkbook BuildErrorExcel(this IWorkbook workbook, List<CellException> exceptions)
         {
-            var newWorkbook = template.WorkBook.Copy();
+            var newWorkbook = workbook.Copy();
             var sheet = newWorkbook.GetSheetAt(0);
             var drawing = sheet.CreateDrawingPatriarch();
-            var helper = template.WorkBook.GetCreationHelper();
+            var helper = workbook.GetCreationHelper();
 
-            foreach (var ex in template.Exceptions)
+            foreach (var ex in exceptions)
             {
                 var cell = sheet.GetRow(ex.Position.Row).GetCell(ex.Position.Col);
                 var anchor = helper.CreateClientAnchor();
@@ -44,15 +46,15 @@ namespace ExcelTemplate.Extensions
         /// 生成错误提示
         /// </summary>
         /// <returns></returns>
-        public static string BuildErrorMessage(this TemplateReader template)
+        public static string BuildErrorMessage(this IList<CellException> exceptions)
         {
-            if (!template.Exceptions.Any())
+            if (!exceptions.Any())
             {
                 return string.Empty;
             }
 
             StringBuilder sb = new StringBuilder(500);
-            foreach (var ex in template.Exceptions.OrderBy(a => a.Position.Row))
+            foreach (var ex in exceptions.OrderBy(a => a.Position.Row))
             {
                 sb.AppendLine(ex.Message);
             }
@@ -64,11 +66,11 @@ namespace ExcelTemplate.Extensions
         /// 生成错误提示文件
         /// </summary>
         /// <returns></returns>
-        public static byte[] BuildErrorFile(this TemplateReader template)
+        public static byte[] BuildErrorFile(this IWorkbook workbook, List<CellException> exceptions)
         {
             using (var ms = new MemoryStream())
             {
-                var book = template.BuildErrorExcel();
+                var book = workbook.BuildErrorExcel(exceptions);
                 book.Write(ms);
 
                 return ms.ToArray();
