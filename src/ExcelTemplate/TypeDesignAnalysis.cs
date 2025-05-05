@@ -121,8 +121,8 @@ namespace ExcelTemplate
             var tablePosition = valueAttr.Position;
             var elementType = TypeHelper.GetCollectionElementType(prop.PropertyType);
             var subProps = elementType.GetProperties();
-            var tmpList = new List<TypeRawHeader>();
-            var dicMapper = new Dictionary<TableHeaderBlock, TableBodyBlock>();
+            var rawHeaderList = new List<TypeRawHeader>();
+            var bodys = new List<TableBodyBlock>();
 
             foreach (var subProp in subProps)
             {
@@ -156,18 +156,21 @@ namespace ExcelTemplate
                         mergeTitles = mergeAttr.Titles;
                     }
 
-                    dicMapper.Add(headerBlock, bodyBlock);
-                    tmpList.Add(new TypeRawHeader() { Block = headerBlock, MergeTitles = mergeTitles });
+                    rawHeaderList.Add(new TypeRawHeader() { Block = headerBlock, MergeTitles = mergeTitles });
+                    bodys.Add(bodyBlock);
                 }
             }
 
-            var headers = MergeHelper.MergeHeader(tablePosition, tmpList);
-            foreach (var item in dicMapper)
+            var headers = MergeHelper.MergeHeader(tablePosition, rawHeaderList);
+            foreach (var body in bodys)
             {
-                item.Value.Position = (item.Key.MergeTo ?? item.Key.Position).GetOffset(1, 0);
-            }
+                // 对应那一列最低的一个表头
+                var lowestHeader = headers.Where(a => a.Position.Col == body.Position.Col)
+                        .OrderByDescending(a => a.Position.Row)
+                        .First();
 
-            var bodys = dicMapper.Select(item => item.Value).ToList();
+                body.Position.Row = (lowestHeader.MergeTo ?? lowestHeader.Position).Row + 1;
+            }
 
             return new TableBlock()
             {
