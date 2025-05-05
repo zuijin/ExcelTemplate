@@ -7,9 +7,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelTemplate", "ExcelTempl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelTemplate.Test", "ExcelTemplate.Test\ExcelTemplate.Test.csproj", "{7A1D884F-D7E1-4AEA-ADAE-8FD79461FF5D}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{CB61E1B4-D871-4839-9240-15198C62C7FC}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{795852CB-1BC2-44F9-A469-F43AE3DB1BCB}"
 	ProjectSection(SolutionItems) = preProject
-		.editorconfig = .editorconfig
+		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
 Global
