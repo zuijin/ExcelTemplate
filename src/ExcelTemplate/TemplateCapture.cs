@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using ExcelTemplate.Extensions;
 using ExcelTemplate.Helper;
 using ExcelTemplate.Model;
 using NPOI.SS.UserModel;
@@ -116,7 +117,6 @@ namespace ExcelTemplate
         private int ReadForm(BlockSection section, ISheet sheet, ref object data)
         {
             var blocks = section.Blocks;
-            var props = data.GetType().GetProperties();
 
             foreach (var block in blocks.OfType<ValueBlock>())
             {
@@ -125,8 +125,7 @@ namespace ExcelTemplate
 
                 try
                 {
-                    var cellVal = GetCellValue(cell);
-                    ObjectHelper.SetObjectValue(data, block.FieldPath, cellVal);
+                    ObjectHelper.SetObjectValue(data, block.FieldPath, cell);
                 }
                 catch (Exception ex)
                 {
@@ -206,13 +205,8 @@ namespace ExcelTemplate
 
                     try
                     {
-                        var val = GetCellValue(cell);
-                        if (val != null)
-                        {
-                            var fieldPath = block.FieldPath.Substring(block.FieldPath.IndexOf('.') + 1);
-
-                            ObjectHelper.SetObjectValue(obj, fieldPath, val);
-                        }
+                        var fieldPath = block.FieldPath.Substring(block.FieldPath.IndexOf('.') + 1);
+                        ObjectHelper.SetObjectValue(obj, fieldPath, cell);
                     }
                     catch (Exception ex)
                     {
@@ -263,37 +257,6 @@ namespace ExcelTemplate
             }
 
             return true;
-        }
-
-        /// <summary>
-        /// 获取单元格的值
-        /// </summary>
-        /// <param name="cell"></param>
-        /// <returns></returns>
-        object GetCellValue(ICell cell)
-        {
-            object val = null;
-            switch (cell.CellType)
-            {
-                case CellType.String:
-                    val = cell.StringCellValue;
-                    break;
-                case CellType.Numeric:
-                    val = DateUtil.IsCellDateFormatted(cell) ? (object?)cell.DateCellValue : cell.NumericCellValue;
-                    break;
-                case CellType.Boolean:
-                    val = cell.BooleanCellValue;
-                    break;
-                case CellType.Blank:
-                    break;
-                default:
-                    val = cell.ToString();
-                    break;
-            }
-
-            //return System.Convert.ChangeType(val, type);
-
-            return val;
         }
 
         /// <summary>

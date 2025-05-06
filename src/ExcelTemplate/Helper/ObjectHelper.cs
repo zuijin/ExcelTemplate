@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ExcelTemplate.Extensions;
+using NPOI.SS.UserModel;
 
 namespace ExcelTemplate.Helper
 {
     public static class ObjectHelper
     {
-        public static void SetObjectValue(object obj, string fieldPath, object val)
+        public static void SetObjectValue(object obj, string fieldPath, ICell cell)
         {
-            if (val == null)
+            if (cell == null)
             {
                 return;
             }
@@ -38,7 +40,7 @@ namespace ExcelTemplate.Helper
                 }
                 else
                 {
-                    val = Convert.ChangeType(val, prop.PropertyType);
+                    var val = cell.GetValue(prop.PropertyType);
                     prop.SetValue(currObj, val);
                 }
 

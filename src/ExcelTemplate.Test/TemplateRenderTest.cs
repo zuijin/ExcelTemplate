@@ -40,7 +40,7 @@ namespace ExcelTemplate.Test
                 foreach (var attr in posAttrs)
                 {
                     var cell = sheet.GetCell(attr.Position);
-                    var cellValue = Convert.ChangeType(cell.GetValue(), prop.PropertyType);
+                    var cellValue = cell.GetValue(prop.PropertyType);
                     var objValue = prop.GetValue(data);
 
                     Assert.Equal(objValue, cellValue);
@@ -102,7 +102,7 @@ namespace ExcelTemplate.Test
                     {
                         var col = positionAttr.Position.Col + colAttr.ColIndex;
                         var cell = sheet.GetCell(currentRow, col);
-                        var cellValue = Convert.ChangeType(cell.GetValue(), prop.PropertyType);
+                        var cellValue = cell.GetValue(prop.PropertyType);
                         var objValue = prop.GetValue(item);
 
                         Assert.Equal(objValue, cellValue);
@@ -169,7 +169,7 @@ namespace ExcelTemplate.Test
                     {
                         var col = positionAttr.Position.Col + colAttr.ColIndex;
                         var cell = sheet.GetCell(currentRow, col);
-                        var cellValue = Convert.ChangeType(cell.GetValue(), prop.PropertyType);
+                        var cellValue = cell.GetValue(prop.PropertyType);
                         var objValue = prop.GetValue(item);
 
                         Assert.Equal(objValue, cellValue);
@@ -207,7 +207,16 @@ namespace ExcelTemplate.Test
                 foreach (var cell in row.AsEnumerable())
                 {
                     var tmpCell = originSheet.GetCell(cell.RowIndex, cell.ColumnIndex);
-                    Assert.Equal(cell.GetValue(), tmpCell.GetValue());
+                    var val1 = tmpCell.GetValue();
+                    var val2 = cell.GetValue();
+
+                    if (val1 is DateTime || val2 is DateTime)
+                    {
+                        val1 = tmpCell.DateCellValue;
+                        val2 = cell.DateCellValue;
+                    }
+
+                    Assert.Equal(val1, val2);
                 }
             }
 
@@ -216,7 +225,16 @@ namespace ExcelTemplate.Test
                 foreach (var cell in row.AsEnumerable())
                 {
                     var tmpCell = sheet.GetCell(cell.RowIndex, cell.ColumnIndex);
-                    Assert.Equal(cell.GetValue(), tmpCell.GetValue());
+                    var val1 = tmpCell.GetValue();
+                    var val2 = cell.GetValue();
+
+                    if (val1 is DateTime || val2 is DateTime)
+                    {
+                        val1 = tmpCell.DateCellValue;
+                        val2 = cell.DateCellValue;
+                    }
+
+                    Assert.Equal(val1, val2);
                 }
             }
 

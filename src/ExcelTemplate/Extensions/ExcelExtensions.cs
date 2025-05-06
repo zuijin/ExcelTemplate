@@ -110,7 +110,13 @@ namespace ExcelTemplate.Extensions
 
         public static object GetValue(this ICell cell, Type type)
         {
-            object val = Convert.ChangeType(cell.GetValue(), type);
+            var val = cell.GetValue();
+            if (type == typeof(DateTime) && !(val is DateTime))
+            {
+                val = cell.DateCellValue;
+            }
+
+            val = Convert.ChangeType(val, type);
             return val;
         }
 
@@ -133,11 +139,26 @@ namespace ExcelTemplate.Extensions
             }
             else if (val is DateTime)
             {
-                cell.SetCellValue((DateTime)val);
-                ICellStyle style = cell.Sheet.Workbook.CreateCellStyle();
-                IDataFormat dataFormat = cell.Sheet.Workbook.CreateDataFormat();
-                style.DataFormat = dataFormat.GetFormat("yyyy/m/d");
-                cell.CellStyle = style;
+                var dateTime = (DateTime)val;
+                cell.SetCellValue(dateTime);
+
+                //IDataFormat dataFormat = cell.Sheet.Workbook.CreateDataFormat();
+                //ICellStyle style = cell.CellStyle;
+                //if (style == null)
+                //{
+                //    style = cell.Sheet.Workbook.CreateCellStyle();
+                //}
+
+                //if (dateTime == dateTime.Date)
+                //{
+                //    style.DataFormat = dataFormat.GetFormat("yyyy/m/d");
+                //}
+                //else
+                //{
+                //    style.DataFormat = dataFormat.GetFormat("yyyy/m/d h:mm:ss");
+                //}
+
+                //cell.CellStyle = style;
             }
             else if (val is bool)
             {
