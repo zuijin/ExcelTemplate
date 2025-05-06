@@ -8,9 +8,9 @@ namespace ExcelTemplate.Helper
 {
     public static class ObjectHelper
     {
-        public static void SetObjectValue(object obj, string fieldPath, ICell cell)
+        public static void SetObjectValue(object obj, string fieldPath, object val)
         {
-            if (cell == null)
+            if (val == null)
             {
                 return;
             }
@@ -40,7 +40,7 @@ namespace ExcelTemplate.Helper
                 }
                 else
                 {
-                    var val = cell.GetValue(prop.PropertyType);
+                    val = Convert.ChangeType(val, prop.PropertyType);
                     prop.SetValue(currObj, val);
                 }
 

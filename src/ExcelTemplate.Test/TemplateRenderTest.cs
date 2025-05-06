@@ -210,11 +210,11 @@ namespace ExcelTemplate.Test
                     var val1 = tmpCell.GetValue();
                     var val2 = cell.GetValue();
 
-                    if (val1 is DateTime || val2 is DateTime)
-                    {
-                        val1 = tmpCell.DateCellValue;
-                        val2 = cell.DateCellValue;
-                    }
+                    //if (val1 is DateTime || val2 is DateTime)
+                    //{
+                    //    val1 = tmpCell.DateCellValue;
+                    //    val2 = cell.DateCellValue;
+                    //}
 
                     Assert.Equal(val1, val2);
                 }
@@ -228,11 +228,11 @@ namespace ExcelTemplate.Test
                     var val1 = tmpCell.GetValue();
                     var val2 = cell.GetValue();
 
-                    if (val1 is DateTime || val2 is DateTime)
-                    {
-                        val1 = tmpCell.DateCellValue;
-                        val2 = cell.DateCellValue;
-                    }
+                    //if (val1 is DateTime || val2 is DateTime)
+                    //{
+                    //    val1 = tmpCell.DateCellValue;
+                    //    val2 = cell.DateCellValue;
+                    //}
 
                     Assert.Equal(val1, val2);
                 }

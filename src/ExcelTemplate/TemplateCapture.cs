@@ -125,7 +125,8 @@ namespace ExcelTemplate
 
                 try
                 {
-                    ObjectHelper.SetObjectValue(data, block.FieldPath, cell);
+                    var val = cell.GetValue();
+                    ObjectHelper.SetObjectValue(data, block.FieldPath, val);
                 }
                 catch (Exception ex)
                 {
@@ -205,8 +206,9 @@ namespace ExcelTemplate
 
                     try
                     {
+                        var val = cell.GetValue();
                         var fieldPath = block.FieldPath.Substring(block.FieldPath.IndexOf('.') + 1);
-                        ObjectHelper.SetObjectValue(obj, fieldPath, cell);
+                        ObjectHelper.SetObjectValue(obj, fieldPath, val);
                     }
                     catch (Exception ex)
                     {
