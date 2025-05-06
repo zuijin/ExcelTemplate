@@ -18,6 +18,26 @@ namespace ExcelTemplate.Model
         /// </summary>
         public List<TableBodyBlock> Body { get; set; }
 
+        public override void ApplyOffset(int rowOffset = 0, int colOffset = 0)
+        {
+            if (rowOffset == 0 && colOffset == 0)
+            {
+                return;
+            }
+
+            base.ApplyOffset(rowOffset, colOffset);
+
+            foreach (var item in this.Header)
+            {
+                item.ApplyOffset(rowOffset, colOffset);
+            }
+
+            foreach (var item in this.Body)
+            {
+                item.ApplyOffset(rowOffset, colOffset);
+            }
+        }
+
 
         public override object Clone()
         {

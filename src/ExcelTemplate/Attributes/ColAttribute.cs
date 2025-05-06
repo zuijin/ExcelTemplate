@@ -1,5 +1,4 @@
 ﻿using System;
-using ExcelTemplate.Model;
 
 namespace ExcelTemplate.Attributes
 {
@@ -10,20 +9,25 @@ namespace ExcelTemplate.Attributes
     public class ColAttribute : Attribute
     {
 
-        public ColAttribute(string headerText, string position)
+        public ColAttribute(string headerText, int colIndex)
         {
             this.HeaderText = headerText;
-            this.Position = position;
+            this.ColIndex = colIndex;
         }
 
         public ColAttribute(string headerText, int row, int col)
         {
             this.HeaderText = headerText;
-            this.Position = (row, col);
         }
 
+        /// <summary>
+        /// 表头
+        /// </summary>
         public string HeaderText { get; set; }
 
-        public Position Position { get; set; }
+        /// <summary>
+        /// 列顺序，从0开始递增
+        /// </summary>
+        public int ColIndex { get; set; }
     }
 }

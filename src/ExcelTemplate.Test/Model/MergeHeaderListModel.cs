@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ExcelTemplate.Attributes;
-using NPOI.SS.Formula.Functions;
+﻿using ExcelTemplate.Attributes;
 
 namespace ExcelTemplate.Test.Model
 {
@@ -17,18 +11,18 @@ namespace ExcelTemplate.Test.Model
         internal class ListItem
         {
             [Merge("第一级", "第二级")]
-            [Col("列1", "B8")]
+            [Col("列1", 0)]
             public int Field_1 { get; set; }
 
             [Merge("第一级", "第二级")]
-            [Col("列2：", "C8")]
+            [Col("列2：", 1)]
             public int Field_2 { get; set; }
 
             [Merge("第一级")]
-            [Col("列3", "D7")]
+            [Col("列3", 2)]
             public string Field_3 { get; set; }
 
-            [Col("列4", "E6")]
+            [Col("列4", 3)]
             public DateTime Field_4 { get; set; }
         }
     }

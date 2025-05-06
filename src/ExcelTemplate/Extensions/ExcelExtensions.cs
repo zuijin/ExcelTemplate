@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
+using System.Linq;
 using ExcelTemplate.Model;
 using NPOI.SS.UserModel;
 
@@ -36,7 +35,13 @@ namespace ExcelTemplate.Extensions
 
         public static ICell GetCell(this ISheet sheet, int row, int col)
         {
-            return sheet.GetRow(row).GetCell(col, MissingCellPolicy.CREATE_NULL_AS_BLANK);
+            var irow = sheet.GetRow(row);
+            if (irow == null)
+            {
+                return null;
+            }
+
+            return irow.GetCell(col, MissingCellPolicy.CREATE_NULL_AS_BLANK);
         }
 
         public static IRow GetOrCreateRow(this ISheet sheet, int rowIndex)
@@ -74,6 +79,11 @@ namespace ExcelTemplate.Extensions
 
         public static object GetValue(this ICell cell)
         {
+            if (cell == null)
+            {
+                return null;
+            }
+
             object val = null;
             switch (cell.CellType)
             {
@@ -81,12 +91,14 @@ namespace ExcelTemplate.Extensions
                     val = cell.StringCellValue;
                     break;
                 case CellType.Numeric:
-                    val = DateUtil.IsCellDateFormatted(cell) ? (object?)cell.DateCellValue : cell.NumericCellValue;
+                    val = DateUtil.IsCellDateFormatted(cell) ? (object)cell.DateCellValue : cell.NumericCellValue;
                     break;
                 case CellType.Boolean:
                     val = cell.BooleanCellValue;
                     break;
                 case CellType.Blank:
+                case CellType.Formula:
+                case CellType.Unknown:
                     break;
                 default:
                     val = cell.ToString();
@@ -94,6 +106,51 @@ namespace ExcelTemplate.Extensions
             }
 
             return val;
+        }
+
+        public static object GetValue(this ICell cell, Type type)
+        {
+            object val = Convert.ChangeType(cell.GetValue(), type);
+            return val;
+        }
+
+        public static void SetValue(this ICell cell, object val)
+        {
+            if (val == null)
+            {
+                return;
+            }
+
+            var numericTypes = new[]
+            {
+                typeof(byte), typeof(float), typeof(int), typeof(long), typeof(double), typeof(decimal),
+                typeof(short), typeof(sbyte), typeof(ushort), typeof(uint), typeof(ulong),
+            };
+
+            if (val is string)
+            {
+                cell.SetCellValue((string)val);
+            }
+            else if (val is DateTime)
+            {
+                cell.SetCellValue((DateTime)val);
+                ICellStyle style = cell.Sheet.Workbook.CreateCellStyle();
+                IDataFormat dataFormat = cell.Sheet.Workbook.CreateDataFormat();
+                style.DataFormat = dataFormat.GetFormat("yyyy/m/d");
+                cell.CellStyle = style;
+            }
+            else if (val is bool)
+            {
+                cell.SetCellValue((bool)val);
+            }
+            else if (numericTypes.Contains(val.GetType()))
+            {
+                cell.SetCellValue(double.Parse(val.ToString()));
+            }
+            else
+            {
+                cell.SetCellValue(val.ToString());
+            }
         }
     }
 }

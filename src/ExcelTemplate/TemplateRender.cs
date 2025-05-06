@@ -62,7 +62,7 @@ namespace ExcelTemplate
         }
 
         /// <summary>
-        /// 读取表单数据
+        /// 写入表单数据
         /// </summary>
         protected void Write(TemplateDesign design, IWorkbook workbook, object data)
         {
@@ -95,8 +95,7 @@ namespace ExcelTemplate
             foreach (var textBlock in section.Blocks.OfType<TextBlock>())
             {
                 var cell = sheet.GetOrCreateRow(textBlock.Position.Row).GetOrCreateCell(textBlock.Position.Col);
-
-                cell.SetCellValue(textBlock.Text);
+                cell.SetValue(textBlock.Text);
 
                 if (textBlock.MergeTo != null)
                 {
@@ -108,8 +107,7 @@ namespace ExcelTemplate
             {
                 var cell = sheet.GetOrCreateRow(valueBlock.Position.Row).GetOrCreateCell(valueBlock.Position.Col);
                 var val = ObjectHelper.GetObjectValue(data, valueBlock.FieldPath);
-
-                cell.SetCellValue(val.ToString());
+                cell.SetValue(val);
 
                 if (valueBlock.MergeTo != null)
                 {
@@ -134,7 +132,6 @@ namespace ExcelTemplate
 
             foreach (var table in tables)
             {
-                var tableHeight = table.Header.Max(a => a.MergeTo?.Row ?? a.Position.Row) - table.Position.Row;
                 var prop = props.FirstOrDefault(a => a.Name == table.TableName);
                 if (prop != null)
                 {
@@ -145,10 +142,8 @@ namespace ExcelTemplate
 
                     var list = prop.GetValue(data);
                     int count = WriteOneList(sheet, table, list);
-                    tableHeight += count;
+                    nextOffset = Math.Max(nextOffset, count - 1);
                 }
-
-                nextOffset = Math.Max(nextOffset, tableHeight);
             }
 
             //后面的区块自动偏移
@@ -168,7 +163,7 @@ namespace ExcelTemplate
             foreach (var header in table.Header)
             {
                 var cell = sheet.GetOrCreateRow(header.Position.Row).GetOrCreateCell(header.Position.Col);
-                cell.SetCellValue(header.Text);
+                cell.SetValue(header.Text);
 
                 if (header.MergeTo != null)
                 {
@@ -190,7 +185,7 @@ namespace ExcelTemplate
                         var filePath = body.FieldPath.Substring(body.FieldPath.LastIndexOf('.') + 1);
                         var val = ObjectHelper.GetObjectValue(item, filePath);
                         var cell = row.GetOrCreateCell(body.Position.Col);
-                        cell.SetCellValue(val?.ToString());
+                        cell.SetValue(val);
                     }
 
                     rowIndex++;

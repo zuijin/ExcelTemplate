@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ExcelTemplate.Model;
-using ExcelTemplate.Test.Model;
-using ExcelTemplate.Extensions;
-using System.Reflection;
+﻿using System.Reflection;
 using ExcelTemplate.Attributes;
-using Microsoft.VisualStudio.TestPlatform.Common.DataCollection;
-using ExcelTemplate.Helper;
+using ExcelTemplate.Extensions;
+using ExcelTemplate.Test.Model;
+using NPOI.SS.UserModel;
 
 namespace ExcelTemplate.Test
 {
@@ -95,7 +88,8 @@ namespace ExcelTemplate.Test
             var props = typeof(ListModel).GetProperties();
             var childrenProp = props.First(a => a.Name == nameof(data.Children));
             var titleRowCount = typeof(ListModel.ListItem).GetProperties().Select(a => a.GetCustomAttribute<MergeAttribute>()).Max(a => a?.Titles.Length ?? 0) + 1;
-            var currentRow = childrenProp.GetCustomAttribute<PositionAttribute>().Position.Row + titleRowCount;
+            var positionAttr = childrenProp.GetCustomAttribute<PositionAttribute>();
+            var currentRow = positionAttr.Position.Row + titleRowCount;
 
             foreach (var item in data.Children)
             {
@@ -106,7 +100,7 @@ namespace ExcelTemplate.Test
                     var colAttr = prop.GetCustomAttribute<ColAttribute>();
                     if (colAttr != null)
                     {
-                        var col = colAttr.Position.Col;
+                        var col = positionAttr.Position.Col + colAttr.ColIndex;
                         var cell = sheet.GetCell(currentRow, col);
                         var cellValue = Convert.ChangeType(cell.GetValue(), prop.PropertyType);
                         var objValue = prop.GetValue(item);
@@ -161,7 +155,8 @@ namespace ExcelTemplate.Test
             var props = typeof(MergeHeaderListModel).GetProperties();
             var childrenProp = props.First(a => a.Name == nameof(data.Children));
             var titleRowCount = typeof(MergeHeaderListModel.ListItem).GetProperties().Select(a => a.GetCustomAttribute<MergeAttribute>()).Max(a => a?.Titles.Length ?? 0) + 1;
-            var currentRow = childrenProp.GetCustomAttribute<PositionAttribute>().Position.Row + titleRowCount;
+            var positionAttr = childrenProp.GetCustomAttribute<PositionAttribute>();
+            var currentRow = positionAttr.Position.Row + titleRowCount;
 
             foreach (var item in data.Children)
             {
@@ -172,7 +167,7 @@ namespace ExcelTemplate.Test
                     var colAttr = prop.GetCustomAttribute<ColAttribute>();
                     if (colAttr != null)
                     {
-                        var col = colAttr.Position.Col;
+                        var col = positionAttr.Position.Col + colAttr.ColIndex;
                         var cell = sheet.GetCell(currentRow, col);
                         var cellValue = Convert.ChangeType(cell.GetValue(), prop.PropertyType);
                         var objValue = prop.GetValue(item);
@@ -182,6 +177,81 @@ namespace ExcelTemplate.Test
                 }
 
                 currentRow++;
+            }
+        }
+
+        /// <summary>
+        /// 渲染混排
+        /// </summary>
+        [Fact]
+        public void RenderMixtureTest()
+        {
+            var filePath = "Files/Mixture.xlsx";
+            var file = File.Open(filePath, FileMode.Open);
+            var originWorkbook = WorkbookFactory.Create(file);
+
+            var capture = TemplateCapture.Create(typeof(MixtureModel));
+            var originData = capture.Capture<MixtureModel>(originWorkbook);
+
+            var render = TemplateRender.Create(typeof(MixtureModel));
+            var workbook = render.Render(originData);
+
+            var originSheet = originWorkbook.GetSheetAt(0);
+            var sheet = workbook.GetSheetAt(0);
+
+            workbook.Save("Temp/Mixture.xlsx");
+
+            //对比单元格
+            foreach (var row in sheet.AsEnumerable())
+            {
+                foreach (var cell in row.AsEnumerable())
+                {
+                    var tmpCell = originSheet.GetCell(cell.RowIndex, cell.ColumnIndex);
+                    Assert.Equal(cell.GetValue(), tmpCell.GetValue());
+                }
+            }
+
+            foreach (var row in originSheet.AsEnumerable())
+            {
+                foreach (var cell in row.AsEnumerable())
+                {
+                    var tmpCell = sheet.GetCell(cell.RowIndex, cell.ColumnIndex);
+                    Assert.Equal(cell.GetValue(), tmpCell.GetValue());
+                }
+            }
+
+            // 对比数据
+            var data = capture.Capture<MixtureModel>(workbook);
+
+            Assert.Equal(originData.StudentName, data.StudentName);
+            Assert.Equal(originData.Sex, data.Sex);
+            Assert.Equal(originData.BirthDate, data.BirthDate);
+            Assert.Equal(originData.TotalScore_1st, data.TotalScore_1st);
+            Assert.Equal(originData.TotalRanking_1st, data.TotalRanking_1st);
+            Assert.Equal(originData.TotalScore_2nd, data.TotalScore_2nd);
+            Assert.Equal(originData.TotalRanking_2nd, data.TotalRanking_2nd);
+            Assert.Equal(originData.Scores_1st.Count, data.Scores_1st.Count);
+            Assert.Equal(originData.Scores_2nd.Count, data.Scores_2nd.Count);
+
+
+            for (int i = 0; i < data.Scores_1st.Count; i++)
+            {
+                var item = data.Scores_1st[i];
+                var item2 = originData.Scores_1st[i];
+                Assert.Equal(item.SubjectName, item2.SubjectName);
+                Assert.Equal(item.Score, item2.Score);
+                Assert.Equal(item.Ranking, item2.Ranking);
+                Assert.Equal(item.ExamTime, item2.ExamTime);
+            }
+
+            for (int i = 0; i < data.Scores_2nd.Count; i++)
+            {
+                var item = data.Scores_2nd[i];
+                var item2 = originData.Scores_2nd[i];
+                Assert.Equal(item.SubjectName, item2.SubjectName);
+                Assert.Equal(item.Score, item2.Score);
+                Assert.Equal(item.Ranking, item2.Ranking);
+                Assert.Equal(item.ExamTime, item2.ExamTime);
             }
         }
     }

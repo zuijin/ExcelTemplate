@@ -30,7 +30,7 @@ namespace ExcelTemplate
                 }
                 else if (IsSpecialCollectionType(propType))
                 {
-                    blocks.Add(GetCollectionTypeBlocks(prop, parents));
+                    blocks.AddRange(GetCollectionTypeBlocks(prop, parents));
                 }
                 else
                 {
@@ -104,15 +104,27 @@ namespace ExcelTemplate
         /// <param name="prop"></param>
         /// <param name="parent"></param>
         /// <returns></returns>
-        private static TableBlock GetCollectionTypeBlocks(PropertyInfo prop, List<PropertyInfo>? parents = null)
+        private static List<IBlock> GetCollectionTypeBlocks(PropertyInfo prop, List<PropertyInfo>? parents = null)
         {
-            var valueAttr = prop.GetCustomAttribute<PositionAttribute>();
-            if (valueAttr == null)
+            List<IBlock> blocks = new List<IBlock>();
+            var positionAttr = prop.GetCustomAttribute<PositionAttribute>();
+            if (positionAttr == null)
             {
-                return null;
+                return blocks;
             }
 
-            var tablePosition = valueAttr.Position;
+            var titleAttrs = prop.GetCustomAttributes<TitleAttribute>();
+            foreach (var attr in titleAttrs)
+            {
+                blocks.Add(new TextBlock()
+                {
+                    Text = attr.Title,
+                    Position = attr.Position,
+                    MergeTo = attr.MergeTo,
+                });
+            }
+
+            var tablePosition = positionAttr.Position;
             var elementType = TypeHelper.GetCollectionElementType(prop.PropertyType);
             var subProps = elementType.GetProperties();
             var rawHeaderList = new List<TypeRawHeader>();
@@ -132,14 +144,14 @@ namespace ExcelTemplate
                 {
                     var headerBlock = new TableHeaderBlock()
                     {
-                        Position = colAttr.Position,
+                        Position = positionAttr.Position.GetOffset(0, colAttr.ColIndex),
                         Text = colAttr.HeaderText,
                     };
 
                     //表体默认为表头的下一行
                     var bodyBlock = new TableBodyBlock()
                     {
-                        Position = headerBlock.Position.GetOffset(1, 0),
+                        Position = positionAttr.Position.GetOffset(1, colAttr.ColIndex),
                         FieldPath = path,
                     };
 
@@ -166,13 +178,15 @@ namespace ExcelTemplate
                 body.Position.Row = (lowestHeader.MergeTo ?? lowestHeader.Position).Row + 1;
             }
 
-            return new TableBlock()
+            blocks.Add(new TableBlock()
             {
                 TableName = PathCombine(parents?.Select(a => a.Name), prop.Name),
                 Position = tablePosition,
                 Header = headers,
                 Body = bodys,
-            };
+            });
+
+            return blocks;
         }
 
         /// <summary>
@@ -223,8 +237,13 @@ namespace ExcelTemplate
                     preSection.Blocks.AddRange(current.Blocks);
                     preSection.Next = current.Next;
                 }
+                else
+                {
+                    preSection = current;
+                }
 
                 current = current.Next;
+                preIsTable = isTable;
             }
         }
 

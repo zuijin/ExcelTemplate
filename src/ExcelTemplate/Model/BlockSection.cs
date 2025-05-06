@@ -35,11 +35,7 @@ namespace ExcelTemplate.Model
 
             foreach (var block in Blocks)
             {
-                block.Position.ApplyOffset(rowOffset, colOffset);
-                if (block.MergeTo != null)
-                {
-                    block.MergeTo.ApplyOffset(rowOffset, colOffset);
-                }
+                block.ApplyOffset(rowOffset, colOffset);
             }
 
             if (this.Next != null)
