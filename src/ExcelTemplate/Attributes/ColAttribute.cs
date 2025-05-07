@@ -29,5 +29,10 @@ namespace ExcelTemplate.Attributes
         /// 列顺序，从0开始递增
         /// </summary>
         public int ColIndex { get; set; }
+
+        /// <summary>
+        /// 样式
+        /// </summary>
+        public string Style { get; set; }
     }
 }

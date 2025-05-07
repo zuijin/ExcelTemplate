@@ -5,6 +5,8 @@ using System.Reflection;
 using ExcelTemplate.Attributes;
 using ExcelTemplate.Helper;
 using ExcelTemplate.Model;
+using ExcelTemplate.Style;
+using NPOI.OpenXmlFormats.Wordprocessing;
 
 namespace ExcelTemplate
 {
@@ -17,20 +19,22 @@ namespace ExcelTemplate
         /// <param name="parents"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public static TemplateDesign DesignAnalysis(Type type, List<PropertyInfo>? parents = null)
+        public static TemplateDesign DesignAnalysis(Type type)
         {
             var blocks = new List<IBlock>();
+            var styleDic = GetStyleDic(type);
             var props = type.GetProperties();
+
             foreach (PropertyInfo prop in props)
             {
                 var propType = prop.PropertyType;
                 if (TypeHelper.IsSimpleType(propType))
                 {
-                    blocks.AddRange(GetSimpleTypeBlocks(prop, parents));
+                    blocks.AddRange(GetSimpleTypeBlocks(prop, styleDic));
                 }
                 else if (IsSpecialCollectionType(propType))
                 {
-                    blocks.AddRange(GetCollectionTypeBlocks(prop, parents));
+                    blocks.AddRange(GetCollectionTypeBlocks(prop, styleDic));
                 }
                 else
                 {
@@ -43,7 +47,21 @@ namespace ExcelTemplate
             //合并
             MergeSection(section);
 
-            return new TemplateDesign(DesignSourceType.Object, section);
+            return new TemplateDesign(DesignSourceType.Type, section);
+        }
+
+        private static Dictionary<string, IStyle> GetStyleDic(Type type)
+        {
+            var styleDic = new Dictionary<string, IStyle>();
+            var attrs = type.GetCustomAttributes<StyleDicAttribute>();
+
+            foreach (var attr in attrs)
+            {
+                var style = StyleUtil.ConvertStyle(attr);
+                styleDic.Add(attr.Key, style);
+            }
+
+            return styleDic;
         }
 
 
@@ -70,9 +88,10 @@ namespace ExcelTemplate
         /// <param name="prop"></param>
         /// <param name="parent"></param>
         /// <returns></returns>
-        private static List<IBlock> GetSimpleTypeBlocks(PropertyInfo prop, List<PropertyInfo>? parents = null)
+        private static List<IBlock> GetSimpleTypeBlocks(PropertyInfo prop, Dictionary<string, IStyle> dicStyle)
         {
             var blocks = new List<IBlock>();
+
             var titleAttr = prop.GetCustomAttribute<TitleAttribute>();
             if (titleAttr != null)
             {
@@ -81,6 +100,7 @@ namespace ExcelTemplate
                     Position = titleAttr.Position,
                     Text = titleAttr.Title,
                     MergeTo = titleAttr.MergeTo,
+                    Style = GetBlockStyle(titleAttr.Style, dicStyle),
                 });
             }
 
@@ -91,11 +111,38 @@ namespace ExcelTemplate
                 {
                     Position = valueAttr.Position,
                     MergeTo = valueAttr.MergeTo,
-                    FieldPath = PathCombine(parents?.Select(a => a.Name), prop.Name)
+                    FieldPath = prop.Name,
+                    Style = GetBlockStyle(valueAttr.Style, dicStyle, prop),
                 });
             }
 
             return blocks;
+        }
+
+        /// <summary>
+        /// 获取区块样式
+        /// </summary>
+        /// <param name="styleKey"></param>
+        /// <param name="dicStyle"></param>
+        /// <param name="prop"></param>
+        /// <returns></returns>
+        private static IStyle GetBlockStyle(string styleKey, Dictionary<string, IStyle> dicStyle, PropertyInfo prop = null)
+        {
+            IStyle style = null;
+            if (!string.IsNullOrWhiteSpace(styleKey))
+            {
+                dicStyle.TryGetValue(styleKey, out style);
+            }
+            else if (prop != null)
+            {
+                var attr = prop.GetCustomAttribute<StyleAttribute>();
+                if (attr != null)
+                {
+                    style = StyleUtil.ConvertStyle(attr);
+                }
+            }
+
+            return style;
         }
 
         /// <summary>
@@ -104,7 +151,7 @@ namespace ExcelTemplate
         /// <param name="prop"></param>
         /// <param name="parent"></param>
         /// <returns></returns>
-        private static List<IBlock> GetCollectionTypeBlocks(PropertyInfo prop, List<PropertyInfo>? parents = null)
+        private static List<IBlock> GetCollectionTypeBlocks(PropertyInfo prop, Dictionary<string, IStyle> dicStyle)
         {
             List<IBlock> blocks = new List<IBlock>();
             var positionAttr = prop.GetCustomAttribute<PositionAttribute>();
@@ -121,6 +168,7 @@ namespace ExcelTemplate
                     Text = attr.Title,
                     Position = attr.Position,
                     MergeTo = attr.MergeTo,
+                    Style = GetBlockStyle(attr.Style, dicStyle),
                 });
             }
 
@@ -129,10 +177,11 @@ namespace ExcelTemplate
             var subProps = elementType.GetProperties();
             var rawHeaderList = new List<TypeRawHeader>();
             var bodys = new List<TableBodyBlock>();
+            var headStyle = GetBlockStyle(positionAttr.Style, dicStyle, prop);
 
             foreach (var subProp in subProps)
             {
-                var path = PathCombine(parents?.Select(a => a.Name), prop.Name, subProp.Name);
+                var path = PathCombine(prop.Name, subProp.Name);
                 var propType = subProp.PropertyType;
                 if (!TypeHelper.IsSimpleType(propType))
                 {
@@ -146,6 +195,7 @@ namespace ExcelTemplate
                     {
                         Position = positionAttr.Position.GetOffset(0, colAttr.ColIndex),
                         Text = colAttr.HeaderText,
+                        Style = headStyle,
                     };
 
                     //表体默认为表头的下一行
@@ -153,6 +203,7 @@ namespace ExcelTemplate
                     {
                         Position = positionAttr.Position.GetOffset(1, colAttr.ColIndex),
                         FieldPath = path,
+                        Style = GetBlockStyle(colAttr.Style, dicStyle, subProp),
                     };
 
                     string[] mergeTitles = new string[0];
@@ -167,7 +218,7 @@ namespace ExcelTemplate
                 }
             }
 
-            var headers = MergeHelper.MergeHeader(tablePosition, rawHeaderList);
+            var headers = MergeHelper.MergeHeader(tablePosition, rawHeaderList, headStyle);
             foreach (var body in bodys)
             {
                 // 对应那一列最低的一个表头
@@ -180,7 +231,7 @@ namespace ExcelTemplate
 
             blocks.Add(new TableBlock()
             {
-                TableName = PathCombine(parents?.Select(a => a.Name), prop.Name),
+                TableName = prop.Name,
                 Position = tablePosition,
                 Header = headers,
                 Body = bodys,

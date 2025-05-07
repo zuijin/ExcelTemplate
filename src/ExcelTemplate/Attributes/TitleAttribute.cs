@@ -39,5 +39,10 @@ namespace ExcelTemplate.Attributes
         public Position Position { get; set; }
 
         public Position MergeTo { get; set; }
+
+        /// <summary>
+        /// 样式
+        /// </summary>
+        public string Style { get; set; }
     }
 }

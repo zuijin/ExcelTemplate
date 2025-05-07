@@ -20,6 +20,7 @@ namespace ExcelTemplate.Test
             Assert.NotSame(textBlock, cloneBlock);
             Assert.NotSame(textBlock.Position, cloneBlock.Position);
             Assert.NotSame(textBlock.MergeTo, cloneBlock.MergeTo);
+            Assert.NotSame(textBlock.Style, cloneBlock.Style);
         }
 
         [Fact]

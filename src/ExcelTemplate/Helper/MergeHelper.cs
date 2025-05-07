@@ -1,19 +1,20 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using ExcelTemplate.Model;
+using ExcelTemplate.Style;
 
 namespace ExcelTemplate.Helper
 {
     public static class MergeHelper
     {
 
-        public static List<TableHeaderBlock> MergeHeader(Position position, List<TypeRawHeader> headerBlocks)
+        public static List<TableHeaderBlock> MergeHeader(Position position, List<TypeRawHeader> headerBlocks, IStyle headStyle)
         {
             var rootNode = BuildNodeTree(headerBlocks);
             HorizontalMerge(rootNode);
             VerticalMerge(rootNode);
 
-            return GetAllBlocks(rootNode, position);
+            return GetAllBlocks(rootNode, position, headStyle);
         }
 
         /// <summary>
@@ -130,7 +131,7 @@ namespace ExcelTemplate.Helper
         /// <param name="position"></param>
         /// <param name="heightOffset"></param>
         /// <returns></returns>
-        private static List<TableHeaderBlock> GetAllBlocks(HeaderNode node, Position position, int heightOffset = 0, int widthOffset = 0)
+        private static List<TableHeaderBlock> GetAllBlocks(HeaderNode node, Position position, IStyle headStyle, int heightOffset = 0, int widthOffset = 0)
         {
             var blocks = new List<TableHeaderBlock>();
             if (node.Width > 0 && node.Height > 0 && node.Children.Count > 0) //非根节点，非叶子节点
@@ -139,6 +140,7 @@ namespace ExcelTemplate.Helper
                 {
                     Position = position.GetOffset(heightOffset, widthOffset),
                     Text = node.Title,
+                    Style = headStyle,
                 };
 
                 if (node.Width > 1 || node.Height > 1)
@@ -166,7 +168,7 @@ namespace ExcelTemplate.Helper
             int totalWidth = 0;
             foreach (var child in node.Children)
             {
-                var childBlocks = GetAllBlocks(child, position, heightOffset + node.Height, totalWidth + widthOffset);
+                var childBlocks = GetAllBlocks(child, position, headStyle, heightOffset + node.Height, totalWidth + widthOffset);
                 blocks.AddRange(childBlocks);
                 totalWidth += child.Width;
             }

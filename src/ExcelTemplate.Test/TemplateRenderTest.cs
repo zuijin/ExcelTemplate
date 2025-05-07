@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using ExcelTemplate.Attributes;
 using ExcelTemplate.Extensions;
+using ExcelTemplate.Model;
 using ExcelTemplate.Test.Model;
 using NPOI.SS.UserModel;
 
@@ -272,5 +273,20 @@ namespace ExcelTemplate.Test
                 Assert.Equal(item.ExamTime, item2.ExamTime);
             }
         }
+        [Fact]
+        public void RenderStyleTest()
+        {
+            var render = TemplateRender.Create(typeof(TestFormStyleModel));
+            var data = new TestFormStyleModel()
+            {
+                StudentName = "李四",
+                BirthDate = DateTime.Today,
+                Sex = "女"
+            };
+
+            var workbook = render.Render(data);
+            workbook.Save("Temp/styletest.xlsx");
+        }
+
     }
 }

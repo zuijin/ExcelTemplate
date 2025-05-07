@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using ExcelTemplate.Model;
+using ExcelTemplate.Style;
 using NPOI.SS.UserModel;
 
 namespace ExcelTemplate.Extensions
@@ -166,6 +167,14 @@ namespace ExcelTemplate.Extensions
             else
             {
                 cell.SetCellValue(val.ToString());
+            }
+        }
+
+        public static void SetStyle(this ICell cell, IStyle style)
+        {
+            if (style != null)
+            {
+                cell.CellStyle = style.GetCellStyle(cell.Sheet.Workbook);
             }
         }
     }

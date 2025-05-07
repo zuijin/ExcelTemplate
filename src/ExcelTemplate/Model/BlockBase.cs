@@ -1,4 +1,6 @@
-﻿namespace ExcelTemplate.Model
+﻿using ExcelTemplate.Style;
+
+namespace ExcelTemplate.Model
 {
     public class BlockBase : IBlock
     {
@@ -10,6 +12,10 @@
         /// 合并到哪个位置
         /// </summary>
         public Position MergeTo { get; set; }
+        /// <summary>
+        /// 样式
+        /// </summary>
+        public IStyle Style { get; set; }
 
         public virtual void ApplyOffset(int rowOffset = 0, int colOffset = 0)
         {
@@ -29,9 +35,15 @@
         {
             var obj = (BlockBase)this.MemberwiseClone();
             obj.Position = (Position)this.Position.Clone();
+
             if (this.MergeTo != null)
             {
                 obj.MergeTo = (Position)this.MergeTo.Clone();
+            }
+
+            if (this.Style != null)
+            {
+                obj.Style = (IStyle)this.Style.Clone();
             }
 
             return obj;

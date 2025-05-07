@@ -96,6 +96,7 @@ namespace ExcelTemplate
             {
                 var cell = sheet.GetOrCreateRow(textBlock.Position.Row).GetOrCreateCell(textBlock.Position.Col);
                 cell.SetValue(textBlock.Text);
+                cell.SetStyle(textBlock.Style);
 
                 if (textBlock.MergeTo != null)
                 {
@@ -108,6 +109,7 @@ namespace ExcelTemplate
                 var cell = sheet.GetOrCreateRow(valueBlock.Position.Row).GetOrCreateCell(valueBlock.Position.Col);
                 var val = ObjectHelper.GetObjectValue(data, valueBlock.FieldPath);
                 cell.SetValue(val);
+                cell.SetStyle(valueBlock.Style);
 
                 if (valueBlock.MergeTo != null)
                 {
@@ -164,6 +166,7 @@ namespace ExcelTemplate
             {
                 var cell = sheet.GetOrCreateRow(header.Position.Row).GetOrCreateCell(header.Position.Col);
                 cell.SetValue(header.Text);
+                cell.SetStyle(header.Style);
 
                 if (header.MergeTo != null)
                 {
@@ -186,6 +189,7 @@ namespace ExcelTemplate
                         var val = ObjectHelper.GetObjectValue(item, filePath);
                         var cell = row.GetOrCreateCell(body.Position.Col);
                         cell.SetValue(val);
+                        cell.SetStyle(body.Style);
                     }
 
                     rowIndex++;
