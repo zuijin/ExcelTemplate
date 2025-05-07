@@ -7,7 +7,7 @@ namespace ExcelTemplate.Style
     /// <summary>
     /// 简单样式
     /// </summary>
-    public interface ISimpleStyle
+    public interface IETSimpleStyle
     {
         /// <summary>
         /// 获取或设置数据格式索引
@@ -17,12 +17,12 @@ namespace ExcelTemplate.Style
         /// <summary>
         /// 前景色
         /// </summary>
-        string ForegroundColor { get; set; }
+        string TextColor { get; set; }
 
         /// <summary>
         /// 背景色
         /// </summary>
-        string BackgroundColor { get; set; }
+        string BgColor { get; set; }
 
         /// <summary>
         /// 获取或设置是否使用粗体
@@ -46,7 +46,7 @@ namespace ExcelTemplate.Style
         /// <summary>
         /// 获取或设置水平对齐方式
         /// </summary>
-        HorizontalAlignment Alignment { get; set; }
+        ETHorizontalAlignment Alignment { get; set; }
 
         /// <summary>
         /// 获取或设置是否自动换行
@@ -56,6 +56,6 @@ namespace ExcelTemplate.Style
         /// <summary>
         /// 获取或设置垂直对齐方式
         /// </summary>
-        VerticalAlignment VerticalAlignment { get; set; }
+        ETVerticalAlignment VerticalAlignment { get; set; }
     }
 }

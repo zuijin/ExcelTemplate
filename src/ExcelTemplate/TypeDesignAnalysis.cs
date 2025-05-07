@@ -50,14 +50,14 @@ namespace ExcelTemplate
             return new TemplateDesign(DesignSourceType.Type, section);
         }
 
-        private static Dictionary<string, IStyle> GetStyleDic(Type type)
+        private static Dictionary<string, IETStyle> GetStyleDic(Type type)
         {
-            var styleDic = new Dictionary<string, IStyle>();
+            var styleDic = new Dictionary<string, IETStyle>();
             var attrs = type.GetCustomAttributes<StyleDicAttribute>();
 
             foreach (var attr in attrs)
             {
-                var style = StyleUtil.ConvertStyle(attr);
+                var style = ETStyleUtil.ConvertStyle(attr);
                 styleDic.Add(attr.Key, style);
             }
 
@@ -88,7 +88,7 @@ namespace ExcelTemplate
         /// <param name="prop"></param>
         /// <param name="parent"></param>
         /// <returns></returns>
-        private static List<IBlock> GetSimpleTypeBlocks(PropertyInfo prop, Dictionary<string, IStyle> dicStyle)
+        private static List<IBlock> GetSimpleTypeBlocks(PropertyInfo prop, Dictionary<string, IETStyle> dicStyle)
         {
             var blocks = new List<IBlock>();
 
@@ -126,9 +126,9 @@ namespace ExcelTemplate
         /// <param name="dicStyle"></param>
         /// <param name="prop"></param>
         /// <returns></returns>
-        private static IStyle GetBlockStyle(string styleKey, Dictionary<string, IStyle> dicStyle, PropertyInfo prop = null)
+        private static IETStyle GetBlockStyle(string styleKey, Dictionary<string, IETStyle> dicStyle, PropertyInfo prop = null)
         {
-            IStyle style = null;
+            IETStyle style = null;
             if (!string.IsNullOrWhiteSpace(styleKey))
             {
                 dicStyle.TryGetValue(styleKey, out style);
@@ -138,7 +138,7 @@ namespace ExcelTemplate
                 var attr = prop.GetCustomAttribute<StyleAttribute>();
                 if (attr != null)
                 {
-                    style = StyleUtil.ConvertStyle(attr);
+                    style = ETStyleUtil.ConvertStyle(attr);
                 }
             }
 
@@ -151,7 +151,7 @@ namespace ExcelTemplate
         /// <param name="prop"></param>
         /// <param name="parent"></param>
         /// <returns></returns>
-        private static List<IBlock> GetCollectionTypeBlocks(PropertyInfo prop, Dictionary<string, IStyle> dicStyle)
+        private static List<IBlock> GetCollectionTypeBlocks(PropertyInfo prop, Dictionary<string, IETStyle> dicStyle)
         {
             List<IBlock> blocks = new List<IBlock>();
             var positionAttr = prop.GetCustomAttribute<PositionAttribute>();

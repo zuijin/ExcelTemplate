@@ -7,25 +7,27 @@ using NPOI.XSSF.UserModel.Extensions;
 
 namespace ExcelTemplate.Style
 {
-    public static class StyleUtil
+    public static class ETStyleUtil
     {
-        public static IStyle ConvertStyle(ISimpleStyle simpleStyle)
+        public static IETStyle ConvertStyle(IETSimpleStyle simpleStyle)
         {
-            var style = new Style()
+            var style = new ETStyle()
             {
                 WrapText = simpleStyle.WrapText,
-                VerticalAlignment = (NPOI.SS.UserModel.VerticalAlignment)simpleStyle.VerticalAlignment,
-                Alignment = (NPOI.SS.UserModel.HorizontalAlignment)simpleStyle.Alignment,
+                VerticalAlignment = (VerticalAlignment)simpleStyle.VerticalAlignment,
+                Alignment = (HorizontalAlignment)simpleStyle.Alignment,
                 ShrinkToFit = simpleStyle.ShrinkToFit,
                 DataFormat = simpleStyle.DataFormat,
-                FillForegroundColor = simpleStyle.ForegroundColor,
-                FillBackgroundColor = simpleStyle.BackgroundColor,
+                FillForegroundColor = simpleStyle.BgColor,
+                FillBackgroundColor = simpleStyle.BgColor,
+                FillPattern = FillPattern.SolidForeground,
             };
 
-            style.Font = new Font()
+            style.Font = new ETFont()
             {
                 IsBold = simpleStyle.IsBold,
                 FontHeightInPoints = simpleStyle.FontHeightInPoints,
+                Color = simpleStyle.TextColor,
             };
 
             return style;
@@ -37,9 +39,9 @@ namespace ExcelTemplate.Style
         /// <param name="workbook"></param>
         /// <param name="cellStyle"></param>
         /// <returns></returns>
-        public static IStyle ConvertStyle(IWorkbook workbook, ICellStyle cellStyle)
+        public static IETStyle ConvertStyle(IWorkbook workbook, ICellStyle cellStyle)
         {
-            var style = new Style()
+            var style = new ETStyle()
             {
                 Alignment = cellStyle.Alignment,
                 BorderBottom = cellStyle.BorderBottom,
@@ -54,7 +56,7 @@ namespace ExcelTemplate.Style
                 FillBackgroundColor = GetColorHexString(workbook, cellStyle.FillBackgroundColor),
                 FillForegroundColor = GetColorHexString(workbook, cellStyle.FillForegroundColor),
                 FillPattern = cellStyle.FillPattern,
-                Font = cellStyle.GetFont(workbook),
+                Font = ConvertFont(workbook, cellStyle.GetFont(workbook)),
                 Indention = cellStyle.Indention,
                 IsHidden = cellStyle.IsHidden,
                 IsLocked = cellStyle.IsLocked,
@@ -71,12 +73,67 @@ namespace ExcelTemplate.Style
             return style;
         }
 
+        public static IFont ConvertFont(IWorkbook workbook, ETFont font)
+        {
+            var ifont = workbook.CreateFont();
+            ifont.Charset = font.Charset;
+            ifont.FontHeight = font.FontHeight;
+            ifont.FontHeightInPoints = font.FontHeightInPoints;
+            ifont.FontName = font.FontName;
+            ifont.IsBold = font.IsBold;
+            ifont.IsItalic = font.IsItalic;
+            ifont.IsStrikeout = font.IsStrikeout;
+            ifont.TypeOffset = font.TypeOffset;
+            ifont.Underline = font.Underline;
+
+            if (!string.IsNullOrWhiteSpace(font.Color))
+            {
+                if (ifont is XSSFFont xf)
+                {
+                    xf.SetColor(GetXSSFColor(font.Color));
+                }
+                else
+                {
+                    ifont.Color = GetHSSFColor(workbook, font.Color);
+                }
+            }
+
+            return ifont;
+        }
+
+        public static ETFont ConvertFont(IWorkbook workbook, IFont ifont)
+        {
+            var font = new ETFont()
+            {
+                Charset = ifont.Charset,
+                FontHeight = ifont.FontHeight,
+                FontHeightInPoints = ifont.FontHeightInPoints,
+                FontName = ifont.FontName,
+                IsBold = ifont.IsBold,
+                IsItalic = ifont.IsItalic,
+                IsStrikeout = ifont.IsStrikeout,
+                TypeOffset = ifont.TypeOffset,
+                Underline = ifont.Underline,
+            };
+
+            if (ifont is XSSFFont xf)
+            {
+                font.Color = xf.GetXSSFColor().ARGBHex;
+            }
+            else
+            {
+                font.Color = RgbToHex(((HSSFFont)ifont).GetHSSFColor((HSSFWorkbook)workbook).RGB);
+            }
+
+            return font;
+        }
+
         /// <summary>
         /// 获取 ICellStyle
         /// </summary>
         /// <param name="style"></param>
         /// <param name="cellStyle"></param>
-        public static ICellStyle GetCellStyle(IWorkbook workbook, IStyle style)
+        public static ICellStyle GetCellStyle(IWorkbook workbook, IETStyle style)
         {
             var cellStyle = workbook.CreateCellStyle();
 
@@ -99,8 +156,7 @@ namespace ExcelTemplate.Style
 
             if (style.Font != null)
             {
-                var font = workbook.CreateFont();
-                font.CloneStyleFrom(style.Font);
+                var font = ConvertFont(workbook, style.Font);
                 cellStyle.SetFont(font);
             }
 
@@ -136,7 +192,7 @@ namespace ExcelTemplate.Style
                 {
                     xssfStye.SetBottomBorderColor(GetXSSFColor(style.BottomBorderColor));
                 }
-                if (!string.IsNullOrWhiteSpace(style.FillForegroundColor))
+                if (!string.IsNullOrWhiteSpace(style.BorderDiagonalColor))
                 {
                     xssfStye.SetDiagonalBorderColor(GetXSSFColor(style.BorderDiagonalColor));
                 }
@@ -168,18 +224,18 @@ namespace ExcelTemplate.Style
                 return IndexedColors.Automatic.Index;
             }
 
-            var (r, g, b) = ParseHexRgb(hexColor);
+            var (r, g, b) = HexToRgb(hexColor);
             var palette = ((HSSFWorkbook)workbook).GetCustomPalette();
 
             // 查找已有颜色或添加新颜色
             var color = palette.FindColor(r, g, b) ?? palette.AddColor(r, g, b);
             return color.Indexed;
         }
-        
+
 
         public static XSSFColor GetXSSFColor(string hexColor)
         {
-            var (r, g, b) = ParseHexRgb(hexColor);
+            var (r, g, b) = HexToRgb(hexColor);
             return new XSSFColor(new byte[] { r, g, b });
         }
 
@@ -194,18 +250,16 @@ namespace ExcelTemplate.Style
         {
             if (workbook is XSSFWorkbook)
             {
-                return IndexedColors.ValueOf(colorIndex).HexString;
+                return RgbToHex(IndexedColors.ValueOf(colorIndex).RGB);
             }
             else
             {
                 // 获取自定义调色板
                 HSSFPalette palette = ((HSSFWorkbook)workbook).GetCustomPalette();
-
                 // 通过索引获取颜色
                 HSSFColor color = palette.GetColor(colorIndex);
-
                 // 如果找不到颜色，返回黑色作为默认值
-                return color.GetHexString();
+                return RgbToHex(color.RGB);
             }
         }
 
@@ -216,7 +270,7 @@ namespace ExcelTemplate.Style
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="ArgumentException"></exception>
-        public static (byte R, byte G, byte B) ParseHexRgb(string hexColor)
+        public static (byte R, byte G, byte B) HexToRgb(string hexColor)
         {
             hexColor = hexColor?.Trim() ?? throw new ArgumentNullException(nameof(hexColor));
 
@@ -242,6 +296,16 @@ namespace ExcelTemplate.Style
             }
 
             throw new ArgumentException("不支持的十六进制颜色格式");
+        }
+
+        /// <summary>
+        /// RGB转十六进制
+        /// </summary>
+        /// <param name="hexColor"></param>
+        /// <returns></returns>
+        public static string RgbToHex(byte[] rgb)
+        {
+            return $"#{rgb[0]:X2}{rgb[1]:X2}{rgb[2]:X2}";
         }
     }
 }

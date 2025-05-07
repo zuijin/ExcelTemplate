@@ -5,11 +5,11 @@ using NPOI.SS.UserModel;
 
 namespace ExcelTemplate.Style
 {
-    public class Style : IStyle
+    public class ETStyle : IETStyle
     {
         public bool ShrinkToFit { get; set; }
         public string DataFormat { get; set; }
-        public IFont Font { get; set; }
+        public ETFont Font { get; set; }
         public bool IsHidden { get; set; }
         public bool IsLocked { get; set; }
         public bool IsQuotePrefixed { get; set; }
@@ -35,9 +35,11 @@ namespace ExcelTemplate.Style
 
         public object Clone()
         {
-            var obj = (Style)MemberwiseClone();
-            obj.Font = new Font();
-            obj.Font.CloneStyleFrom(this.Font);
+            var obj = (ETStyle)MemberwiseClone();
+            if (this.Font != null)
+            {
+                obj.Font = (ETFont)this.Font.Clone();
+            }
 
             return obj;
         }
@@ -47,7 +49,7 @@ namespace ExcelTemplate.Style
         {
             if (_cellStyle == null)
             {
-                _cellStyle = StyleUtil.GetCellStyle(workbook, this);
+                _cellStyle = ETStyleUtil.GetCellStyle(workbook, this);
             }
 
             return _cellStyle;

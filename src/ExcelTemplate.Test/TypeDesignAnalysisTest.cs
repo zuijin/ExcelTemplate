@@ -1,6 +1,7 @@
 ﻿using ExcelTemplate.Model;
 using ExcelTemplate.Test.Model;
 using NPOI.SS.Formula.Functions;
+using NPOI.SS.UserModel;
 
 namespace ExcelTemplate.Test
 {
@@ -16,7 +17,7 @@ namespace ExcelTemplate.Test
                 if (block.FieldPath == "StudentName")
                 {
                     Assert.NotNull(block.Style);
-                    Assert.Equal("FF0000", block.Style.FillBackgroundColor);
+                    Assert.Equal("FF0000", block.Style.Font.Color);
                     Assert.Equal(18, block.Style.Font.FontHeightInPoints);
                     Assert.True(block.Style.Font.IsBold);
                     Assert.Equal(NPOI.SS.UserModel.HorizontalAlignment.Center, block.Style.Alignment);
@@ -26,6 +27,8 @@ namespace ExcelTemplate.Test
                 {
                     Assert.NotNull(block.Style);
                     Assert.Equal("0000FF", block.Style.FillBackgroundColor);
+                    Assert.Equal("0000FF", block.Style.FillForegroundColor);
+                    Assert.Equal(FillPattern.SolidForeground, block.Style.FillPattern);
                     Assert.Equal(12, block.Style.Font.FontHeightInPoints);
                     Assert.Equal(NPOI.SS.UserModel.HorizontalAlignment.Left, block.Style.Alignment);
                 }
@@ -42,7 +45,7 @@ namespace ExcelTemplate.Test
                 if (block.Text == "姓名：")
                 {
                     Assert.NotNull(block.Style);
-                    Assert.Equal("FF0000", block.Style.FillBackgroundColor);
+                    Assert.Equal("FF0000", block.Style.Font.Color);
                     Assert.Equal(18, block.Style.Font.FontHeightInPoints);
                     Assert.True(block.Style.Font.IsBold);
                     Assert.Equal(NPOI.SS.UserModel.HorizontalAlignment.Center, block.Style.Alignment);

@@ -6,7 +6,7 @@ using ExcelTemplate.Style;
 namespace ExcelTemplate.Attributes
 {
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
-    public class StyleAttribute : Attribute, ISimpleStyle
+    public class StyleAttribute : Attribute, IETSimpleStyle
     {
         /// <summary>
         /// 获取或设置数据格式索引
@@ -16,12 +16,12 @@ namespace ExcelTemplate.Attributes
         /// <summary>
         /// 前景色
         /// </summary>
-        public string ForegroundColor { get; set; }
+        public string TextColor { get; set; }
 
         /// <summary>
         /// 背景色
         /// </summary>
-        public string BackgroundColor { get; set; }
+        public string BgColor { get; set; }
 
         /// <summary>
         /// 获取或设置是否使用粗体
@@ -45,7 +45,7 @@ namespace ExcelTemplate.Attributes
         /// <summary>
         /// 获取或设置水平对齐方式
         /// </summary>
-        public HorizontalAlignment Alignment { get; set; }
+        public ETHorizontalAlignment Alignment { get; set; }
 
         /// <summary>
         /// 获取或设置是否自动换行
@@ -55,7 +55,7 @@ namespace ExcelTemplate.Attributes
         /// <summary>
         /// 获取或设置垂直对齐方式
         /// </summary>
-        public VerticalAlignment VerticalAlignment { get; set; }
+        public ETVerticalAlignment VerticalAlignment { get; set; }
     }
 
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]

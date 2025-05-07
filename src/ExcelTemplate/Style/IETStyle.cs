@@ -6,7 +6,7 @@ namespace ExcelTemplate.Style
     /// <summary>
     /// 全量样式，大部分字段跟NPOI的样式对应
     /// </summary>
-    public interface IStyle : ICloneable
+    public interface IETStyle : ICloneable
     {
         /// <summary>
         /// 单元格是否自动缩小以适应文本（当文本过长时）
@@ -21,7 +21,7 @@ namespace ExcelTemplate.Style
         /// <summary>
         /// 设置字体样式
         /// </summary>
-        IFont Font { get; set; }
+        ETFont Font { get; set; }
 
         /// <summary>
         /// 获取或设置单元格是否隐藏

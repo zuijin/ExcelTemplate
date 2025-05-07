@@ -170,7 +170,7 @@ namespace ExcelTemplate.Extensions
             }
         }
 
-        public static void SetStyle(this ICell cell, IStyle style)
+        public static void SetStyle(this ICell cell, IETStyle style)
         {
             if (style != null)
             {

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ExcelTemplate.Style
 {
-    public enum HorizontalAlignment
+    public enum ETHorizontalAlignment
     {
         /// <summary>
         /// 常规对齐（默认对齐方式）

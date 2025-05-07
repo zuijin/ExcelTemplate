@@ -8,7 +8,7 @@ namespace ExcelTemplate.Helper
     public static class MergeHelper
     {
 
-        public static List<TableHeaderBlock> MergeHeader(Position position, List<TypeRawHeader> headerBlocks, IStyle headStyle)
+        public static List<TableHeaderBlock> MergeHeader(Position position, List<TypeRawHeader> headerBlocks, IETStyle headStyle)
         {
             var rootNode = BuildNodeTree(headerBlocks);
             HorizontalMerge(rootNode);
@@ -131,7 +131,7 @@ namespace ExcelTemplate.Helper
         /// <param name="position"></param>
         /// <param name="heightOffset"></param>
         /// <returns></returns>
-        private static List<TableHeaderBlock> GetAllBlocks(HeaderNode node, Position position, IStyle headStyle, int heightOffset = 0, int widthOffset = 0)
+        private static List<TableHeaderBlock> GetAllBlocks(HeaderNode node, Position position, IETStyle headStyle, int heightOffset = 0, int widthOffset = 0)
         {
             var blocks = new List<TableHeaderBlock>();
             if (node.Width > 0 && node.Height > 0 && node.Children.Count > 0) //非根节点，非叶子节点

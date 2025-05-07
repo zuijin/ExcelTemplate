@@ -15,7 +15,7 @@ namespace ExcelTemplate.Model
         /// <summary>
         /// 样式
         /// </summary>
-        public IStyle Style { get; set; }
+        public IETStyle Style { get; set; }
 
         public virtual void ApplyOffset(int rowOffset = 0, int colOffset = 0)
         {
@@ -43,7 +43,7 @@ namespace ExcelTemplate.Model
 
             if (this.Style != null)
             {
-                obj.Style = (IStyle)this.Style.Clone();
+                obj.Style = (IETStyle)this.Style.Clone();
             }
 
             return obj;

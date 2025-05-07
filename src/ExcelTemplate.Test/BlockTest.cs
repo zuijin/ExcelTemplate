@@ -1,4 +1,5 @@
 using ExcelTemplate.Model;
+using ExcelTemplate.Style;
 using NPOI.SS.Formula.Functions;
 
 namespace ExcelTemplate.Test
@@ -12,7 +13,8 @@ namespace ExcelTemplate.Test
             {
                 Position = "B2",
                 MergeTo = "C3",
-                Text = "aaa"
+                Text = "aaa",
+                Style = new Style.ETStyle(),
             };
 
             var cloneBlock = (TextBlock)textBlock.Clone();

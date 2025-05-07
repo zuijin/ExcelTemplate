@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ExcelTemplate.Style
 {
-    public enum VerticalAlignment
+    public enum ETVerticalAlignment
     {
         Top = 0,
         Center = 1,
