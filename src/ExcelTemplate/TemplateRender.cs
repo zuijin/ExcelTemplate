@@ -5,6 +5,7 @@ using System.Linq;
 using ExcelTemplate.Extensions;
 using ExcelTemplate.Helper;
 using ExcelTemplate.Model;
+using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 
@@ -38,14 +39,26 @@ namespace ExcelTemplate
         }
 
         /// <summary>
-        /// 写入数据
+        /// 渲染数据
         /// </summary>
         /// <returns></returns>
-        public IWorkbook Render(object data)
+        public IWorkbook Render(object data, ExcelType excelType = ExcelType.Xlsx)
         {
-            var workbook = new XSSFWorkbook();
-            workbook.CreateSheet();
+            IWorkbook workbook;
+            if (excelType == ExcelType.Xlsx)
+            {
+                workbook = new XSSFWorkbook();
+            }
+            else if (excelType == ExcelType.Xls)
+            {
+                workbook = new HSSFWorkbook();
+            }
+            else
+            {
+                throw new Exception("不支持的 ExcelType 枚举");
+            }
 
+            workbook.CreateSheet();
             Write(_design, workbook, data);
 
             return workbook;

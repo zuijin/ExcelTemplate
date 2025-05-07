@@ -35,7 +35,7 @@ namespace ExcelTemplate.Attributes
         /// 此属性返回的值与Excel中显示的字号一致，如10、14或28等
         /// </remarks>
         /// <see cref="FontHeight"/>
-        public double FontHeightInPoints { get; set; }
+        public double FontHeightInPoints { get; set; } = 11;
 
         /// <summary>
         /// 单元格是否自动伸缩以适应文本（当文本过长时）
@@ -55,7 +55,7 @@ namespace ExcelTemplate.Attributes
         /// <summary>
         /// 获取或设置垂直对齐方式
         /// </summary>
-        public ETVerticalAlignment VerticalAlignment { get; set; }
+        public ETVerticalAlignment VerticalAlignment { get; set; } = ETVerticalAlignment.None;
     }
 
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
