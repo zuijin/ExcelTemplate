@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using ExcelTemplate.Style;
 
 namespace ExcelTemplate.Model
@@ -6,7 +7,7 @@ namespace ExcelTemplate.Model
     /// <summary>
     /// 模版定义
     /// </summary>
-    public class TemplateDesign
+    public class TemplateDesign : ICloneable
     {
         public TemplateDesign() { }
         public TemplateDesign(DesignSourceType sourceType, BlockSection BlockSection)
@@ -24,6 +25,17 @@ namespace ExcelTemplate.Model
         /// 区块定义
         /// </summary>
         public BlockSection BlockSection { get; set; }
+
+        public object Clone()
+        {
+            var obj = (TemplateDesign)this.MemberwiseClone();
+            if (this.BlockSection != null)
+            {
+                obj.BlockSection = (BlockSection)this.BlockSection.Clone();
+            }
+
+            return obj;
+        }
     }
 
     public enum DesignSourceType
