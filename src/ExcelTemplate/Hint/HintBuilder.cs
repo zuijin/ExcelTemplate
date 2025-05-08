@@ -15,8 +15,9 @@ namespace ExcelTemplate.Hint
         private IWorkbook _workbook;
         private TemplateDesign _design;
 
+        public T Data => _data;
         internal Dictionary<string, (int row, int col)> _formFieldDic = new Dictionary<string, (int row, int col)>();
-        internal Dictionary<object, Dictionary<string, (int row, int col)>> _listDic = new Dictionary<object, Dictionary<string, (int row, int col)>>();
+        internal Dictionary<object, int> _listDic = new Dictionary<object, int>();
 
         public HintBuilder(TemplateDesign design, IWorkbook workbook, T data, List<CellException> exceptions)
         {
@@ -25,11 +26,13 @@ namespace ExcelTemplate.Hint
             _workbook = workbook;
             _data = data;
             _exceptions.AddRange(exceptions);
+
+            InitDic();
         }
 
         private void InitDic()
         {
-            new HintBuilder<TemplateDesign>(new TemplateDesign(), _workbook, new TemplateDesign(), null).For(a => a.SourceType).AddError("");
+            throw new NotImplementedException();
         }
 
         public void AddError(int row, int col, string message)
@@ -37,14 +40,9 @@ namespace ExcelTemplate.Hint
             _exceptions.Add(new CellException(row, col, message));
         }
 
-        public FieldHintExecutor<T, TField> For<TField>(Expression<Func<T, TField>> expression)
+        public FieldHintExp<T, TField> For<TField>(Expression<Func<T, TField>> expression)
         {
-            return new FieldHintExecutor<T,TField>(this, expression);
-        }
-
-        public FieldHintExecutor<T, IEnumerable<TField>> For<TField>(Expression<Func<T, IEnumerable<TField>>> expression)
-        {
-            return new FieldHintExecutor<T, IEnumerable<TField>>(this, expression);
+            return new FieldHintExp<T, TField>(this, expression);
         }
     }
 }

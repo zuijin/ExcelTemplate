@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using ExcelTemplate.Extensions;
 using ExcelTemplate.Helper;
+using ExcelTemplate.Hint;
 using ExcelTemplate.Model;
 using NPOI.SS.UserModel;
 
@@ -72,6 +73,25 @@ namespace ExcelTemplate
             }
 
             return obj;
+        }
+
+        public HintBuilder<T> CaptureHintBuilder<T>(Stream stream)
+        {
+            var workbook = WorkbookFactory.Create(stream);
+            return CaptureHintBuilder<T>(workbook);
+        }
+
+        public HintBuilder<T> CaptureHintBuilder<T>(IWorkbook workbook)
+        {
+            _exceptions.Clear();
+            var obj = Capture<T>(workbook);
+
+            if (_exceptions.Any())
+            {
+                throw _exceptions.First();
+            }
+
+            return new HintBuilder<T>(_design, workbook, obj, _exceptions);
         }
 
         /// <summary>
