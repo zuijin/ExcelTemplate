@@ -22,9 +22,7 @@ jobs:
         dotnet-version: 8.0.x
     - name: Build
       working-directory: ./src
-      run:
-        export LANG="zh_CN.UTF-8"
-        dotnet build
+      run: export LANG="zh_CN.UTF-8" & dotnet build
     - name: Test
       working-directory: ./src
       run: dotnet test --no-build --verbosity normal
