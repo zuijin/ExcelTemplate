@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
+using ExcelTemplate.Helper;
 using ExcelTemplate.Model;
 using NPOI.SS.UserModel;
 using NPOI.Util;
+using NPOI.XWPF.UserModel;
 
 namespace ExcelTemplate.Hint
 {
@@ -16,8 +20,8 @@ namespace ExcelTemplate.Hint
         private TemplateDesign _design;
 
         public T Data => _data;
-        internal Dictionary<string, (int row, int col)> _formFieldDic = new Dictionary<string, (int row, int col)>();
-        internal Dictionary<object, int> _listDic = new Dictionary<object, int>();
+        internal Dictionary<string, Position> FieldDic = new Dictionary<string, Position>();
+        internal Dictionary<object, int> ElemetDic = new Dictionary<object, int>();
 
         public HintBuilder(TemplateDesign design, IWorkbook workbook, T data, List<CellException> exceptions)
         {
@@ -32,7 +36,35 @@ namespace ExcelTemplate.Hint
 
         private void InitDic()
         {
-            throw new NotImplementedException();
+            var current = _design.BlockSection;
+            while (current != null)
+            {
+                foreach (var block in current.Blocks.OfType<ValueBlock>())
+                {
+                    FieldDic.Add(block.FieldPath, block.Position);
+                }
+
+                foreach (var table in current.Blocks.OfType<TableBlock>())
+                {
+                    var list = (IEnumerable)ObjectHelper.GetObjectValue(_data, table.TableName);
+                    var index = 0;
+                    foreach (var element in list)
+                    {
+                        var firstRow = table.Body.First().Position.Row;
+                        foreach (var body in table.Body)
+                        {
+                            var fieldPath = body.FieldPath.Substring(body.FieldPath.IndexOf('.') + 1);
+                            var dataPath = $"{table.TableName}.{index}.{fieldPath}";
+                            FieldDic.Add(dataPath, (firstRow + index, body.Position.Col));
+                        }
+
+                        ElemetDic.Add(element, index);
+                        index++;
+                    }
+                }
+
+                current = current.Next;
+            }
         }
 
         public void AddError(int row, int col, string message)

@@ -7,6 +7,7 @@ using ExcelTemplate.Helper;
 using ExcelTemplate.Hint;
 using ExcelTemplate.Model;
 using NPOI.SS.UserModel;
+using NPOI.Util;
 
 namespace ExcelTemplate
 {
@@ -64,8 +65,8 @@ namespace ExcelTemplate
 
         public object Capture(IWorkbook workbook, Type type)
         {
-            _exceptions.Clear();
-            var obj = Read(workbook, type, _design);
+            var designClone = (TemplateDesign)_design.Clone();
+            var obj = Read(workbook, type, designClone);
 
             if (_exceptions.Any())
             {
@@ -83,15 +84,15 @@ namespace ExcelTemplate
 
         public HintBuilder<T> CaptureHintBuilder<T>(IWorkbook workbook)
         {
-            _exceptions.Clear();
-            var obj = Capture<T>(workbook);
+            var designClone = (TemplateDesign)_design.Clone();
+            var obj = Read(workbook, typeof(T), designClone);
 
             if (_exceptions.Any())
             {
                 throw _exceptions.First();
             }
 
-            return new HintBuilder<T>(_design, workbook, obj, _exceptions);
+            return new HintBuilder<T>(designClone, workbook, (T)obj, _exceptions);
         }
 
         /// <summary>
@@ -99,9 +100,11 @@ namespace ExcelTemplate
         /// </summary>
         private object Read(IWorkbook workBook, Type type, TemplateDesign design)
         {
+            _exceptions.Clear();
+
             var data = Activator.CreateInstance(type);
             var sheet = workBook.GetSheetAt(0);
-            var current = (BlockSection)design.BlockSection.Clone();
+            var current = design.BlockSection;
             int nextRow = 0;
 
             while (current != null)

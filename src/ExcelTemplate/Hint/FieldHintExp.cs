@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq.Expressions;
+using ExcelTemplate.Model;
 
 namespace ExcelTemplate.Hint
 {
@@ -18,13 +19,13 @@ namespace ExcelTemplate.Hint
         public void AddError(string message)
         {
             var pos = GetPosition();
-            _builder.AddError(pos.row, pos.col, message);
+            _builder.AddError(pos.Row, pos.Col, message);
         }
 
-        private (int row, int col) GetPosition()
+        private Position GetPosition()
         {
             var dataPath = Visit(_expression);
-            throw new NotImplementedException();
+            return _builder.FieldDic[dataPath];
         }
 
         private string Visit(Expression exp)
@@ -82,12 +83,12 @@ namespace ExcelTemplate.Hint
                     }
                     else
                     {
-                        if (!_builder._listDic.ContainsKey(obj))
+                        if (!_builder.ElemetDic.ContainsKey(obj))
                         {
                             throw new Exception("该对象不属于集合内");
                         }
 
-                        index = _builder._listDic[obj];
+                        index = _builder.ElemetDic[obj];
                     }
                 }
                 else if (arg.NodeType == ExpressionType.Constant)

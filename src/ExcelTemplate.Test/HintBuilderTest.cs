@@ -10,7 +10,7 @@ namespace ExcelTemplate.Test
 {
     public class HintBuilderTest
     {
-        //[Fact]
+        [Fact]
         public void BuilderExpressionTest()
         {
             var filePath = "Files/Mixture.xlsx";
@@ -18,14 +18,10 @@ namespace ExcelTemplate.Test
             var template = TemplateCapture.Create(typeof(MixtureModel));
 
             var builder = template.CaptureHintBuilder<MixtureModel>(file);
-            var i = 0;
             foreach (var item in builder.Data.Scores_1st)
             {
-                i++;
-                builder.For(a => a.Scores_1st.Pick(i).Score).AddError("aaaa");
-                builder.For(a => a.Sex).AddError("bbb");
+                builder.For(a => a.Scores_1st.Pick(item).Score).AddError("aaaa");
             }
-
         }
     }
 }
