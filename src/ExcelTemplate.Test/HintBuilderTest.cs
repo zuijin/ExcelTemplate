@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ExcelTemplate.Test.Model;
-using ExcelTemplate.Hint;
+using ExcelTemplate.Extensions;
 
 namespace ExcelTemplate.Test
 {
@@ -22,6 +22,14 @@ namespace ExcelTemplate.Test
             {
                 builder.For(a => a.Scores_1st.Pick(item).Score).AddError("aaaa");
             }
+
+            foreach (var item in builder.Data.Scores_2nd)
+            {
+                builder.For(a => a.Scores_2nd.Pick(item).Score).AddError("bbb");
+            }
+
+            var workbook = builder.BuildErrorExcel();
+            workbook.Save("Temp/hit.xlsx");
         }
     }
 }

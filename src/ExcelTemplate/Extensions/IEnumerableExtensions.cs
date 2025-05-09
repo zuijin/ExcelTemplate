@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
-namespace ExcelTemplate.Hint
+namespace ExcelTemplate.Extensions
 {
-    public static class HintBuilderExtensions
+    public static class IEnumerableExtensions
     {
         /// <summary>
         /// 选中集合中的一个元素

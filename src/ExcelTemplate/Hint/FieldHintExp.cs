@@ -25,7 +25,7 @@ namespace ExcelTemplate.Hint
         private Position GetPosition()
         {
             var dataPath = Visit(_expression);
-            return _builder.FieldDic[dataPath];
+            return _builder.FieldPositionDic[dataPath];
         }
 
         private string Visit(Expression exp)
@@ -83,12 +83,12 @@ namespace ExcelTemplate.Hint
                     }
                     else
                     {
-                        if (!_builder.ElemetDic.ContainsKey(obj))
+                        if (!_builder.ElemetIndexDic.ContainsKey(obj))
                         {
                             throw new Exception("该对象不属于集合内");
                         }
 
-                        index = _builder.ElemetDic[obj];
+                        index = _builder.ElemetIndexDic[obj];
                     }
                 }
                 else if (arg.NodeType == ExpressionType.Constant)
