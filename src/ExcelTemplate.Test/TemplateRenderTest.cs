@@ -7,12 +7,13 @@ using NPOI.SS.UserModel;
 
 namespace ExcelTemplate.Test
 {
+    [TestClass]
     public class TemplateRenderTest
     {
         /// <summary>
         /// 渲染表单
         /// </summary>
-        [Fact]
+        [TestMethod]
         public void RenderFormTest()
         {
             var render = TemplateRender.Create(typeof(FormModel));
@@ -34,7 +35,7 @@ namespace ExcelTemplate.Test
                 foreach (var attr in titleAttrs)
                 {
                     var cell = sheet.GetCell(attr.Position);
-                    Assert.Equal(attr.Title, cell.GetValue().ToString());
+                    Assert.AreEqual(attr.Title, cell.GetValue().ToString());
                 }
 
                 var posAttrs = prop.GetCustomAttributes<PositionAttribute>();
@@ -44,7 +45,7 @@ namespace ExcelTemplate.Test
                     var cellValue = cell.GetValue(prop.PropertyType);
                     var objValue = prop.GetValue(data);
 
-                    Assert.Equal(objValue, cellValue);
+                    Assert.AreEqual(objValue, cellValue);
                 }
             }
         }
@@ -52,7 +53,7 @@ namespace ExcelTemplate.Test
         /// <summary>
         /// 渲染列表
         /// </summary>
-        [Fact]
+        [TestMethod]
         public void RenderListTest()
         {
             var render = TemplateRender.Create(typeof(ListModel));
@@ -106,7 +107,7 @@ namespace ExcelTemplate.Test
                         var cellValue = cell.GetValue(prop.PropertyType);
                         var objValue = prop.GetValue(item);
 
-                        Assert.Equal(objValue, cellValue);
+                        Assert.AreEqual(objValue, cellValue);
                     }
                 }
 
@@ -117,7 +118,7 @@ namespace ExcelTemplate.Test
         /// <summary>
         /// 渲染合并表头的列表
         /// </summary>
-        [Fact]
+        [TestMethod]
         public void RenderMergeHeaderListTest()
         {
             var render = TemplateRender.Create(typeof(MergeHeaderListModel));
@@ -173,7 +174,7 @@ namespace ExcelTemplate.Test
                         var cellValue = cell.GetValue(prop.PropertyType);
                         var objValue = prop.GetValue(item);
 
-                        Assert.Equal(objValue, cellValue);
+                        Assert.AreEqual(objValue, cellValue);
                     }
                 }
 
@@ -184,10 +185,10 @@ namespace ExcelTemplate.Test
         /// <summary>
         /// 渲染混排
         /// </summary>
-        [Fact]
+        [TestMethod]
         public void RenderMixtureTest()
         {
-            var filePath = "Files/Mixture.xlsx";
+            var filePath = "Files/MixtureRender.xlsx";
             var file = File.Open(filePath, FileMode.Open);
             var originWorkbook = WorkbookFactory.Create(file);
 
@@ -200,7 +201,7 @@ namespace ExcelTemplate.Test
             var originSheet = originWorkbook.GetSheetAt(0);
             var sheet = workbook.GetSheetAt(0);
 
-            workbook.Save("Temp/Mixture.xlsx");
+            //workbook.Save("Temp/Mixture.xlsx");
 
             //对比单元格
             foreach (var row in sheet.AsEnumerable())
@@ -217,7 +218,7 @@ namespace ExcelTemplate.Test
                     //    val2 = cell.DateCellValue;
                     //}
 
-                    Assert.Equal(val1, val2);
+                    Assert.AreEqual(val1, val2);
                 }
             }
 
@@ -235,45 +236,45 @@ namespace ExcelTemplate.Test
                     //    val2 = cell.DateCellValue;
                     //}
 
-                    Assert.Equal(val1, val2);
+                    Assert.AreEqual(val1, val2);
                 }
             }
 
             // 对比数据
             var data = capture.Capture<MixtureModel>(workbook);
 
-            Assert.Equal(originData.StudentName, data.StudentName);
-            Assert.Equal(originData.Sex, data.Sex);
-            Assert.Equal(originData.BirthDate, data.BirthDate);
-            Assert.Equal(originData.TotalScore_1st, data.TotalScore_1st);
-            Assert.Equal(originData.TotalRanking_1st, data.TotalRanking_1st);
-            Assert.Equal(originData.TotalScore_2nd, data.TotalScore_2nd);
-            Assert.Equal(originData.TotalRanking_2nd, data.TotalRanking_2nd);
-            Assert.Equal(originData.Scores_1st.Count, data.Scores_1st.Count);
-            Assert.Equal(originData.Scores_2nd.Count, data.Scores_2nd.Count);
+            Assert.AreEqual(originData.StudentName, data.StudentName);
+            Assert.AreEqual(originData.Sex, data.Sex);
+            Assert.AreEqual(originData.BirthDate, data.BirthDate);
+            Assert.AreEqual(originData.TotalScore_1st, data.TotalScore_1st);
+            Assert.AreEqual(originData.TotalRanking_1st, data.TotalRanking_1st);
+            Assert.AreEqual(originData.TotalScore_2nd, data.TotalScore_2nd);
+            Assert.AreEqual(originData.TotalRanking_2nd, data.TotalRanking_2nd);
+            Assert.AreEqual(originData.Scores_1st.Count, data.Scores_1st.Count);
+            Assert.AreEqual(originData.Scores_2nd.Count, data.Scores_2nd.Count);
 
 
             for (int i = 0; i < data.Scores_1st.Count; i++)
             {
                 var item = data.Scores_1st[i];
                 var item2 = originData.Scores_1st[i];
-                Assert.Equal(item.SubjectName, item2.SubjectName);
-                Assert.Equal(item.Score, item2.Score);
-                Assert.Equal(item.Ranking, item2.Ranking);
-                Assert.Equal(item.ExamTime, item2.ExamTime);
+                Assert.AreEqual(item.SubjectName, item2.SubjectName);
+                Assert.AreEqual(item.Score, item2.Score);
+                Assert.AreEqual(item.Ranking, item2.Ranking);
+                Assert.AreEqual(item.ExamTime, item2.ExamTime);
             }
 
             for (int i = 0; i < data.Scores_2nd.Count; i++)
             {
                 var item = data.Scores_2nd[i];
                 var item2 = originData.Scores_2nd[i];
-                Assert.Equal(item.SubjectName, item2.SubjectName);
-                Assert.Equal(item.Score, item2.Score);
-                Assert.Equal(item.Ranking, item2.Ranking);
-                Assert.Equal(item.ExamTime, item2.ExamTime);
+                Assert.AreEqual(item.SubjectName, item2.SubjectName);
+                Assert.AreEqual(item.Score, item2.Score);
+                Assert.AreEqual(item.Ranking, item2.Ranking);
+                Assert.AreEqual(item.ExamTime, item2.ExamTime);
             }
         }
-        [Fact]
+        [TestMethod]
         public void RenderStyleTest()
         {
             var render = TemplateRender.Create(typeof(TestFormStyleModel));

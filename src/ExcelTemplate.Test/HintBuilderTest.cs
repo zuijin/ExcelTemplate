@@ -8,9 +8,10 @@ using ExcelTemplate.Extensions;
 
 namespace ExcelTemplate.Test
 {
+    [TestClass]
     public class HintBuilderTest
     {
-        [Fact]
+        [TestMethod]
         public void BuilderExpressionTest()
         {
             var filePath = "Files/HitBuilderTest.xlsx";

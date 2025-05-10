@@ -4,9 +4,10 @@ using NPOI.SS.Formula.Functions;
 
 namespace ExcelTemplate.Test
 {
+    [TestClass]
     public class BlockTest
     {
-        [Fact]
+        [TestMethod]
         public void TestBlockClone()
         {
             var textBlock = new TextBlock()
@@ -19,13 +20,13 @@ namespace ExcelTemplate.Test
 
             var cloneBlock = (TextBlock)textBlock.Clone();
 
-            Assert.NotSame(textBlock, cloneBlock);
-            Assert.NotSame(textBlock.Position, cloneBlock.Position);
-            Assert.NotSame(textBlock.MergeTo, cloneBlock.MergeTo);
-            Assert.NotSame(textBlock.Style, cloneBlock.Style);
+            Assert.AreNotSame(textBlock, cloneBlock);
+            Assert.AreNotSame(textBlock.Position, cloneBlock.Position);
+            Assert.AreNotSame(textBlock.MergeTo, cloneBlock.MergeTo);
+            Assert.AreNotSame(textBlock.Style, cloneBlock.Style);
         }
 
-        [Fact]
+        [TestMethod]
         public void TestBlockClone2()
         {
             var textBlock = new TestBlock()
@@ -38,10 +39,10 @@ namespace ExcelTemplate.Test
 
             var cloneBlock = (TestBlock)textBlock.Clone();
 
-            Assert.Same(textBlock.testPosition, cloneBlock.testPosition);
+            Assert.AreSame(textBlock.testPosition, cloneBlock.testPosition);
         }
 
-        [Fact]
+        [TestMethod]
         public void TestBlockClone3()
         {
             var textBlock = new TestBlock2()
@@ -54,7 +55,7 @@ namespace ExcelTemplate.Test
 
             var cloneBlock = (TestBlock2)textBlock.Clone();
 
-            Assert.NotSame(textBlock.testPosition, cloneBlock.testPosition);
+            Assert.AreNotSame(textBlock.testPosition, cloneBlock.testPosition);
         }
 
         public class TestBlock : TextBlock

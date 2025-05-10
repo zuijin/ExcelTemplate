@@ -5,13 +5,13 @@ VisualStudioVersion = 17.13.35931.197
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelTemplate", "ExcelTemplate\ExcelTemplate.csproj", "{DC97EB67-1B1C-480B-ACAD-1AE5D00680A6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelTemplate.Test", "ExcelTemplate.Test\ExcelTemplate.Test.csproj", "{7A1D884F-D7E1-4AEA-ADAE-8FD79461FF5D}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{795852CB-1BC2-44F9-A469-F43AE3DB1BCB}"
 	ProjectSection(SolutionItems) = preProject
 		..\.github\workflows\dotnet.yml = ..\.github\workflows\dotnet.yml
 		..\README.md = ..\README.md
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelTemplate.Test", "ExcelTemplate.Test\ExcelTemplate.Test.csproj", "{FB6A49DF-FCA9-4255-BEEA-232C95F79E69}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +23,10 @@ Global
 		{DC97EB67-1B1C-480B-ACAD-1AE5D00680A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DC97EB67-1B1C-480B-ACAD-1AE5D00680A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DC97EB67-1B1C-480B-ACAD-1AE5D00680A6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7A1D884F-D7E1-4AEA-ADAE-8FD79461FF5D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7A1D884F-D7E1-4AEA-ADAE-8FD79461FF5D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7A1D884F-D7E1-4AEA-ADAE-8FD79461FF5D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7A1D884F-D7E1-4AEA-ADAE-8FD79461FF5D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB6A49DF-FCA9-4255-BEEA-232C95F79E69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB6A49DF-FCA9-4255-BEEA-232C95F79E69}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB6A49DF-FCA9-4255-BEEA-232C95F79E69}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB6A49DF-FCA9-4255-BEEA-232C95F79E69}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

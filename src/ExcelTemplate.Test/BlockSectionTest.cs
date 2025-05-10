@@ -4,9 +4,10 @@ using NPOI.SS.Formula.Functions;
 
 namespace ExcelTemplate.Test
 {
+    [TestClass]
     public class BlockSectionTest
     {
-        [Fact]
+        [TestMethod]
         public void TestBlockSectionClone()
         {
             var design = TypeDesignAnalysis.DesignAnalysis(typeof(FormModel));
@@ -17,12 +18,12 @@ namespace ExcelTemplate.Test
 
             while (currentClone != null)
             {
-                Assert.NotSame(currentClone, currentOrigin);
-                Assert.NotSame(currentClone.Blocks, currentOrigin.Blocks);
+                Assert.AreNotSame(currentClone, currentOrigin);
+                Assert.AreNotSame(currentClone.Blocks, currentOrigin.Blocks);
 
                 for (var i = 0; i < clone.Blocks.Count; i++)
                 {
-                    Assert.NotSame(clone.Blocks[i], currentOrigin.Blocks[i]);
+                    Assert.AreNotSame(clone.Blocks[i], currentOrigin.Blocks[i]);
                 }
 
                 currentClone = currentClone.Next;
