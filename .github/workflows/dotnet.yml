@@ -22,7 +22,7 @@ jobs:
         dotnet-version: 8.0.x
     - name: Set UTF-8 encoding
       run: |
-        echo "LC_ALL=en_US.UTF-8" >> $GITHUB_ENV
+        echo "LC_ALL=zh_CN.UTF-8" >> $GITHUB_ENV
         echo "NUGET_XMLDOC_MODE=skip" >> $GITHUB_ENV  # 避免 XML 文档解析问题
     - name: Build
       working-directory: ./src
