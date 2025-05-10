@@ -15,11 +15,6 @@ namespace ExcelTemplate.Attributes
             this.ColIndex = colIndex;
         }
 
-        public ColAttribute(string headerText, int row, int col)
-        {
-            this.HeaderText = headerText;
-        }
-
         /// <summary>
         /// 表头
         /// </summary>
