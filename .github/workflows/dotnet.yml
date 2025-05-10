@@ -22,8 +22,8 @@ jobs:
         dotnet-version: 8.0.x
     - name: Set UTF-8 encoding
       run: |
-        echo "LC_ALL=en_US.UTF-8" >> $GITHUB_ENV
-        echo "LANG=en_US.UTF-8" >> $GITHUB_ENV
+        echo "LC_ALL=zh_CN.UTF-8" >> $GITHUB_ENV
+        echo "LANG=zh_CN.UTF-8" >> $GITHUB_ENV
     - name: Build
       working-directory: ./src
       run: dotnet build
