@@ -13,7 +13,7 @@ namespace ExcelTemplate.Test
         [Fact]
         public void BuilderExpressionTest()
         {
-            var filePath = "Files/Mixture.xlsx";
+            var filePath = "Files/HitBuilderTest.xlsx";
             var file = File.Open(filePath, FileMode.Open);
             var template = TemplateCapture.Create(typeof(MixtureModel));
 
