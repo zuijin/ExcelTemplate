@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 using NPOI.HSSF.UserModel;
 using NPOI.HSSF.Util;
 using NPOI.SS.UserModel;
@@ -286,6 +287,16 @@ namespace ExcelTemplate.Style
         }
 
         /// <summary>
+        /// 判断是否符合十六进制RGB格式
+        /// </summary>
+        /// <param name="hexColor"></param>
+        /// <returns></returns>
+        public static bool IsRgbHex(string hexColor)
+        {
+            return Regex.IsMatch(hexColor, "^([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$");
+        }
+
+        /// <summary>
         /// 解析RGB颜色字符串
         /// </summary>
         /// <param name="hexColor"></param>
@@ -294,11 +305,10 @@ namespace ExcelTemplate.Style
         /// <exception cref="ArgumentException"></exception>
         public static (byte R, byte G, byte B) HexToRgb(string hexColor)
         {
-            hexColor = hexColor?.Trim() ?? throw new ArgumentNullException(nameof(hexColor));
-
-            // 支持 #RGB、#RRGGBB、RGB、RRGGBB 格式
-            if (hexColor.StartsWith("#"))
-                hexColor = hexColor.Substring(1);
+            if (!IsRgbHex(hexColor))
+            {
+                throw new ArgumentNullException(nameof(hexColor));
+            }
 
             if (hexColor.Length == 3) // #RGB 格式
             {

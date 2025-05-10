@@ -29,6 +29,7 @@ namespace ExcelTemplate.Test
                 builder.For(a => a.Scores_2nd.Pick(item).Score).AddError("bbb");
             }
 
+            builder.SetErrorBgColor("FF0000");
             var workbook = builder.BuildErrorExcel();
             workbook.Save("Temp/hit.xlsx");
         }
