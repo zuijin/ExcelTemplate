@@ -4,7 +4,6 @@ using NPOI.HSSF.UserModel;
 using NPOI.HSSF.Util;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
-using NPOI.XSSF.UserModel.Extensions;
 
 namespace ExcelTemplate.Style
 {
@@ -16,13 +15,30 @@ namespace ExcelTemplate.Style
             {
                 WrapText = simpleStyle.WrapText,
                 VerticalAlignment = (VerticalAlignment)simpleStyle.VerticalAlignment,
-                Alignment = (HorizontalAlignment)simpleStyle.Alignment,
+                Alignment = (HorizontalAlignment)simpleStyle.HorizontalAlignment,
                 ShrinkToFit = simpleStyle.ShrinkToFit,
                 DataFormat = simpleStyle.DataFormat,
                 FillForegroundColor = simpleStyle.BgColor,
                 FillBackgroundColor = simpleStyle.BgColor,
-                FillPattern = FillPattern.SolidForeground,
+                //FillPattern = FillPattern.SolidForeground,
+                BorderBottom = (BorderStyle)simpleStyle.BorderStyle,
+                BorderTop = (BorderStyle)simpleStyle.BorderStyle,
+                BorderLeft = (BorderStyle)simpleStyle.BorderStyle,
+                BorderRight = (BorderStyle)simpleStyle.BorderStyle,
+                LeftBorderColor = simpleStyle.BorderColor,
+                RightBorderColor = simpleStyle.BorderColor,
+                TopBorderColor = simpleStyle.BorderColor,
+                BottomBorderColor = simpleStyle.BorderColor,
             };
+
+            if (!string.IsNullOrWhiteSpace(simpleStyle.BgColor))
+            {
+                (var a, _, _, _) = HexToArgb(simpleStyle.BgColor);
+                if (a > 0)
+                {
+                    style.FillPattern = FillPattern.SolidForeground;
+                }
+            }
 
             style.Font = new ETFont()
             {
@@ -75,12 +91,12 @@ namespace ExcelTemplate.Style
             {
                 if (cellStyle.FillBackgroundColorColor != null)
                 {
-                    style.FillBackgroundColor = RgbToHex(cellStyle.FillBackgroundColorColor.RGB);
+                    style.FillBackgroundColor = ArgbToHex(cellStyle.FillBackgroundColorColor.RGB);
                 }
 
                 if (cellStyle.FillForegroundColorColor != null)
                 {
-                    style.FillForegroundColor = RgbToHex(cellStyle.FillForegroundColorColor.RGB);
+                    style.FillForegroundColor = ArgbToHex(cellStyle.FillForegroundColorColor.RGB);
                 }
             }
 
@@ -135,12 +151,12 @@ namespace ExcelTemplate.Style
                 var c = xf.GetXSSFColor();
                 if (c != null)
                 {
-                    font.Color = RgbToHex(c.RGB);
+                    font.Color = ArgbToHex(c.RGB);
                 }
             }
             else
             {
-                font.Color = RgbToHex(((HSSFFont)ifont).GetHSSFColor((HSSFWorkbook)workbook).RGB);
+                font.Color = ArgbToHex(((HSSFFont)ifont).GetHSSFColor((HSSFWorkbook)workbook).RGB);
             }
 
             return font;
@@ -242,7 +258,7 @@ namespace ExcelTemplate.Style
                 return IndexedColors.Automatic.Index;
             }
 
-            var (r, g, b) = HexToRgb(hexColor);
+            var (a, r, g, b) = HexToArgb(hexColor);
             var palette = ((HSSFWorkbook)workbook).GetCustomPalette();
 
             // 查找已有颜色或添加新颜色
@@ -253,8 +269,8 @@ namespace ExcelTemplate.Style
 
         public static XSSFColor GetXSSFColor(string hexColor)
         {
-            var (r, g, b) = HexToRgb(hexColor);
-            return new XSSFColor(new byte[] { r, g, b });
+            var (a, r, g, b) = HexToArgb(hexColor);
+            return new XSSFColor(new byte[] { a, r, g, b });
         }
 
 
@@ -268,12 +284,12 @@ namespace ExcelTemplate.Style
         {
             if (colorIndex == 0)
             {
-                return RgbToHex(IndexedColors.Automatic.RGB);
+                return "00000000";
             }
 
             if (workbook is XSSFWorkbook)
             {
-                return RgbToHex(IndexedColors.ValueOf(colorIndex).RGB);
+                return ArgbToHex(IndexedColors.ValueOf(colorIndex).RGB);
             }
             else
             {
@@ -282,7 +298,7 @@ namespace ExcelTemplate.Style
                 // 通过索引获取颜色
                 HSSFColor color = palette.GetColor(colorIndex);
                 // 如果找不到颜色，返回黑色作为默认值
-                return RgbToHex(color.RGB);
+                return ArgbToHex(color.RGB);
             }
         }
 
@@ -293,7 +309,7 @@ namespace ExcelTemplate.Style
         /// <returns></returns>
         public static bool IsRgbHex(string hexColor)
         {
-            return Regex.IsMatch(hexColor, "^([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$");
+            return Regex.IsMatch(hexColor, "^([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$");
         }
 
         /// <summary>
@@ -303,27 +319,47 @@ namespace ExcelTemplate.Style
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="ArgumentException"></exception>
-        public static (byte R, byte G, byte B) HexToRgb(string hexColor)
+        public static (byte A, byte R, byte G, byte B) HexToArgb(string hexColor)
         {
             if (!IsRgbHex(hexColor))
             {
                 throw new ArgumentNullException(nameof(hexColor));
             }
 
-            if (hexColor.Length == 3) // #RGB 格式
+            if (hexColor.Length == 3) // RGB 格式
             {
                 return (
+                    A: Convert.ToByte("FF", 16),
                     R: Convert.ToByte(new string(hexColor[0], 2), 16),
                     G: Convert.ToByte(new string(hexColor[1], 2), 16),
                     B: Convert.ToByte(new string(hexColor[2], 2), 16)
                 );
             }
-            else if (hexColor.Length == 6) // #RRGGBB 格式
+            else if (hexColor.Length == 4) // ARGB 格式
             {
                 return (
+                    A: Convert.ToByte(new string(hexColor[0], 2), 16),
+                    R: Convert.ToByte(new string(hexColor[1], 2), 16),
+                    G: Convert.ToByte(new string(hexColor[2], 2), 16),
+                    B: Convert.ToByte(new string(hexColor[3], 2), 16)
+                );
+            }
+            else if (hexColor.Length == 6) // RRGGBB 格式
+            {
+                return (
+                    A: Convert.ToByte("FF", 16),
                     R: Convert.ToByte(hexColor.Substring(0, 2), 16),
                     G: Convert.ToByte(hexColor.Substring(2, 2), 16),
                     B: Convert.ToByte(hexColor.Substring(4, 2), 16)
+                );
+            }
+            else if (hexColor.Length == 8) // AARRGGBB 格式
+            {
+                return (
+                    A: Convert.ToByte(hexColor.Substring(0, 2), 16),
+                    R: Convert.ToByte(hexColor.Substring(2, 2), 16),
+                    G: Convert.ToByte(hexColor.Substring(4, 2), 16),
+                    B: Convert.ToByte(hexColor.Substring(6, 2), 16)
                 );
             }
 
@@ -331,13 +367,20 @@ namespace ExcelTemplate.Style
         }
 
         /// <summary>
-        /// RGB转十六进制
+        /// ARGB转十六进制
         /// </summary>
         /// <param name="hexColor"></param>
         /// <returns></returns>
-        public static string RgbToHex(byte[] rgb)
+        public static string ArgbToHex(byte[] rgb)
         {
-            return $"{rgb[0]:X2}{rgb[1]:X2}{rgb[2]:X2}";
+            if (rgb.Length == 3)
+            {
+                return $"FF{rgb[0]:X2}{rgb[1]:X2}{rgb[2]:X2}";
+            }
+            else
+            {
+                return $"{rgb[0]:X2}{rgb[1]:X2}{rgb[2]:X2}{rgb[3]:X2}";
+            }
         }
     }
 }

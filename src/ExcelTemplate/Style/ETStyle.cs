@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using NPOI.SS.UserModel;
+﻿using NPOI.SS.UserModel;
 
 namespace ExcelTemplate.Style
 {
@@ -18,10 +15,10 @@ namespace ExcelTemplate.Style
         public NPOI.SS.UserModel.VerticalAlignment VerticalAlignment { get; set; }
         public short Rotation { get; set; }
         public short Indention { get; set; }
-        public BorderStyle BorderLeft { get; set; }
-        public BorderStyle BorderRight { get; set; }
-        public BorderStyle BorderTop { get; set; }
-        public BorderStyle BorderBottom { get; set; }
+        public BorderStyle BorderLeft { get; set; } = BorderStyle.Thin;
+        public BorderStyle BorderRight { get; set; } = BorderStyle.Thin;
+        public BorderStyle BorderTop { get; set; } = BorderStyle.Thin;
+        public BorderStyle BorderBottom { get; set; } = BorderStyle.Thin;
         public string LeftBorderColor { get; set; }
         public string RightBorderColor { get; set; }
         public string TopBorderColor { get; set; }
@@ -30,7 +27,7 @@ namespace ExcelTemplate.Style
         public string FillBackgroundColor { get; set; }
         public string FillForegroundColor { get; set; }
         public string BorderDiagonalColor { get; set; }
-        public BorderStyle BorderDiagonalLineStyle { get; set; }
+        public BorderStyle BorderDiagonalLineStyle { get; set; } = BorderStyle.Thin;
         public BorderDiagonal BorderDiagonal { get; set; }
 
         public object Clone()

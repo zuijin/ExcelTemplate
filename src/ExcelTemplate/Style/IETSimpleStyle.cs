@@ -46,7 +46,7 @@ namespace ExcelTemplate.Style
         /// <summary>
         /// 获取或设置水平对齐方式
         /// </summary>
-        ETHorizontalAlignment Alignment { get; set; }
+        ETHorizontalAlignment HorizontalAlignment { get; set; }
 
         /// <summary>
         /// 获取或设置是否自动换行
@@ -57,5 +57,14 @@ namespace ExcelTemplate.Style
         /// 获取或设置垂直对齐方式
         /// </summary>
         ETVerticalAlignment VerticalAlignment { get; set; }
+
+        /// <summary>
+        /// 边框样式
+        /// </summary>
+        ETBorderStyle BorderStyle { get; set; }
+        /// <summary>
+        /// 边框颜色
+        /// </summary>
+        string BorderColor { get; set; }
     }
 }

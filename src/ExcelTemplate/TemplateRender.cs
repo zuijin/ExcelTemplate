@@ -7,6 +7,7 @@ using ExcelTemplate.Extensions;
 using ExcelTemplate.Helper;
 using ExcelTemplate.Hint;
 using ExcelTemplate.Model;
+using ExcelTemplate.Style;
 using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
@@ -140,6 +141,7 @@ namespace ExcelTemplate
 
                 if (textBlock.MergeTo != null)
                 {
+                    SetMergeStyle(sheet, textBlock.Position, textBlock.MergeTo, textBlock.Style);
                     sheet.AddMergedRegion(textBlock.Position, textBlock.MergeTo);
                 }
             }
@@ -153,6 +155,7 @@ namespace ExcelTemplate
 
                 if (valueBlock.MergeTo != null)
                 {
+                    SetMergeStyle(sheet, valueBlock.Position, valueBlock.MergeTo, valueBlock.Style);
                     sheet.AddMergedRegion(valueBlock.Position, valueBlock.MergeTo);
                 }
             }
@@ -210,6 +213,7 @@ namespace ExcelTemplate
 
                 if (header.MergeTo != null)
                 {
+                    SetMergeStyle(sheet, header.Position, header.MergeTo, header.Style);
                     sheet.AddMergedRegion(header.Position, header.MergeTo);
                 }
             }
@@ -239,6 +243,21 @@ namespace ExcelTemplate
             }
 
             return 0;
+        }
+
+        protected void SetMergeStyle(ISheet sheet, Position position, Position mergeTo, IETStyle style)
+        {
+            if (style != null)
+            {
+                for (int i = 0; i <= (mergeTo.Row - position.Row); i++)
+                {
+                    for (int j = 0; j <= (mergeTo.Col - position.Col); j++)
+                    {
+                        var pos = position.GetOffset(i, j);
+                        sheet.GetOrCreateCell(pos).SetStyle(style);
+                    }
+                }
+            }
         }
     }
 }

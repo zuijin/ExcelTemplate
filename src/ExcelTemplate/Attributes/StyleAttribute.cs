@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using ExcelTemplate.Style;
 
 namespace ExcelTemplate.Attributes
@@ -45,7 +43,7 @@ namespace ExcelTemplate.Attributes
         /// <summary>
         /// 获取或设置水平对齐方式
         /// </summary>
-        public ETHorizontalAlignment Alignment { get; set; }
+        public ETHorizontalAlignment HorizontalAlignment { get; set; }
 
         /// <summary>
         /// 获取或设置是否自动换行
@@ -56,6 +54,14 @@ namespace ExcelTemplate.Attributes
         /// 获取或设置垂直对齐方式
         /// </summary>
         public ETVerticalAlignment VerticalAlignment { get; set; } = ETVerticalAlignment.None;
+        /// <summary>
+        /// 边框样式
+        /// </summary>
+        public ETBorderStyle BorderStyle { get; set; }
+        /// <summary>
+        /// 边框颜色
+        /// </summary>
+        public string BorderColor { get; set; }
     }
 
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
