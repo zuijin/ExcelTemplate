@@ -1,4 +1,4 @@
-using ExcelTemplate.Test.Model;
+ï»¿using ExcelTemplate.Test.Model;
 
 namespace ExcelTemplate.Test
 {
@@ -6,7 +6,7 @@ namespace ExcelTemplate.Test
     public class TemplateCaptureTest
     {
         /// <summary>
-        /// ¶Á±íµ¥
+        /// è¯»è¡¨å•
         /// </summary>
         [TestMethod]
         public void TestReadForm()
@@ -23,7 +23,7 @@ namespace ExcelTemplate.Test
         }
 
         /// <summary>
-        /// ¶ÁÈ¡ÁĞ±í
+        /// è¯»å–åˆ—è¡¨
         /// </summary>
         [TestMethod]
         public void TestReadList()
@@ -57,7 +57,7 @@ namespace ExcelTemplate.Test
         }
 
         /// <summary>
-        /// ¶ÁÈ¡°üº¬ºÏ²¢±íÍ·µÄÁĞ±í
+        /// è¯»å–åŒ…å«åˆå¹¶è¡¨å¤´çš„åˆ—è¡¨
         /// </summary>
         [TestMethod]
         public void TestReadMergeHeaderList()
@@ -92,7 +92,7 @@ namespace ExcelTemplate.Test
         }
 
         /// <summary>
-        /// ¶ÁÈ¡»ìÅÅ
+        /// è¯»å–æ··æ’
         /// </summary>
         [TestMethod]
         public void TestReadMixture()
@@ -101,8 +101,8 @@ namespace ExcelTemplate.Test
             var file = File.Open(filePath, FileMode.Open);
             var template = TemplateCapture.Create(typeof(MixtureModel));
 
-            string name = "ÕÅÈı";
-            string sex = "ÄĞ";
+            string name = "å¼ ä¸‰";
+            string sex = "ç”·";
 
             var data = template.Capture<MixtureModel>(file);
             Assert.AreEqual(name, data.StudentName);
@@ -115,15 +115,15 @@ namespace ExcelTemplate.Test
 
             object[][] tmp =
             [
-                ["ÓïÎÄ", 100f, 2, DateTime.Parse("2000/5/6")],
-                ["ÊıÑ§", 101f, 3, DateTime.Parse("2000/5/7")],
-                ["Ó¢Óï", 102f, 4, DateTime.Parse("2000/5/8")],
-                ["»¯Ñ§", 103f, 5, DateTime.Parse("2000/5/9")],
-                ["ÎïÀí", 104f, 6, DateTime.Parse("2000/5/10")],
-                ["ÉúÎï", 105f, 7, DateTime.Parse("2000/5/11")],
-                ["µØÀí", 106f, 8, DateTime.Parse("2000/5/12")],
-                ["ÕşÖÎ", 107f, 9, DateTime.Parse("2000/5/13")],
-                ["ÀúÊ·", 108f, 10,DateTime.Parse("2000/5/14")],
+                ["è¯­æ–‡", 100f, 2, DateTime.Parse("2000/5/6")],
+                ["æ•°å­¦", 101f, 3, DateTime.Parse("2000/5/7")],
+                ["è‹±è¯­", 102f, 4, DateTime.Parse("2000/5/8")],
+                ["åŒ–å­¦", 103f, 5, DateTime.Parse("2000/5/9")],
+                ["ç‰©ç†", 104f, 6, DateTime.Parse("2000/5/10")],
+                ["ç”Ÿç‰©", 105f, 7, DateTime.Parse("2000/5/11")],
+                ["åœ°ç†", 106f, 8, DateTime.Parse("2000/5/12")],
+                ["æ”¿æ²»", 107f, 9, DateTime.Parse("2000/5/13")],
+                ["å†å²", 108f, 10,DateTime.Parse("2000/5/14")],
             ];
 
             for (int i = 0; i < data.Scores_1st.Count; i++)
@@ -137,15 +137,15 @@ namespace ExcelTemplate.Test
 
             object[][] tmp2 =
             [
-                ["ÓïÎÄ", 104f, 2, DateTime.Parse("2000/6/6")],
-                ["ÊıÑ§", 105f, 5, DateTime.Parse("2000/6/7")],
-                ["Ó¢Óï", 106f, 4, DateTime.Parse("2000/6/8")],
-                ["»¯Ñ§", 107f, 1, DateTime.Parse("2000/6/9")],
-                ["ÎïÀí", 108f, 6, DateTime.Parse("2000/6/10")],
-                ["ÉúÎï", 109f, 7, DateTime.Parse("2000/6/11")],
-                ["µØÀí", 110f, 7, DateTime.Parse("2000/6/12")],
-                ["ÕşÖÎ", 111f, 9, DateTime.Parse("2000/6/13")],
-                ["ÀúÊ·", 112f, 6, DateTime.Parse("2000/6/14")],
+                ["è¯­æ–‡", 104f, 2, DateTime.Parse("2000/6/6")],
+                ["æ•°å­¦", 105f, 5, DateTime.Parse("2000/6/7")],
+                ["è‹±è¯­", 106f, 4, DateTime.Parse("2000/6/8")],
+                ["åŒ–å­¦", 107f, 1, DateTime.Parse("2000/6/9")],
+                ["ç‰©ç†", 108f, 6, DateTime.Parse("2000/6/10")],
+                ["ç”Ÿç‰©", 109f, 7, DateTime.Parse("2000/6/11")],
+                ["åœ°ç†", 110f, 7, DateTime.Parse("2000/6/12")],
+                ["æ”¿æ²»", 111f, 9, DateTime.Parse("2000/6/13")],
+                ["å†å²", 112f, 6, DateTime.Parse("2000/6/14")],
             ];
 
             for (int i = 0; i < data.Scores_2nd.Count; i++)
