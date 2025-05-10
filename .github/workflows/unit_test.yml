@@ -1,7 +1,7 @@
 # This workflow will build a .NET project
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
 
-name: .NET
+name: UnitTest
 
 on:
   push:
@@ -20,13 +20,9 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
-    - name: Set UTF-8 encoding
-      run: |
-        echo "LC_ALL=zh_CN.UTF-8" >> $GITHUB_ENV
-        echo "LANG=zh_CN.UTF-8" >> $GITHUB_ENV
     - name: Build
       working-directory: ./src
       run: dotnet build
     - name: Test
       working-directory: ./src
-      run: dotnet test --no-build --logger "console;verbosity=normal;Encoding=UTF-8"
+      run: dotnet test --no-build
