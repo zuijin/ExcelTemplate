@@ -20,18 +20,22 @@ namespace ExcelTemplate.Hint
         private List<CellException> _exceptions;
         private IWorkbook _workbook;
         private TemplateDesign _design;
+        private Dictionary<string, Position> _fieldPositionDic;
+        private Dictionary<object, int> _elemetIndexDic;
 
         public T Data => _data;
-        internal Dictionary<string, Position> FieldPositionDic = new Dictionary<string, Position>();
-        internal Dictionary<object, int> ElemetIndexDic = new Dictionary<object, int>();
+        internal Dictionary<string, Position> FieldPositionDic => _fieldPositionDic;
+        internal Dictionary<object, int> ElemetIndexDic => _elemetIndexDic;
 
         public HintBuilder(TemplateDesign design, IWorkbook workbook, T data, List<CellException> exceptions)
         {
             _exceptions = new List<CellException>();
+            _exceptions.AddRange(exceptions);
             _design = design;
             _workbook = workbook;
             _data = data;
-            _exceptions.AddRange(exceptions);
+            _fieldPositionDic = new Dictionary<string, Position>();
+            _elemetIndexDic = new Dictionary<object, int>();
 
             InitDic();
         }

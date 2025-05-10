@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq.Expressions;
+using ExcelTemplate.Extensions;
 using ExcelTemplate.Model;
 
 namespace ExcelTemplate.Hint
@@ -16,6 +17,10 @@ namespace ExcelTemplate.Hint
             _expression = expression;
         }
 
+        /// <summary>
+        /// 添加错误信息
+        /// </summary>
+        /// <param name="message"></param>
         public void AddError(string message)
         {
             var pos = GetPosition();
@@ -39,14 +44,15 @@ namespace ExcelTemplate.Hint
             {
                 case ExpressionType.Lambda:
                     return VisiLambda((LambdaExpression)exp);
+
                 case ExpressionType.MemberAccess:
                     return VisitMemberAccess((MemberExpression)exp);
 
                 case ExpressionType.Call:
                     return VisitMethodCall((MethodCallExpression)exp);
+
                 default:
                     throw new Exception("不支持的表达式");
-
             }
         }
 
@@ -68,42 +74,42 @@ namespace ExcelTemplate.Hint
 
         private string VisitMethodCall(MethodCallExpression exp)
         {
-            if (exp.Method.ReflectedType.FullName == "ExcelTemplate.Hint.HintBuilderExtensions" && exp.Method.Name == "Pick")
+            if (exp.Method.ReflectedType != typeof(IEnumerableExtensions) || exp.Method.Name != "Pick")
             {
-                var preStr = Visit(exp.Arguments[0]);
-                var index = -1;
-                var arg = exp.Arguments[1];
-                if (arg.NodeType == ExpressionType.MemberAccess)
-                {
-                    var lambda = Expression.Lambda(arg).Compile();
-                    var obj = lambda.DynamicInvoke();
-                    if (obj is int)
-                    {
-                        index = (int)obj;
-                    }
-                    else
-                    {
-                        if (!_builder.ElemetIndexDic.ContainsKey(obj))
-                        {
-                            throw new Exception("该对象不属于集合内");
-                        }
+                throw new Exception($"不支持的表达式{exp.Method.Name}");
+            }
 
-                        index = _builder.ElemetIndexDic[obj];
-                    }
-                }
-                else if (arg.NodeType == ExpressionType.Constant)
+            var preStr = Visit(exp.Arguments[0]);
+            var index = -1;
+            var arg = exp.Arguments[1];
+            if (arg.NodeType == ExpressionType.MemberAccess)
+            {
+                var lambda = Expression.Lambda(arg).Compile();
+                var obj = lambda.DynamicInvoke();
+                if (obj is int)
                 {
-                    index = (int)((ConstantExpression)arg).Value;
+                    index = (int)obj;
                 }
                 else
                 {
-                    throw new Exception("不支持的参数表达式");
-                }
+                    if (!_builder.ElemetIndexDic.ContainsKey(obj))
+                    {
+                        throw new Exception($"传入的参数对象不属于集合内，方法名：{exp.Method.Name}");
+                    }
 
-                return $"{preStr}.{index}";
+                    index = _builder.ElemetIndexDic[obj];
+                }
+            }
+            else if (arg.NodeType == ExpressionType.Constant)
+            {
+                index = (int)((ConstantExpression)arg).Value;
+            }
+            else
+            {
+                throw new Exception("不支持的参数表达式");
             }
 
-            throw new Exception($"不支持的表达式{exp.Method.Name}");
+            return $"{preStr}.{index}";
         }
     }
 }
