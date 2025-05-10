@@ -143,20 +143,22 @@ namespace ExcelTemplate.Extensions
                 var dateTime = (DateTime)val;
                 cell.SetCellValue(dateTime);
 
-                //TODO: 先判断单元格本身是否已经是日期格式
-
-                IDataFormat dataFormat = cell.Sheet.Workbook.CreateDataFormat();
-                ICellStyle style = cell.Sheet.Workbook.CreateCellStyle();
-                if (dateTime == dateTime.Date)
+                if (!DateUtil.IsCellDateFormatted(cell))
                 {
-                    style.DataFormat = dataFormat.GetFormat("yyyy/m/d");
-                }
-                else
-                {
-                    style.DataFormat = dataFormat.GetFormat("yyyy/m/d h:mm:ss");
-                }
+                    IDataFormat dataFormat = cell.Sheet.Workbook.CreateDataFormat();
+                    ICellStyle style = cell.Sheet.Workbook.CreateCellStyle();
 
-                cell.CellStyle = style;
+                    if (dateTime == dateTime.Date)
+                    {
+                        style.DataFormat = dataFormat.GetFormat("yyyy/m/d");
+                    }
+                    else
+                    {
+                        style.DataFormat = dataFormat.GetFormat("yyyy/m/d h:mm:ss");
+                    }
+
+                    cell.CellStyle = style;
+                }
             }
             else if (val is bool)
             {

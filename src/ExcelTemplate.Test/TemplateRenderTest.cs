@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using ExcelTemplate.Attributes;
 using ExcelTemplate.Extensions;
-using ExcelTemplate.Model;
+using ExcelTemplate.Style;
 using ExcelTemplate.Test.Model;
 using NPOI.SS.UserModel;
 
@@ -285,8 +285,35 @@ namespace ExcelTemplate.Test
                 Sex = "女"
             };
 
-            var workbook = render.Render(data);
-            workbook.Save("Temp/styletest.xlsx");
+            var builder = render.RenderHintBuilder(data);
+            //workbook.Save("Temp/styletest.xlsx");
+            var sheet = builder.Workbook.GetSheetAt(0);
+            var position = builder.For(a => a.StudentName).GetPosition();
+            var cell = sheet.GetCell(position);
+            var style = ETStyleUtil.ConvertStyle(builder.Workbook, cell.CellStyle);
+
+            Assert.AreEqual("FF0000", style.Font.Color);
+            Assert.AreEqual(18, style.Font.FontHeightInPoints);
+            Assert.AreEqual(true, style.Font.IsBold);
+            Assert.AreEqual(HorizontalAlignment.Center, style.Alignment);
+            Assert.AreEqual(true, style.ShrinkToFit);
+            Assert.AreEqual(VerticalAlignment.Center, style.VerticalAlignment);
+            Assert.AreEqual(true, style.WrapText);
+
+            position = builder.For(a => a.BirthDate).GetPosition();
+            cell = sheet.GetCell(position);
+            style = ETStyleUtil.ConvertStyle(builder.Workbook, cell.CellStyle);
+            Assert.AreEqual("yyyy/m/d h:mm:ss", style.DataFormat);
+
+            position = builder.For(a => a.Sex).GetPosition();
+            cell = sheet.GetCell(position);
+            style = ETStyleUtil.ConvertStyle(builder.Workbook, cell.CellStyle);
+
+            Assert.AreEqual("0000FF", style.FillForegroundColor);
+            Assert.AreEqual(12, style.Font.FontHeightInPoints);
+            Assert.AreEqual(false, style.Font.IsBold);
+            Assert.AreEqual(HorizontalAlignment.Left, style.Alignment);
+
         }
 
     }

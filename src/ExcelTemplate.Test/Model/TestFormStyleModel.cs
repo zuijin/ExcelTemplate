@@ -4,7 +4,7 @@ using ExcelTemplate.Style;
 namespace ExcelTemplate.Test.Model
 {
     [StyleDic(Key = "date_format", DataFormat = "yyyy/m/d h:mm:ss")]
-    [StyleDic(Key = "title_red", TextColor = "FF0000", FontHeightInPoints = 18, IsBold = true, Alignment = ETHorizontalAlignment.Center)]
+    [StyleDic(Key = "title_red", TextColor = "FF0000", FontHeightInPoints = 18, IsBold = true, Alignment = ETHorizontalAlignment.Center, VerticalAlignment = ETVerticalAlignment.Center, ShrinkToFit = true, WrapText = true)]
     internal class TestFormStyleModel
     {
         [Title("姓名：", "B2", Style = "title_red")]

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ExcelTemplate.Extensions;
 using ExcelTemplate.Helper;
+using ExcelTemplate.Hint;
 using ExcelTemplate.Model;
 using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
@@ -38,11 +39,7 @@ namespace ExcelTemplate
             return new TemplateRender(design);
         }
 
-        /// <summary>
-        /// 渲染数据
-        /// </summary>
-        /// <returns></returns>
-        public IWorkbook Render(object data, ExcelType excelType = ExcelType.Xlsx)
+        private static IWorkbook CreateWorkbook(ExcelType excelType)
         {
             IWorkbook workbook;
             if (excelType == ExcelType.Xlsx)
@@ -58,8 +55,17 @@ namespace ExcelTemplate
                 throw new Exception("不支持的 ExcelType 枚举");
             }
 
-            workbook.CreateSheet();
-            Write(_design, workbook, data);
+            return workbook;
+        }
+
+        /// <summary>
+        /// 渲染数据
+        /// </summary>
+        /// <returns></returns>
+        public IWorkbook Render(object data, ExcelType excelType = ExcelType.Xlsx)
+        {
+            var workbook = CreateWorkbook(excelType);
+            Render(data, workbook);
 
             return workbook;
         }
@@ -71,7 +77,27 @@ namespace ExcelTemplate
                 workbook.CreateSheet();
             }
 
-            Write(_design, workbook, data);
+            var designClone = (TemplateDesign)_design.Clone();
+            Write(designClone, workbook, data);
+        }
+
+        public HintBuilder<T> RenderHintBuilder<T>(T data, ExcelType excelType = ExcelType.Xlsx)
+        {
+            var workbook = CreateWorkbook(excelType);
+            return RenderHintBuilder<T>(data, workbook);
+        }
+
+        public HintBuilder<T> RenderHintBuilder<T>(T data, IWorkbook workbook)
+        {
+            if (workbook.NumberOfSheets == 0)
+            {
+                workbook.CreateSheet();
+            }
+
+            var designClone = (TemplateDesign)_design.Clone();
+            Write(designClone, workbook, data);
+
+            return new HintBuilder<T>(designClone, workbook, data, new List<CellException> { });
         }
 
         /// <summary>
@@ -80,7 +106,7 @@ namespace ExcelTemplate
         protected void Write(TemplateDesign design, IWorkbook workbook, object data)
         {
             var sheet = workbook.GetSheetAt(0);
-            var current = (BlockSection)design.BlockSection.Clone();
+            var current = design.BlockSection;
 
             while (current != null)
             {

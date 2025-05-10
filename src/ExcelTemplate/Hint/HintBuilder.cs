@@ -24,6 +24,7 @@ namespace ExcelTemplate.Hint
         private Dictionary<object, int> _elemetIndexDic;
 
         public T Data => _data;
+        public IWorkbook Workbook => _workbook;
         internal Dictionary<string, Position> FieldPositionDic => _fieldPositionDic;
         internal Dictionary<object, int> ElemetIndexDic => _elemetIndexDic;
 

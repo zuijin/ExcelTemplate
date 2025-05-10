@@ -70,6 +70,19 @@ namespace ExcelTemplate.Style
                 WrapText = cellStyle.WrapText,
             };
 
+            if (workbook is XSSFWorkbook)
+            {
+                if (cellStyle.FillBackgroundColorColor != null)
+                {
+                    style.FillBackgroundColor = RgbToHex(cellStyle.FillBackgroundColorColor.RGB);
+                }
+
+                if (cellStyle.FillForegroundColorColor != null)
+                {
+                    style.FillForegroundColor = RgbToHex(cellStyle.FillForegroundColorColor.RGB);
+                }
+            }
+
             return style;
         }
 
@@ -118,7 +131,11 @@ namespace ExcelTemplate.Style
 
             if (ifont is XSSFFont xf)
             {
-                font.Color = xf.GetXSSFColor().ARGBHex;
+                var c = xf.GetXSSFColor();
+                if (c != null)
+                {
+                    font.Color = RgbToHex(c.RGB);
+                }
             }
             else
             {
@@ -248,6 +265,11 @@ namespace ExcelTemplate.Style
         /// <returns></returns>
         public static string GetColorHexString(IWorkbook workbook, short colorIndex)
         {
+            if (colorIndex == 0)
+            {
+                return RgbToHex(IndexedColors.Automatic.RGB);
+            }
+
             if (workbook is XSSFWorkbook)
             {
                 return RgbToHex(IndexedColors.ValueOf(colorIndex).RGB);
@@ -305,7 +327,7 @@ namespace ExcelTemplate.Style
         /// <returns></returns>
         public static string RgbToHex(byte[] rgb)
         {
-            return $"#{rgb[0]:X2}{rgb[1]:X2}{rgb[2]:X2}";
+            return $"{rgb[0]:X2}{rgb[1]:X2}{rgb[2]:X2}";
         }
     }
 }
