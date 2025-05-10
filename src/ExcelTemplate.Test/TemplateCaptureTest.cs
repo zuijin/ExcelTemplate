@@ -101,9 +101,12 @@ namespace ExcelTemplate.Test
             var file = File.Open(filePath, FileMode.Open);
             var template = TemplateCapture.Create(typeof(MixtureModel));
 
+            string name = "张三";
+            string sex = "男";
+
             var data = template.Capture<MixtureModel>(file);
-            //Assert.AreEqual("张三", data.StudentName);
-            Assert.AreEqual("男", data.Sex);
+            Assert.AreEqual(name, data.StudentName);
+            Assert.AreEqual(sex, data.Sex);
             Assert.AreEqual(DateTime.Parse("2025/2/3"), data.BirthDate);
             Assert.AreEqual(936f, data.TotalScore_1st);
             Assert.AreEqual(7, data.TotalRanking_1st);
