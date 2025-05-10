@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
+using ExcelTemplate.Exceptions;
 using ExcelTemplate.Extensions;
 using ExcelTemplate.Helper;
 using ExcelTemplate.Model;

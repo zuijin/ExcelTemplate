@@ -27,6 +27,11 @@ namespace ExcelTemplate.Helper
                     throw new Exception($"类型 {obj.GetType().Name} 内找不到字段 {fieldPath}");
                 }
 
+                if (!prop.CanWrite)
+                {
+                    throw new Exception($"字段 {fieldPath} 无法写入，请检查是否处于只读状态");
+                }
+
                 if (i < (fieldArr.Length - 1))
                 {
                     var tmp = prop.GetValue(currObj);
@@ -43,7 +48,6 @@ namespace ExcelTemplate.Helper
                     val = Convert.ChangeType(val, prop.PropertyType);
                     prop.SetValue(currObj, val);
                 }
-
             }
         }
 

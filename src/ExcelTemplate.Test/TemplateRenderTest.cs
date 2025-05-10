@@ -229,13 +229,6 @@ namespace ExcelTemplate.Test
                     var tmpCell = sheet.GetCell(cell.RowIndex, cell.ColumnIndex);
                     var val1 = tmpCell.GetValue();
                     var val2 = cell.GetValue();
-
-                    //if (val1 is DateTime || val2 is DateTime)
-                    //{
-                    //    val1 = tmpCell.DateCellValue;
-                    //    val2 = cell.DateCellValue;
-                    //}
-
                     Assert.AreEqual(val1, val2);
                 }
             }

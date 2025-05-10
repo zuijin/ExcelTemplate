@@ -10,7 +10,7 @@ namespace ExcelTemplate.Model
     public class TemplateDesign : ICloneable
     {
         public TemplateDesign() { }
-        public TemplateDesign(DesignSourceType sourceType, BlockSection BlockSection)
+        public TemplateDesign(TemplateDesignSourceType sourceType, BlockSection BlockSection)
         {
             this.SourceType = sourceType;
             this.BlockSection = BlockSection;
@@ -19,7 +19,12 @@ namespace ExcelTemplate.Model
         /// <summary>
         /// 模版设计来源
         /// </summary>
-        public DesignSourceType SourceType { get; private set; }
+        public TemplateDesignSourceType SourceType { get; private set; }
+
+        /// <summary>
+        /// 模版使用方式
+        /// </summary>
+        public TemplateDesignUsage Usage { get; set; } = TemplateDesignUsage.TwoWay;
 
         /// <summary>
         /// 区块定义
@@ -38,7 +43,7 @@ namespace ExcelTemplate.Model
         }
     }
 
-    public enum DesignSourceType
+    public enum TemplateDesignSourceType
     {
         /// <summary>
         /// 类型
@@ -48,5 +53,21 @@ namespace ExcelTemplate.Model
         /// Excel文件
         /// </summary>
         File = 2,
+    }
+
+    public enum TemplateDesignUsage
+    {
+        /// <summary>
+        /// 双向
+        /// </summary>
+        TwoWay = 0,
+        /// <summary>
+        /// 只导入
+        /// </summary>
+        ImportOnly = 1,
+        /// <summary>
+        /// 只导出
+        /// </summary>
+        ExportOnly = 2,
     }
 }

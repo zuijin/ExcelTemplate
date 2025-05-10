@@ -1,6 +1,7 @@
 ﻿using System;
+using ExcelTemplate.Model;
 
-namespace ExcelTemplate.Model
+namespace ExcelTemplate.Exceptions
 {
     /// <summary>
     /// 单元格异常
@@ -9,22 +10,22 @@ namespace ExcelTemplate.Model
     {
         public CellException(int row, int col, string message) : base(message)
         {
-            this.Position = new Position(row, col);
+            Position = new Position(row, col);
         }
 
         public CellException(int row, int col, string message, Exception inner) : base(message, inner)
         {
-            this.Position = new Position(row, col);
+            Position = new Position(row, col);
         }
 
         public CellException(string letter, string message) : base(message)
         {
-            this.Position = letter;
+            Position = letter;
         }
 
         public CellException(string letter, string message, Exception inner) : base(message, inner)
         {
-            this.Position = letter;
+            Position = letter;
         }
 
         public Position Position { get; set; }

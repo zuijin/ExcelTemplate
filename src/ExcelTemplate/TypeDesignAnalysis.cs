@@ -47,7 +47,7 @@ namespace ExcelTemplate
             //合并
             MergeSection(section);
 
-            return new TemplateDesign(DesignSourceType.Type, section);
+            return new TemplateDesign(TemplateDesignSourceType.Type, section);
         }
 
         private static Dictionary<string, IETStyle> GetStyleDic(Type type)
