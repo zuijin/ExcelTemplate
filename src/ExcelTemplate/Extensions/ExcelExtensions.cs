@@ -143,6 +143,8 @@ namespace ExcelTemplate.Extensions
                 var dateTime = (DateTime)val;
                 cell.SetCellValue(dateTime);
 
+                //TODO: 先判断单元格本身是否已经是日期格式
+
                 IDataFormat dataFormat = cell.Sheet.Workbook.CreateDataFormat();
                 ICellStyle style = cell.Sheet.Workbook.CreateCellStyle();
                 if (dateTime == dateTime.Date)

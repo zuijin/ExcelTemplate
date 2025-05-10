@@ -27,7 +27,11 @@ namespace ExcelTemplate.Hint
             _builder.AddError(pos.Row, pos.Col, message);
         }
 
-        private Position GetPosition()
+        /// <summary>
+        /// 获取坐标
+        /// </summary>
+        /// <returns></returns>
+        public Position GetPosition()
         {
             var dataPath = Visit(_expression);
             return _builder.FieldPositionDic[dataPath];

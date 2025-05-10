@@ -29,6 +29,10 @@ namespace ExcelTemplate
 
                 currentSection = currentSection.Next;
             }
+
+            //TODO: 检查是否有多个字段映射到同一个单元格的情况
+            //TODO: 检查是否有多个单元格映射到同一个字段的情况
+            //TODO: 检查是否有某个字段是只读状态，包括只有get访问器的情况 
         }
 
         /// <summary>
