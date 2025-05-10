@@ -21,13 +21,18 @@ namespace ExcelTemplate.Test
             var builder = template.CaptureHintBuilder<MixtureModel>(file);
             foreach (var item in builder.Data.Scores_1st)
             {
-                builder.For(a => a.Scores_1st.Pick(item).Score).AddError("aaaa");
+                builder.For(a => a.Scores_1st.Pick(item).Score).AddError("错误的分数");
             }
 
-            foreach (var item in builder.Data.Scores_2nd)
+            for (var i = 0; i < builder.Data.Scores_2nd.Count; i++)
             {
-                builder.For(a => a.Scores_2nd.Pick(item).Score).AddError("bbb");
+                if (i % 2 == 0)
+                {
+                    builder.For(a => a.Scores_2nd.Pick(i).ExamTime).AddError("错误的时间");
+                }
             }
+
+            builder.For(a => a.TotalRanking_2nd).AddError("错误的排名");
 
             builder.SetErrorBgColor("FF0000");
             var workbook = builder.BuildErrorExcel();
