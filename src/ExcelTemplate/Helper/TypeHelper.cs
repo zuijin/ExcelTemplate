@@ -19,7 +19,7 @@ namespace ExcelTemplate.Helper
             if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
                 return IsSimpleType(type.GetGenericArguments()[0]);
 
-            return type.IsValueType && type.IsPrimitive || type.IsEnum;
+            return (type.IsValueType && type.IsPrimitive) || type.IsEnum;
         }
 
         /// <summary>

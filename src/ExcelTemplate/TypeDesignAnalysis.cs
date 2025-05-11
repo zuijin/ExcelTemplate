@@ -27,19 +27,22 @@ namespace ExcelTemplate
 
             foreach (PropertyInfo prop in props)
             {
+                List<IBlock> tmpBlocks;
                 var propType = prop.PropertyType;
                 if (TypeHelper.IsSimpleType(propType))
                 {
-                    blocks.AddRange(GetSimpleTypeBlocks(prop, styleDic));
+                    tmpBlocks = GetSimpleTypeBlocks(prop, styleDic);
                 }
                 else if (IsSpecialCollectionType(propType))
                 {
-                    blocks.AddRange(GetCollectionTypeBlocks(prop, styleDic));
+                    tmpBlocks = GetCollectionTypeBlocks(prop, styleDic);
                 }
                 else
                 {
                     throw new Exception($"暂不支持复杂类型：{prop.Name}");
                 }
+
+                blocks.AddRange(tmpBlocks);
             }
 
             var section = ReorganizeSection(blocks);
