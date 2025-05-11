@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.AccessControl;
 using ExcelTemplate.Exceptions;
 using ExcelTemplate.Extensions;
 using ExcelTemplate.Helper;
@@ -23,7 +24,8 @@ namespace ExcelTemplate
         const int FIND_MAX_ROW = 100;
 
         TemplateDesign _design;
-        List<CellException> _exceptions = new List<CellException>();
+        List<CellException> _exceptions;
+        Dictionary<string, Func<object, object>> _dicMappings;
 
         public TemplateDesign Design { get => _design; }
         public List<CellException> Exceptions { get => _exceptions; }
@@ -34,6 +36,9 @@ namespace ExcelTemplate
         public TemplateCapture(TemplateDesign design)
         {
             _design = design;
+            _exceptions = new List<CellException>();
+            _dicMappings = new Dictionary<string, Func<object, object>>();
+
             DesignInspector.Check(design);
         }
 
@@ -149,7 +154,8 @@ namespace ExcelTemplate
 
                 try
                 {
-                    var val = cell.GetValue();
+                    var rawVal = cell.GetValue();
+                    var val = TryGetMappingValue(block.FieldPath, rawVal);
                     ObjectHelper.SetObjectValue(data, block.FieldPath, val);
                 }
                 catch (Exception ex)
@@ -230,7 +236,8 @@ namespace ExcelTemplate
 
                     try
                     {
-                        var val = cell.GetValue();
+                        var rawVal = cell.GetValue();
+                        var val = TryGetMappingValue(block.FieldPath, rawVal);
                         var fieldPath = block.FieldPath.Substring(block.FieldPath.IndexOf('.') + 1);
                         ObjectHelper.SetObjectValue(obj, fieldPath, val);
                     }
@@ -329,6 +336,38 @@ namespace ExcelTemplate
                     throw new Exception($"已查找达到{FIND_MAX_ROW}行，未找到下一个模版区块");
                 }
             }
+        }
+
+        /// <summary>
+        /// 添加值映射方法
+        /// </summary>
+        /// <param name="fieldPath"></param>
+        /// <param name="mappingFunc"></param>
+        /// <exception cref="Exception"></exception>
+        public void AddMapping(string fieldPath, Func<object, object> mappingFunc)
+        {
+            if (_dicMappings.ContainsKey(fieldPath))
+            {
+                throw new Exception($"字段 {fieldPath} 已添加过 Mapping 方法了");
+            }
+
+            _dicMappings.Add(fieldPath, mappingFunc);
+        }
+
+        /// <summary>
+        /// 尝试使用Mapping方法对值进行转化
+        /// </summary>
+        /// <param name="fieldPath"></param>
+        /// <param name="rawVal"></param>
+        /// <returns></returns>
+        private object TryGetMappingValue(string fieldPath, object rawVal)
+        {
+            if (_dicMappings.TryGetValue(fieldPath, out Func<object, object> mappingFunc))
+            {
+                return mappingFunc(rawVal);
+            }
+
+            return rawVal;
         }
 
 

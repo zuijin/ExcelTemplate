@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using ExcelTemplate.Model;
 using NPOI.SS.UserModel;
 
@@ -60,6 +61,27 @@ namespace ExcelTemplate
         public IWorkbook GetExcelFromData(object data)
         {
             return _render.Render(data);
+        }
+
+        /// <summary>
+        /// 添加读取Excel时的值映射方法
+        /// </summary>
+        /// <param name="fieldPath"></param>
+        /// <param name="mappingFunc"></param>
+        /// <exception cref="Exception"></exception>
+        public void AddReadMapping(string fieldPath, Func<object, object> mappingFunc)
+        {
+            _capture.AddMapping(fieldPath, mappingFunc);
+        }
+
+        /// <summary>
+        /// 添加写入Excel时的值映射方法
+        /// </summary>
+        /// <param name="fieldPath"></param>
+        /// <param name="mappingFunc"></param>
+        public void AddWriteMapping(string fieldPath, Func<object, object> mappingFunc)
+        {
+            _render.AddMapping(fieldPath, mappingFunc);
         }
     }
 }

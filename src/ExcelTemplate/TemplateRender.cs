@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using ExcelTemplate.Exceptions;
 using ExcelTemplate.Extensions;
 using ExcelTemplate.Helper;
@@ -22,6 +23,7 @@ namespace ExcelTemplate
         TemplateDesign _design;
 
         public TemplateDesign Design { get => _design; }
+        Dictionary<string, Func<object, object>> _dicMappings;
 
         /// <summary>
         /// 
@@ -29,6 +31,8 @@ namespace ExcelTemplate
         public TemplateRender(TemplateDesign design)
         {
             _design = design;
+            _dicMappings = new Dictionary<string, Func<object, object>>();
+
             DesignInspector.Check(design);
         }
 
@@ -150,7 +154,8 @@ namespace ExcelTemplate
             {
                 var cell = sheet.GetOrCreateRow(valueBlock.Position.Row).GetOrCreateCell(valueBlock.Position.Col);
                 var val = ObjectHelper.GetObjectValue(data, valueBlock.FieldPath);
-                cell.SetValue(val);
+                var cellVal = TryGetMappingValue(valueBlock.FieldPath, val);
+                cell.SetValue(cellVal);
                 cell.SetStyle(valueBlock.Style);
 
                 if (valueBlock.MergeTo != null)
@@ -232,7 +237,8 @@ namespace ExcelTemplate
                         var filePath = body.FieldPath.Substring(body.FieldPath.LastIndexOf('.') + 1);
                         var val = ObjectHelper.GetObjectValue(item, filePath);
                         var cell = row.GetOrCreateCell(body.Position.Col);
-                        cell.SetValue(val);
+                        var cellVal = TryGetMappingValue(body.FieldPath, val);
+                        cell.SetValue(cellVal);
                         cell.SetStyle(body.Style);
                     }
 
@@ -258,6 +264,38 @@ namespace ExcelTemplate
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// 添加值映射方法
+        /// </summary>
+        /// <param name="fieldPath"></param>
+        /// <param name="mappingFunc"></param>
+        /// <exception cref="Exception"></exception>
+        public void AddMapping(string fieldPath, Func<object, object> mappingFunc)
+        {
+            if (_dicMappings.ContainsKey(fieldPath))
+            {
+                throw new Exception($"字段 {fieldPath} 已添加过 Mapping 方法了");
+            }
+
+            _dicMappings.Add(fieldPath, mappingFunc);
+        }
+
+        /// <summary>
+        /// 尝试使用Mapping方法对值进行转化
+        /// </summary>
+        /// <param name="fieldPath"></param>
+        /// <param name="rawVal"></param>
+        /// <returns></returns>
+        private object TryGetMappingValue(string fieldPath, object rawVal)
+        {
+            if (_dicMappings.TryGetValue(fieldPath, out Func<object, object> mappingFunc))
+            {
+                return mappingFunc(rawVal);
+            }
+
+            return rawVal;
         }
     }
 }

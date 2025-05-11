@@ -349,6 +349,8 @@ namespace ExcelTemplate.Test
                 TotalScore_2nd = 968
             };
 
+            render.AddMapping("Scores_1st.Ranking", obj => ((int)obj) + 20);
+
             var builder = render.RenderHintBuilder(model);
             builder.Workbook.Save("Temp/TestMixtureStyle.xlsx");
         }
