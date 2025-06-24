@@ -373,6 +373,11 @@ namespace ExcelTemplate.Style
         /// <returns></returns>
         public static string ArgbToHex(byte[] rgb)
         {
+            if (rgb == null)
+            {
+                return null;
+            }
+
             if (rgb.Length == 3)
             {
                 return $"FF{rgb[0]:X2}{rgb[1]:X2}{rgb[2]:X2}";

@@ -29,11 +29,24 @@ namespace ExcelTemplate.Extensions
             }
         }
 
+        /// <summary>
+        /// 获取单元格
+        /// </summary>
+        /// <param name="sheet"></param>
+        /// <param name="position"></param>
+        /// <returns></returns>
         public static ICell GetCell(this ISheet sheet, Position position)
         {
             return sheet.GetCell(position.Row, position.Col);
         }
 
+        /// <summary>
+        /// 获取单元格
+        /// </summary>
+        /// <param name="sheet"></param>
+        /// <param name="row"></param>
+        /// <param name="col"></param>
+        /// <returns></returns>
         public static ICell GetCell(this ISheet sheet, int row, int col)
         {
             var irow = sheet.GetRow(row);
@@ -45,6 +58,12 @@ namespace ExcelTemplate.Extensions
             return irow.GetCell(col, MissingCellPolicy.CREATE_NULL_AS_BLANK);
         }
 
+        /// <summary>
+        /// 获取行，如果该行不存在，则创建一个
+        /// </summary>
+        /// <param name="sheet"></param>
+        /// <param name="rowIndex"></param>
+        /// <returns></returns>
         public static IRow GetOrCreateRow(this ISheet sheet, int rowIndex)
         {
             var row = sheet.GetRow(rowIndex);
@@ -56,17 +75,35 @@ namespace ExcelTemplate.Extensions
             return row;
         }
 
+        /// <summary>
+        /// 获取单元格，如果该单元格不存在，则创建一个
+        /// </summary>
+        /// <param name="sheet"></param>
+        /// <param name="position"></param>
+        /// <returns></returns>
         public static ICell GetOrCreateCell(this ISheet sheet, Position position)
         {
             var row = sheet.GetOrCreateRow(position.Row);
             return row.GetOrCreateCell(position.Col);
         }
 
+        /// <summary>
+        /// 添加单元格合并
+        /// </summary>
+        /// <param name="sheet"></param>
+        /// <param name="position"></param>
+        /// <param name="mergeTo"></param>
         public static void AddMergedRegion(this ISheet sheet, Position position, Position mergeTo)
         {
             sheet.AddMergedRegion(new NPOI.SS.Util.CellRangeAddress(position.Row, mergeTo.Row, position.Col, mergeTo.Col));
         }
 
+        /// <summary>
+        /// 获取单元格，如果该单元格不存在，则创建一个
+        /// </summary>
+        /// <param name="row"></param>
+        /// <param name="colIndex"></param>
+        /// <returns></returns>
         public static ICell GetOrCreateCell(this IRow row, int colIndex)
         {
             var cell = row.GetCell(colIndex);
@@ -78,6 +115,11 @@ namespace ExcelTemplate.Extensions
             return cell;
         }
 
+        /// <summary>
+        /// 获取单元格的值
+        /// </summary>
+        /// <param name="cell"></param>
+        /// <returns></returns>
         public static object GetValue(this ICell cell)
         {
             if (cell == null)
@@ -109,6 +151,12 @@ namespace ExcelTemplate.Extensions
             return val;
         }
 
+        /// <summary>
+        /// 获取单元格的值
+        /// </summary>
+        /// <param name="cell"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
         public static object GetValue(this ICell cell, Type type)
         {
             var val = cell.GetValue();
@@ -121,6 +169,11 @@ namespace ExcelTemplate.Extensions
             return val;
         }
 
+        /// <summary>
+        /// 设置单元格值
+        /// </summary>
+        /// <param name="cell"></param>
+        /// <param name="val"></param>
         public static void SetValue(this ICell cell, object val)
         {
             if (val == null)
@@ -174,12 +227,38 @@ namespace ExcelTemplate.Extensions
             }
         }
 
+        /// <summary>
+        /// 设置单元格样式
+        /// </summary>
+        /// <param name="cell"></param>
+        /// <param name="style"></param>
         public static void SetStyle(this ICell cell, IETStyle style)
         {
             if (style != null)
             {
                 cell.CellStyle = style.GetCellStyle(cell.Sheet.Workbook);
             }
+        }
+
+        /// <summary>
+        /// 判断是否空单元格
+        /// </summary>
+        /// <param name="cell"></param>
+        /// <returns></returns>
+        public static bool IsEmpty(this ICell cell)
+        {
+            if (cell == null)
+            {
+                return true;
+            }
+
+            var val = cell.GetValue();
+            if (val == null || string.IsNullOrWhiteSpace(val.ToString()))
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }
