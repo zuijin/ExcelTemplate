@@ -45,6 +45,12 @@ namespace ExcelTemplate
             return new TemplateRender(design);
         }
 
+        public static TemplateRender Create(string excelFile)
+        {
+            var design = ExcelDesignAnalysis.DesignAnalysis(excelFile);
+            return new TemplateRender(design);
+        }
+
         private static IWorkbook CreateWorkbook(ExcelType excelType)
         {
             IWorkbook workbook;
@@ -140,9 +146,9 @@ namespace ExcelTemplate
             foreach (var textBlock in section.Blocks.OfType<TextBlock>())
             {
                 var cell = sheet.GetOrCreateRow(textBlock.Position.Row).GetOrCreateCell(textBlock.Position.Col);
-                cell.SetValue(textBlock.Text);
                 cell.SetStyle(textBlock.Style);
-
+                cell.SetValue(textBlock.Text);
+                
                 if (textBlock.MergeTo != null)
                 {
                     SetMergeStyle(sheet, textBlock.Position, textBlock.MergeTo, textBlock.Style);
@@ -155,9 +161,9 @@ namespace ExcelTemplate
                 var cell = sheet.GetOrCreateRow(valueBlock.Position.Row).GetOrCreateCell(valueBlock.Position.Col);
                 var val = ObjectHelper.GetObjectValue(data, valueBlock.FieldPath);
                 var cellVal = TryGetMappingValue(valueBlock.FieldPath, val);
-                cell.SetValue(cellVal);
                 cell.SetStyle(valueBlock.Style);
-
+                cell.SetValue(cellVal);
+                
                 if (valueBlock.MergeTo != null)
                 {
                     SetMergeStyle(sheet, valueBlock.Position, valueBlock.MergeTo, valueBlock.Style);
@@ -213,9 +219,9 @@ namespace ExcelTemplate
             foreach (var header in table.Header)
             {
                 var cell = sheet.GetOrCreateRow(header.Position.Row).GetOrCreateCell(header.Position.Col);
-                cell.SetValue(header.Text);
                 cell.SetStyle(header.Style);
-
+                cell.SetValue(header.Text);
+                
                 if (header.MergeTo != null)
                 {
                     SetMergeStyle(sheet, header.Position, header.MergeTo, header.Style);
@@ -238,8 +244,8 @@ namespace ExcelTemplate
                         var val = ObjectHelper.GetObjectValue(item, filePath);
                         var cell = row.GetOrCreateCell(body.Position.Col);
                         var cellVal = TryGetMappingValue(body.FieldPath, val);
-                        cell.SetValue(cellVal);
                         cell.SetStyle(body.Style);
+                        cell.SetValue(cellVal);
                     }
 
                     rowIndex++;

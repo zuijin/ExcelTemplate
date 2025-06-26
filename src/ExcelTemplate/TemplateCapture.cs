@@ -51,6 +51,12 @@ namespace ExcelTemplate
             return new TemplateCapture(design);
         }
 
+        public static TemplateCapture Create(string excelFile)
+        {
+            var design = ExcelDesignAnalysis.DesignAnalysis(excelFile);
+            return new TemplateCapture(design);
+        }
+
         public T Capture<T>(Stream stream)
         {
             var workbook = WorkbookFactory.Create(stream);
@@ -193,7 +199,17 @@ namespace ExcelTemplate
 
                     int itemCount;
                     var list = ReadOneList(sheet, table.Body, prop.PropertyType, out itemCount);
-                    var tableLastRow = table.Header.Max(a => a.MergeTo?.Row ?? a.Position.Row) + itemCount; //列表最后一行 = 表头最后一行 + 表体数据行数
+                    var tableLastRow = table.Position.Row;
+                    if (table.Header.Any())
+                    {
+                        tableLastRow = table.Header.Max(a => a.MergeTo?.Row ?? a.Position.Row);
+                    }
+                    else
+                    {
+                        tableLastRow = table.Body.Min(a => a.Position.Row);
+                    }
+
+                    tableLastRow += itemCount; //列表最后一行
                     lastRow = Math.Max(lastRow, tableLastRow);
 
                     prop.SetValue(data, list);

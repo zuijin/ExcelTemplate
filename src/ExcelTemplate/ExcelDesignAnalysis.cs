@@ -113,18 +113,41 @@ namespace ExcelTemplate
                 return null;
             }
 
+            CheckAndBuildTable(firstSection);
+
             return new TemplateDesign(TemplateDesignSourceType.File, firstSection);
         }
 
-        private void CheckAndBuildTable(BlockSection root)
+        private static void CheckAndBuildTable(BlockSection root)
         {
             var current = root;
             while (current != null)
             {
                 if (current.Blocks.Any(a => a is TableBodyBlock))
-                { 
+                {
+                    var tableBodys = current.Blocks.OfType<TableBodyBlock>().OrderBy(a => a.Position.Col).ToList();
+                    current.Blocks.RemoveAll(a => a is TableBodyBlock);
+
+                    var tableGroups = tableBodys.GroupBy(a => GetTableName(a.FieldPath));
+                    foreach (var tableGroup in tableGroups)
+                    {
+                        current.Blocks.Add(new TableBlock()
+                        {
+                            Body = tableBodys,
+                            Header = new List<TableHeaderBlock>(),
+                            TableName = tableGroup.Key,
+                            Position = tableBodys.First().Position,
+                        });
+                    }
                 }
+
+                current = current.Next;
             }
+        }
+
+        private static string GetTableName(string fieldPath)
+        {
+            return fieldPath.Substring(0, fieldPath.LastIndexOf('.'));
         }
     }
 }
