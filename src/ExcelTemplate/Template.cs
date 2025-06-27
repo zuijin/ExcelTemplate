@@ -16,7 +16,7 @@ namespace ExcelTemplate
 
         public Template(Type designType)
         {
-            _design = TypeDesignAnalysis.DesignAnalysis(designType);
+            _design = new TypeDesignAnalysis().DesignAnalysis(designType);
             _capture = new TemplateCapture(_design);
             _render = new TemplateRender(_design);
         }

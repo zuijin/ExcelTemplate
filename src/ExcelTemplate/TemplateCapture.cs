@@ -47,13 +47,13 @@ namespace ExcelTemplate
         /// </summary>
         public static TemplateCapture Create(Type type)
         {
-            var design = TypeDesignAnalysis.DesignAnalysis(type);
+            var design = new TypeDesignAnalysis().DesignAnalysis(type);
             return new TemplateCapture(design);
         }
 
         public static TemplateCapture Create(string excelFile)
         {
-            var design = ExcelDesignAnalysis.DesignAnalysis(excelFile);
+            var design = new ExcelDesignAnalysis().DesignAnalysis(excelFile);
             return new TemplateCapture(design);
         }
 

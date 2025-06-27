@@ -9,7 +9,7 @@ public class DesignInspectorTest
     [TestMethod]
     public void CheckTest()
     {
-        var design = TypeDesignAnalysis.DesignAnalysis(typeof(Obj1));
+        var design = new TypeDesignAnalysis().DesignAnalysis(typeof(Obj1));
 
         try
         {

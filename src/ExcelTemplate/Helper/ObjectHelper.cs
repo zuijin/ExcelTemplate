@@ -1,8 +1,9 @@
-﻿using System;
+﻿using ExcelTemplate.Extensions;
+using KellermanSoftware.CompareNetObjects;
+using NPOI.SS.UserModel;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using ExcelTemplate.Extensions;
-using NPOI.SS.UserModel;
 
 namespace ExcelTemplate.Helper
 {
@@ -109,6 +110,13 @@ namespace ExcelTemplate.Helper
             // 获取并调用Add方法
             var addMethod = listType.GetMethod("Add");
             addMethod.Invoke(list, new[] { item });
+        }
+
+        public static bool Compare(object obj1, object obj2)
+        {
+            var compareLogic = new CompareLogic();
+            var result = compareLogic.Compare(obj1, obj2);
+            return result.AreEqual;
         }
     }
 }

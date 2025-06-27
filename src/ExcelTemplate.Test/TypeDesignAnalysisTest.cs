@@ -11,7 +11,7 @@ namespace ExcelTemplate.Test
         [TestMethod]
         public void StyleTest()
         {
-            var design = TypeDesignAnalysis.DesignAnalysis(typeof(TestFormStyleModel));
+            var design = new TypeDesignAnalysis().DesignAnalysis(typeof(TestFormStyleModel));
 
             EachBlock<ValueBlock>(design.BlockSection, (block) =>
             {

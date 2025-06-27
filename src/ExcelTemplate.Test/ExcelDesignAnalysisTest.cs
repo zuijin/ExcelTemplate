@@ -13,7 +13,7 @@ namespace ExcelTemplate.Test
         public void DesignAnalysisTest()
         {
             var filePath = "Files/Mixture_Template.xlsx";
-            var design = ExcelDesignAnalysis.DesignAnalysis(filePath);
+            var design = new ExcelDesignAnalysis().DesignAnalysis(filePath);
         }
     }
 }

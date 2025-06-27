@@ -196,22 +196,22 @@ namespace ExcelTemplate.Extensions
                 var dateTime = (DateTime)val;
                 cell.SetCellValue(dateTime);
 
-                if (!DateUtil.IsCellDateFormatted(cell))
-                {
-                    IDataFormat dataFormat = cell.Sheet.Workbook.CreateDataFormat();
-                    ICellStyle style = cell.Sheet.Workbook.CreateCellStyle();
+                //if (!DateUtil.IsCellDateFormatted(cell))
+                //{
+                //    IDataFormat dataFormat = cell.Sheet.Workbook.CreateDataFormat();
+                //    ICellStyle style = cell.Sheet.Workbook.CreateCellStyle();
 
-                    if (dateTime == dateTime.Date)
-                    {
-                        style.DataFormat = dataFormat.GetFormat("yyyy/m/d");
-                    }
-                    else
-                    {
-                        style.DataFormat = dataFormat.GetFormat("yyyy/m/d h:mm:ss");
-                    }
+                //    if (dateTime == dateTime.Date)
+                //    {
+                //        style.DataFormat = dataFormat.GetFormat("yyyy/m/d");
+                //    }
+                //    else
+                //    {
+                //        style.DataFormat = dataFormat.GetFormat("yyyy/m/d h:mm:ss");
+                //    }
 
-                    cell.CellStyle = style;
-                }
+                //    cell.CellStyle = style;
+                //}
             }
             else if (val is bool)
             {

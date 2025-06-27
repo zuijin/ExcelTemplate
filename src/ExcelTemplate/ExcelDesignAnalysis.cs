@@ -1,20 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Text.RegularExpressions;
-using ExcelTemplate.Extensions;
+﻿using ExcelTemplate.Extensions;
 using ExcelTemplate.Helper;
 using ExcelTemplate.Model;
 using ExcelTemplate.Style;
 using NPOI.SS.UserModel;
-using Org.BouncyCastle.Asn1.IsisMtt.X509;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace ExcelTemplate
 {
-    public static class ExcelDesignAnalysis
+    public class ExcelDesignAnalysis
     {
         private const string VALUE_FIELD_FORMAT = @"^\${(([_a-zA-Z][_a-zA-Z0-9]*)(\.[_a-zA-Z][_a-zA-Z0-9]*)*)}$";
         private const string VALUE_FIELD_PATH = @"^\${(.*)}$";
@@ -22,13 +19,30 @@ namespace ExcelTemplate
         private const string TBODY_FIELD_FORMAT = @"^\${#(([_a-zA-Z][_a-zA-Z0-9]*)(\.[_a-zA-Z][_a-zA-Z0-9]*)*)}$";
         private const string TBODY_FIELD_PATH = @"^\${#(.*)}$";
 
+        private List<IETStyle> _uniqueStyles = new List<IETStyle>();
+
+        public IETStyle GetOrMapStyle(ICell cell)
+        {
+            var style = ETStyleUtil.ConvertStyle(cell.Sheet.Workbook, cell.CellStyle);
+            foreach (var item in _uniqueStyles)
+            {
+                if (ObjectHelper.Compare(style, item))
+                {
+                    return item;
+                }
+            }
+
+            _uniqueStyles.Add(style);
+            return style;
+        }
+
         /// <summary>
         /// 从excel文件中提取对应的模版设计信息
         /// </summary>
         /// <param name="firstSection"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception> 
-        public static TemplateDesign DesignAnalysis(string fileName)
+        public TemplateDesign DesignAnalysis(string fileName)
         {
             if (string.IsNullOrWhiteSpace(fileName) || !File.Exists(fileName))
             {
@@ -56,7 +70,7 @@ namespace ExcelTemplate
                         var position = new Position(cell.RowIndex, cell.ColumnIndex);
                         var merge = mergeInfos.Find(a => a.FirstColumn == cell.ColumnIndex && a.FirstRow == cell.RowIndex);
                         var mergeTo = (merge == null) ? null : new Position(merge.LastRow, merge.LastColumn);
-                        var style = ETStyleUtil.ConvertStyle(cell.Sheet.Workbook, cell.CellStyle);
+                        var style = GetOrMapStyle(cell);
                         var valueStr = val is string ? val.ToString().Replace(" ", "") : null;
 
                         if (valueStr != null && Regex.IsMatch(valueStr, VALUE_FIELD_FORMAT))
@@ -118,7 +132,7 @@ namespace ExcelTemplate
             return new TemplateDesign(TemplateDesignSourceType.File, firstSection);
         }
 
-        private static void CheckAndBuildTable(BlockSection root)
+        private void CheckAndBuildTable(BlockSection root)
         {
             var current = root;
             while (current != null)
@@ -145,7 +159,7 @@ namespace ExcelTemplate
             }
         }
 
-        private static string GetTableName(string fieldPath)
+        private string GetTableName(string fieldPath)
         {
             return fieldPath.Substring(0, fieldPath.LastIndexOf('.'));
         }

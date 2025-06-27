@@ -10,7 +10,7 @@ using NPOI.OpenXmlFormats.Wordprocessing;
 
 namespace ExcelTemplate
 {
-    public static class TypeDesignAnalysis
+    public class TypeDesignAnalysis
     {
         /// <summary>
         /// 从类型中的字段特性（Attribute）定义，提取对应的模版设计信息
@@ -19,7 +19,7 @@ namespace ExcelTemplate
         /// <param name="parents"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public static TemplateDesign DesignAnalysis(Type type)
+        public TemplateDesign DesignAnalysis(Type type)
         {
             var blocks = new List<IBlock>();
             var styleDic = GetStyleDic(type);

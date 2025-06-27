@@ -1,17 +1,17 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using ExcelTemplate.Exceptions;
+﻿using ExcelTemplate.Exceptions;
 using ExcelTemplate.Extensions;
 using ExcelTemplate.Helper;
 using ExcelTemplate.Hint;
 using ExcelTemplate.Model;
 using ExcelTemplate.Style;
 using NPOI.HSSF.UserModel;
+using NPOI.SS.Formula.Functions;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace ExcelTemplate
 {
@@ -21,6 +21,7 @@ namespace ExcelTemplate
     public class TemplateRender
     {
         TemplateDesign _design;
+        Dictionary<IETStyle, ICellStyle> _dicStyles = new Dictionary<IETStyle, ICellStyle>();
 
         public TemplateDesign Design { get => _design; }
         Dictionary<string, Func<object, object>> _dicMappings;
@@ -41,13 +42,13 @@ namespace ExcelTemplate
         /// </summary>
         public static TemplateRender Create(Type type)
         {
-            var design = TypeDesignAnalysis.DesignAnalysis(type);
+            var design = new TypeDesignAnalysis().DesignAnalysis(type);
             return new TemplateRender(design);
         }
 
         public static TemplateRender Create(string excelFile)
         {
-            var design = ExcelDesignAnalysis.DesignAnalysis(excelFile);
+            var design = new ExcelDesignAnalysis().DesignAnalysis(excelFile);
             return new TemplateRender(design);
         }
 
@@ -146,9 +147,8 @@ namespace ExcelTemplate
             foreach (var textBlock in section.Blocks.OfType<TextBlock>())
             {
                 var cell = sheet.GetOrCreateRow(textBlock.Position.Row).GetOrCreateCell(textBlock.Position.Col);
-                cell.SetStyle(textBlock.Style);
-                cell.SetValue(textBlock.Text);
-                
+                SetValueAndStyle(cell, textBlock.Text, textBlock.Style);
+
                 if (textBlock.MergeTo != null)
                 {
                     SetMergeStyle(sheet, textBlock.Position, textBlock.MergeTo, textBlock.Style);
@@ -161,9 +161,8 @@ namespace ExcelTemplate
                 var cell = sheet.GetOrCreateRow(valueBlock.Position.Row).GetOrCreateCell(valueBlock.Position.Col);
                 var val = ObjectHelper.GetObjectValue(data, valueBlock.FieldPath);
                 var cellVal = TryGetMappingValue(valueBlock.FieldPath, val);
-                cell.SetStyle(valueBlock.Style);
-                cell.SetValue(cellVal);
-                
+                SetValueAndStyle(cell, cellVal, valueBlock.Style);
+
                 if (valueBlock.MergeTo != null)
                 {
                     SetMergeStyle(sheet, valueBlock.Position, valueBlock.MergeTo, valueBlock.Style);
@@ -219,9 +218,8 @@ namespace ExcelTemplate
             foreach (var header in table.Header)
             {
                 var cell = sheet.GetOrCreateRow(header.Position.Row).GetOrCreateCell(header.Position.Col);
-                cell.SetStyle(header.Style);
-                cell.SetValue(header.Text);
-                
+                SetValueAndStyle(cell, header.Text, header.Style);
+
                 if (header.MergeTo != null)
                 {
                     SetMergeStyle(sheet, header.Position, header.MergeTo, header.Style);
@@ -244,8 +242,7 @@ namespace ExcelTemplate
                         var val = ObjectHelper.GetObjectValue(item, filePath);
                         var cell = row.GetOrCreateCell(body.Position.Col);
                         var cellVal = TryGetMappingValue(body.FieldPath, val);
-                        cell.SetStyle(body.Style);
-                        cell.SetValue(cellVal);
+                        SetValueAndStyle(cell, cellVal, body.Style);
                     }
 
                     rowIndex++;
@@ -257,6 +254,88 @@ namespace ExcelTemplate
             return 0;
         }
 
+        int lastFormatId = -2;
+        Random _random = new Random();
+        private int GetNextFormatId()
+        {
+            var id = _random.Next(-1000, -2);
+            if (id == lastFormatId)
+            {
+                return GetNextFormatId();
+            }
+
+            return id;
+        }
+
+        /// <summary>
+        /// 设置单元格值和样式
+        /// </summary>
+        /// <param name="cell"></param>
+        /// <param name="value"></param>
+        /// <param name="style"></param>
+        private void SetValueAndStyle(ICell cell, object value, IETStyle style)
+        {
+            cell.SetValue(value);
+
+            var tmpStyle = style;
+            if (tmpStyle == null)
+            {
+                tmpStyle = ETStyleUtil.ConvertStyle(cell.Sheet.Workbook, cell.CellStyle);
+            }
+
+            var randomId = GetNextFormatId();
+            if (value is DateTime dateTime && !DateUtil.IsADateFormat(randomId, tmpStyle.DataFormat))
+            {
+                tmpStyle = (IETStyle)tmpStyle.Clone();
+                if (dateTime == dateTime.Date)
+                {
+                    tmpStyle.DataFormat = "yyyy/m/d";
+                }
+                else
+                {
+                    tmpStyle.DataFormat = "yyyy/m/d h:mm:ss";
+                }
+            }
+
+            SetStyle(cell, tmpStyle);
+        }
+
+        /// <summary>
+        /// 设置单元格样式
+        /// </summary>
+        /// <param name="cell"></param>
+        /// <param name="style"></param>
+        private void SetStyle(ICell cell, IETStyle style)
+        {
+            if (style == null)
+            {
+                return;
+            }
+
+            ICellStyle targetStyle;
+            if (!_dicStyles.TryGetValue(style, out targetStyle))
+            {
+                foreach (var item in _dicStyles)
+                {
+                    if (ObjectHelper.Compare(style, item.Key))
+                    {
+                        _dicStyles.Add(style, item.Value);
+                        targetStyle = item.Value;
+                        break;
+                    }
+                }
+
+                if (targetStyle == null)
+                {
+                    var tmp = style.GetCellStyle(cell.Sheet.Workbook);
+                    _dicStyles.Add(style, tmp);
+                    targetStyle = tmp;
+                }
+            }
+
+            cell.CellStyle = targetStyle;
+        }
+
         protected void SetMergeStyle(ISheet sheet, Position position, Position mergeTo, IETStyle style)
         {
             if (style != null)
@@ -266,7 +345,8 @@ namespace ExcelTemplate
                     for (int j = 0; j <= (mergeTo.Col - position.Col); j++)
                     {
                         var pos = position.GetOffset(i, j);
-                        sheet.GetOrCreateCell(pos).SetStyle(style);
+                        var cell = sheet.GetOrCreateCell(pos);
+                        SetStyle(cell, style);
                     }
                 }
             }
