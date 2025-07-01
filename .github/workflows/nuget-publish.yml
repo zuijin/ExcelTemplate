@@ -6,7 +6,7 @@ name: Publish NuGet Package # Action名称
 on:
   push:
     branches:
-      - master # 监听的分支
+      - main # 监听的分支
     paths: # 监听的文件
       - 'src/Directory.Build.props'
 
