@@ -1,0 +1,41 @@
+<Project>
+	<PropertyGroup>
+		<Authors>zuijin</Authors>
+		<Company></Company>
+		<Copyright></Copyright>
+	</PropertyGroup>
+
+	<!-- Calculate the build and revision numbers based on the current date -->
+	<PropertyGroup>
+		<MajorVersion>1</MajorVersion>
+		<MinorVersion>0</MinorVersion>
+		<PatchVersion>0</PatchVersion>
+		<BuildNumber>$(MajorVersion).$(MinorVersion).$(PatchVersion)</BuildNumber>
+	</PropertyGroup>
+	<!-- Use the calculated version for the NuGet package -->
+	<PropertyGroup>
+		<VersionPrefix>$(BuildNumber)</VersionPrefix>
+		<Version>$(VersionPrefix)</Version>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<!-- 设置 SolutionDir 属性为解决方案文件的绝对路径 -->
+		<SolutionDir>$(MSBuildThisFileDirectory)</SolutionDir>
+	</PropertyGroup>
+	<ItemGroup>
+		<!-- Nuget的Icon文件 -->
+		<!--<None Include="$(SolutionDir)vx_images\DimTechStudio-Icon.png">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>-->
+		<!-- Nuget的自述文件 -->
+		<None Include="$(SolutionDir)README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
+	<PropertyGroup>
+		<PackageIcon></PackageIcon>
+		<!--<PackageReadmeFile>README.md</PackageReadmeFile>-->
+	</PropertyGroup>
+</Project>

@@ -12,10 +12,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{795852CB-1
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelTemplate.Test", "ExcelTemplate.Test\ExcelTemplate.Test.csproj", "{FB6A49DF-FCA9-4255-BEEA-232C95F79E69}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "github", "github", "{67C76122-3063-4B40-BA20-27B5BD606CCE}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{E2E61621-7FDD-4017-8D67-70152F40561E}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{189F68A4-9037-46E5-84A2-ACBEEA67C0F0}"
 	ProjectSection(SolutionItems) = preProject
+		..\.github\workflows\nuget-publish.yml = ..\.github\workflows\nuget-publish.yml
 		..\.github\workflows\unit_test.yml = ..\.github\workflows\unit_test.yml
 	EndProjectSection
 EndProject
@@ -38,8 +39,8 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{67C76122-3063-4B40-BA20-27B5BD606CCE} = {795852CB-1BC2-44F9-A469-F43AE3DB1BCB}
-		{E2E61621-7FDD-4017-8D67-70152F40561E} = {67C76122-3063-4B40-BA20-27B5BD606CCE}
+		{02EA681E-C7D8-13C7-8484-4AC65E1B71E8} = {795852CB-1BC2-44F9-A469-F43AE3DB1BCB}
+		{189F68A4-9037-46E5-84A2-ACBEEA67C0F0} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {29122817-7507-4CE1-9191-44A9952CDFEF}

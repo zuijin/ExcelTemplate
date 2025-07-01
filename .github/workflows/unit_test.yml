@@ -15,14 +15,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 8.0.x
-    - name: Build
-      working-directory: ./src
-      run: dotnet build
-    - name: Test
-      working-directory: ./src
-      run: dotnet test --no-build
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Build
+        working-directory: ./src
+        run: dotnet build
+
+      - name: Test
+        working-directory: ./src
+        run: dotnet test --no-build

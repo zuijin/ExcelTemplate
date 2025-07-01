@@ -1,0 +1,44 @@
+name: Publish NuGet Package # Action名称
+
+# 设置触发器
+# 以下示例为master分支，Directory.Build.props文件发生变动后，
+# 触发本action
+on:
+  push:
+    branches:
+      - master # 监听的分支
+    paths: # 监听的文件
+      - 'src/Directory.Build.props'
+
+# 设置运行环境及执行步骤
+# 作用见step name
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore NuGet packages
+        working-directory: ./src
+        run: dotnet restore
+
+      - name: Build
+        working-directory: ./src
+        run: dotnet build --configuration Release
+
+      - name: Pack NuGet package
+        working-directory: ./src
+        run: |
+          cd ExcelTemplate
+          dotnet pack ExcelTemplate.csproj --configuration Release --no-build
+
+      # 需在github库中设置${{ secrets.NUGET_API_KEY }}
+      - name: Publish NuGet package
+        run: dotnet nuget push **/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
