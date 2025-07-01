@@ -18,13 +18,13 @@ namespace ExcelTemplate.Hint
         }
 
         /// <summary>
-        /// 添加错误信息
+        /// 添加提示信息
         /// </summary>
         /// <param name="message"></param>
-        public void AddError(string message)
+        public void AddMessage(string message)
         {
             var pos = GetPosition();
-            _builder.AddError(pos.Row, pos.Col, message);
+            _builder.AddMessage(pos.Row, pos.Col, message);
         }
 
         /// <summary>

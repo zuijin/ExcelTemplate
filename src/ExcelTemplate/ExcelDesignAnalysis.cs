@@ -36,12 +36,6 @@ namespace ExcelTemplate
             return style;
         }
 
-        /// <summary>
-        /// 从excel文件中提取对应的模版设计信息
-        /// </summary>
-        /// <param name="firstSection"></param>
-        /// <returns></returns>
-        /// <exception cref="Exception"></exception> 
         public TemplateDesign DesignAnalysis(string fileName)
         {
             if (string.IsNullOrWhiteSpace(fileName) || !File.Exists(fileName))
@@ -49,7 +43,20 @@ namespace ExcelTemplate
                 throw new Exception($"文件{fileName}不存在");
             }
 
-            var workbook = WorkbookFactory.Create(fileName);
+            using (var s = File.OpenRead(fileName))
+            {
+                return DesignAnalysis(s);
+            }
+        }
+
+        /// <summary>
+        /// 从excel文件中提取对应的模版设计信息
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <returns></returns>
+        public TemplateDesign DesignAnalysis(Stream stream)
+        {
+            var workbook = WorkbookFactory.Create(stream);
             var sheet = workbook.GetSheetAt(0);
             var rowEnumerator = sheet.GetRowEnumerator();
             var mergeInfos = sheet.MergedRegions;
@@ -129,6 +136,8 @@ namespace ExcelTemplate
 
             CheckAndBuildTable(firstSection);
 
+            MergeSection(firstSection);
+
             return new TemplateDesign(TemplateDesignSourceType.File, firstSection);
         }
 
@@ -162,6 +171,35 @@ namespace ExcelTemplate
         private string GetTableName(string fieldPath)
         {
             return fieldPath.Substring(0, fieldPath.LastIndexOf('.'));
+        }
+
+        /// <summary>
+        /// 将部分可以合并的区块，尽量合并起来
+        /// </summary>
+        /// <param name="section"></param>
+        /// <returns></returns>
+        private static void MergeSection(BlockSection section)
+        {
+            var preSection = section;
+            var preIsTable = DesignInspector.IsTableSection(section);
+            var current = section.Next;
+
+            while (current != null)
+            {
+                var isTable = DesignInspector.IsTableSection(current);
+                if (!isTable && !preIsTable) // 两个非列表区块，可以合并
+                {
+                    preSection.Blocks.AddRange(current.Blocks);
+                    preSection.Next = current.Next;
+                }
+                else
+                {
+                    preSection = current;
+                }
+
+                current = current.Next;
+                preIsTable = isTable;
+            }
         }
     }
 }

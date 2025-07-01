@@ -11,6 +11,7 @@ using NPOI.XSSF.UserModel;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace ExcelTemplate
@@ -40,13 +41,13 @@ namespace ExcelTemplate
         /// <summary>
         /// 创建 TemplateWriter
         /// </summary>
-        public static TemplateRender Create(Type type)
+        public static TemplateRender FromType(Type type)
         {
             var design = new TypeDesignAnalysis().DesignAnalysis(type);
             return new TemplateRender(design);
         }
 
-        public static TemplateRender Create(string excelFile)
+        public static TemplateRender FromExcel(string excelFile)
         {
             var design = new ExcelDesignAnalysis().DesignAnalysis(excelFile);
             return new TemplateRender(design);
@@ -83,6 +84,12 @@ namespace ExcelTemplate
             return workbook;
         }
 
+        public void Render(object data, Stream stream)
+        {
+            var workbook = WorkbookFactory.Create(stream);
+            Render(data, workbook);
+        }
+
         public void Render(object data, IWorkbook workbook)
         {
             if (workbook.NumberOfSheets == 0)
@@ -94,13 +101,13 @@ namespace ExcelTemplate
             Write(designClone, workbook, data);
         }
 
-        public HintBuilder<T> RenderHintBuilder<T>(T data, ExcelType excelType = ExcelType.Xlsx)
+        public HintBuilder<T> GetHintBuilder<T>(T data, ExcelType excelType = ExcelType.Xlsx)
         {
             var workbook = CreateWorkbook(excelType);
-            return RenderHintBuilder<T>(data, workbook);
+            return GetHintBuilder<T>(data, workbook);
         }
 
-        public HintBuilder<T> RenderHintBuilder<T>(T data, IWorkbook workbook)
+        public HintBuilder<T> GetHintBuilder<T>(T data, IWorkbook workbook)
         {
             if (workbook.NumberOfSheets == 0)
             {
@@ -110,7 +117,7 @@ namespace ExcelTemplate
             var designClone = (TemplateDesign)_design.Clone();
             Write(designClone, workbook, data);
 
-            return new HintBuilder<T>(designClone, workbook, data, new List<CellException> { });
+            return new HintBuilder<T>(designClone, workbook, data, new List<CellHintMessage> { });
         }
 
         /// <summary>

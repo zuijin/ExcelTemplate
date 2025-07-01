@@ -13,7 +13,7 @@ namespace ExcelTemplate.Test
         {
             var filePath = "Files/Form.xlsx";
             var file = File.Open(filePath, FileMode.Open);
-            var template = TemplateCapture.Create(typeof(FormModel));
+            var template = TemplateCapture.FromType(typeof(FormModel));
 
             dynamic data = template.Capture<FormModel>(file);
             Assert.AreEqual(data.Field_1, 123);
@@ -30,7 +30,7 @@ namespace ExcelTemplate.Test
         {
             var filePath = "Files/List.xlsx";
             var file = File.Open(filePath, FileMode.Open);
-            var template = TemplateCapture.Create(typeof(ListModel));
+            var template = TemplateCapture.FromType(typeof(ListModel));
 
             dynamic data = template.Capture<ListModel>(file);
             Assert.AreEqual(data.Children.Count, 7);
@@ -64,7 +64,7 @@ namespace ExcelTemplate.Test
         {
             var filePath = "Files/MergeHeaderList.xlsx";
             var file = File.Open(filePath, FileMode.Open);
-            var template = TemplateCapture.Create(typeof(MergeHeaderListModel));
+            var template = TemplateCapture.FromType(typeof(MergeHeaderListModel));
 
             dynamic data = template.Capture<MergeHeaderListModel>(file);
             Assert.AreEqual(data.Children.Count, 7);
@@ -99,7 +99,7 @@ namespace ExcelTemplate.Test
         {
             var filePath = "Files/Mixture.xlsx";
             var file = File.Open(filePath, FileMode.Open);
-            var template = TemplateCapture.Create(typeof(MixtureModel));
+            var template = TemplateCapture.FromType(typeof(MixtureModel));
 
             string name = "张三";
             string sex = "男";

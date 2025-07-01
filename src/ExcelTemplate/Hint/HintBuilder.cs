@@ -20,22 +20,22 @@ namespace ExcelTemplate.Hint
     public class HintBuilder<T>
     {
         private T _data;
-        private List<CellException> _exceptions;
+        private List<CellHintMessage> _messages;
         private IWorkbook _workbook;
         private TemplateDesign _design;
         private Dictionary<string, Position> _fieldPositionDic;
         private Dictionary<object, int> _elemetIndexDic;
-        private string _errBgColor;
+        private string _messageBgColor;
 
         public T Data => _data;
         public IWorkbook Workbook => _workbook;
         internal Dictionary<string, Position> FieldPositionDic => _fieldPositionDic;
         internal Dictionary<object, int> ElemetIndexDic => _elemetIndexDic;
 
-        public HintBuilder(TemplateDesign design, IWorkbook workbook, T data, List<CellException> exceptions)
+        public HintBuilder(TemplateDesign design, IWorkbook workbook, T data, List<CellHintMessage> messages)
         {
-            _exceptions = new List<CellException>();
-            _exceptions.AddRange(exceptions);
+            _messages = new List<CellHintMessage>();
+            _messages.AddRange(messages);
             _design = design;
             _workbook = workbook;
             _data = data;
@@ -79,15 +79,15 @@ namespace ExcelTemplate.Hint
         }
 
         /// <summary>
-        /// 设置错误单元格的背景颜色，十六进制RGB格式 FFF 或 FFFFFF，如果传 null 则不更改背景颜色
+        /// 设置提示单元格的背景颜色，十六进制RGB格式 FFF 或 FFFFFF，如果传 null 则不更改背景颜色
         /// </summary>
         /// <param name="bgColor"></param>
         /// <exception cref="Exception"></exception>
-        public void SetErrorBgColor(string bgColor)
+        public void SetMessageBgColor(string bgColor)
         {
             if (string.IsNullOrWhiteSpace(bgColor))
             {
-                _errBgColor = null;
+                _messageBgColor = null;
                 return;
             }
 
@@ -96,18 +96,18 @@ namespace ExcelTemplate.Hint
                 throw new Exception("颜色格式错误，不符合十六进制 FFF 或 FFFFFF 的格式");
             }
 
-            _errBgColor = bgColor;
+            _messageBgColor = bgColor;
         }
 
         /// <summary>
-        /// 添加错误信息
+        /// 添加提示信息
         /// </summary>
         /// <param name="row"></param>
         /// <param name="col"></param>
         /// <param name="message"></param>
-        public void AddError(int row, int col, string message)
+        public void AddMessage(int row, int col, string message)
         {
-            _exceptions.Add(new CellException(row, col, message));
+            _messages.Add(new CellHintMessage(row, col, message));
         }
 
         public FieldHintExp<T, TField> For<TField>(Expression<Func<T, TField>> expression)
@@ -116,26 +116,17 @@ namespace ExcelTemplate.Hint
         }
 
         /// <summary>
-        /// 是否存在异常
+        /// 生成提示Excel
         /// </summary>
         /// <returns></returns>
-        public bool HasError()
-        {
-            return _exceptions.Any();
-        }
-
-        /// <summary>
-        /// 生成错误提示Excel
-        /// </summary>
-        /// <returns></returns>
-        public IWorkbook BuildErrorExcel()
+        public IWorkbook BuildExcel()
         {
             var newWorkbook = _workbook.Copy();
             var sheet = newWorkbook.GetSheetAt(0);
             var drawing = sheet.CreateDrawingPatriarch();
             var helper = newWorkbook.GetCreationHelper();
 
-            foreach (var group in _exceptions.GroupBy(a => (a.Position.Row, a.Position.Col)))
+            foreach (var group in _messages.GroupBy(a => (a.Position.Row, a.Position.Col)))
             {
                 var position = group.Key;
                 var message = string.Join(Environment.NewLine, group.Select(a => a.Message));
@@ -148,7 +139,7 @@ namespace ExcelTemplate.Hint
                 cell.CellComment = comment;
 
                 //设置背景颜色
-                if (!string.IsNullOrWhiteSpace(_errBgColor))
+                if (!string.IsNullOrWhiteSpace(_messageBgColor))
                 {
                     var newStyle = newWorkbook.CreateCellStyle();
                     newStyle.CloneStyleFrom(cell.CellStyle);
@@ -156,11 +147,11 @@ namespace ExcelTemplate.Hint
 
                     if (newStyle is XSSFCellStyle)
                     {
-                        ((XSSFCellStyle)newStyle).SetFillForegroundColor(ETStyleUtil.GetXSSFColor(_errBgColor));
+                        ((XSSFCellStyle)newStyle).SetFillForegroundColor(ETStyleUtil.GetXSSFColor(_messageBgColor));
                     }
                     else
                     {
-                        newStyle.FillForegroundColor = ETStyleUtil.GetHSSFColor(newWorkbook, _errBgColor);
+                        newStyle.FillForegroundColor = ETStyleUtil.GetHSSFColor(newWorkbook, _messageBgColor);
                     }
 
                     cell.CellStyle = newStyle;
@@ -171,18 +162,18 @@ namespace ExcelTemplate.Hint
         }
 
         /// <summary>
-        /// 生成错误提示
+        /// 生成提示
         /// </summary>
         /// <returns></returns>
-        public string BuildErrorMessage()
+        public string BuildMessage()
         {
-            if (!_exceptions.Any())
+            if (!_messages.Any())
             {
                 return string.Empty;
             }
 
             StringBuilder sb = new StringBuilder(500);
-            foreach (var ex in _exceptions.OrderBy(a => a.Position.Row))
+            foreach (var ex in _messages.OrderBy(a => a.Position.Row))
             {
                 sb.AppendLine(ex.Message);
             }
@@ -191,14 +182,14 @@ namespace ExcelTemplate.Hint
         }
 
         /// <summary>
-        /// 生成错误提示文件
+        /// 生成提示文件
         /// </summary>
         /// <returns></returns>
-        public byte[] BuildErrorFile()
+        public byte[] BuildFile()
         {
             using (var ms = new MemoryStream())
             {
-                var book = BuildErrorExcel();
+                var book = BuildExcel();
                 book.Write(ms);
 
                 return ms.ToArray();

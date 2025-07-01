@@ -1,7 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using ExcelTemplate.Hint;
 using ExcelTemplate.Model;
+using NPOI.SS.Formula.Functions;
 using NPOI.SS.UserModel;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Runtime.InteropServices;
 
 namespace ExcelTemplate
 {
@@ -14,33 +18,68 @@ namespace ExcelTemplate
         TemplateCapture _capture;
         TemplateRender _render;
 
-        public Template(Type designType)
+        public Template(TemplateDesign design)
         {
-            _design = new TypeDesignAnalysis().DesignAnalysis(designType);
+            _design = design;
             _capture = new TemplateCapture(_design);
             _render = new TemplateRender(_design);
+        }
+
+        public static Template FromType<T>()
+        {
+            var design = new TypeDesignAnalysis().DesignAnalysis(typeof(T));
+            return new Template(design);
+        }
+
+        public static Template FromType(Type type)
+        {
+            var design = new TypeDesignAnalysis().DesignAnalysis(type);
+            return new Template(design);
+        }
+
+        public static Template FromExcel(string excelFile)
+        {
+            var design = new ExcelDesignAnalysis().DesignAnalysis(excelFile);
+            return new Template(design);
         }
 
         /// <summary>
         /// 从Excel读取数据
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="workbook"></param>
+        /// <param name="stream"></param>
         /// <returns></returns>
-        public T ReadFromExcel<T>(IWorkbook workbook)
+        public T Capture<T>(Stream stream)
         {
-            return _capture.Capture<T>(workbook);
+            return _capture.Capture<T>(stream);
         }
 
         /// <summary>
         /// 从Excel读取数据
         /// </summary>
-        /// <param name="workbook"></param>
+        /// <param name="stream"></param>
         /// <param name="dataType">数据类型</param>
         /// <returns></returns>
-        public object ReadFromExcel(IWorkbook workbook, Type dataType)
+        public object Capture(Stream stream, Type dataType)
         {
-            return _capture.Capture(workbook, dataType);
+            return _capture.Capture(stream, dataType);
+        }
+
+        /// <summary>
+        /// 获取提示信息生成器
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="stream"></param>
+        /// <returns></returns>
+        public HintBuilder<T> GetHintBuilder<T>(Stream stream)
+        {
+            return _capture.GetHintBuilder<T>(stream);
+        }
+
+        public HintBuilder<T> GetHintBuilder<T>(string fileName)
+        {
+            using var stream = File.OpenRead(fileName);
+            return _capture.GetHintBuilder<T>(stream);
         }
 
         /// <summary>
@@ -48,9 +87,19 @@ namespace ExcelTemplate
         /// </summary>
         /// <param name="data"></param>
         /// <param name="workbook"></param>
-        public void WriteToExcel(object data, IWorkbook workbook)
+        public void Render(object data, IWorkbook workbook)
         {
             _render.Render(data, workbook);
+        }
+
+        /// <summary>
+        /// 将数据写入Excel
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="stream">excel文件流</param>
+        public void Render(object data, Stream stream)
+        {
+            _render.Render(data, stream);
         }
 
         /// <summary>
@@ -58,7 +107,7 @@ namespace ExcelTemplate
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        public IWorkbook GetExcelFromData(object data)
+        public IWorkbook Render(object data)
         {
             return _render.Render(data);
         }
@@ -79,7 +128,7 @@ namespace ExcelTemplate
         /// </summary>
         /// <param name="fieldPath"></param>
         /// <param name="mappingFunc"></param>
-        public void AddWriteMapping(string fieldPath, Func<object, object> mappingFunc)
+        public void AddRenderMapping(string fieldPath, Func<object, object> mappingFunc)
         {
             _render.AddMapping(fieldPath, mappingFunc);
         }

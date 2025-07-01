@@ -45,13 +45,13 @@ namespace ExcelTemplate
         /// <summary>
         /// 创建
         /// </summary>
-        public static TemplateCapture Create(Type type)
+        public static TemplateCapture FromType(Type type)
         {
             var design = new TypeDesignAnalysis().DesignAnalysis(type);
             return new TemplateCapture(design);
         }
 
-        public static TemplateCapture Create(string excelFile)
+        public static TemplateCapture FromExcel(string excelFile)
         {
             var design = new ExcelDesignAnalysis().DesignAnalysis(excelFile);
             return new TemplateCapture(design);
@@ -88,13 +88,13 @@ namespace ExcelTemplate
             return obj;
         }
 
-        public HintBuilder<T> CaptureHintBuilder<T>(Stream stream)
+        public HintBuilder<T> GetHintBuilder<T>(Stream stream)
         {
             var workbook = WorkbookFactory.Create(stream);
-            return CaptureHintBuilder<T>(workbook);
+            return GetHintBuilder<T>(workbook);
         }
 
-        public HintBuilder<T> CaptureHintBuilder<T>(IWorkbook workbook)
+        public HintBuilder<T> GetHintBuilder<T>(IWorkbook workbook)
         {
             var designClone = (TemplateDesign)_design.Clone();
             var obj = Read(workbook, typeof(T), designClone);
@@ -104,7 +104,8 @@ namespace ExcelTemplate
                 throw _exceptions.First();
             }
 
-            return new HintBuilder<T>(designClone, workbook, (T)obj, _exceptions);
+            var messages = _exceptions.Select(a => new CellHintMessage(a.Position, a.Message)).ToList();
+            return new HintBuilder<T>(designClone, workbook, (T)obj, messages);
         }
 
         /// <summary>

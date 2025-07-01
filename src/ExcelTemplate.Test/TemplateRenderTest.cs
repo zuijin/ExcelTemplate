@@ -16,7 +16,7 @@ namespace ExcelTemplate.Test
         [TestMethod]
         public void RenderFormTest()
         {
-            var render = TemplateRender.Create(typeof(FormModel));
+            var render = TemplateRender.FromType(typeof(FormModel));
             var data = new FormModel()
             {
                 Field_1 = 555,
@@ -56,7 +56,7 @@ namespace ExcelTemplate.Test
         [TestMethod]
         public void RenderListTest()
         {
-            var render = TemplateRender.Create(typeof(ListModel));
+            var render = TemplateRender.FromType(typeof(ListModel));
             var data = new ListModel()
             {
                 Children = new List<ListModel.ListItem>()
@@ -121,7 +121,7 @@ namespace ExcelTemplate.Test
         [TestMethod]
         public void RenderMergeHeaderListTest()
         {
-            var render = TemplateRender.Create(typeof(MergeHeaderListModel));
+            var render = TemplateRender.FromType(typeof(MergeHeaderListModel));
             var data = new MergeHeaderListModel()
             {
                 Children = new List<MergeHeaderListModel.ListItem>()
@@ -192,10 +192,10 @@ namespace ExcelTemplate.Test
             var file = File.Open(filePath, FileMode.Open);
             var originWorkbook = WorkbookFactory.Create(file);
 
-            var capture = TemplateCapture.Create(typeof(MixtureModel));
+            var capture = TemplateCapture.FromType(typeof(MixtureModel));
             var originData = capture.Capture<MixtureModel>(originWorkbook);
 
-            var render = TemplateRender.Create(typeof(MixtureModel));
+            var render = TemplateRender.FromType(typeof(MixtureModel));
             var workbook = render.Render(originData);
 
             var originSheet = originWorkbook.GetSheetAt(0);
@@ -270,7 +270,7 @@ namespace ExcelTemplate.Test
         [TestMethod]
         public void RenderFormStyleTest()
         {
-            var render = TemplateRender.Create(typeof(TestFormStyleModel));
+            var render = TemplateRender.FromType(typeof(TestFormStyleModel));
             var data = new TestFormStyleModel()
             {
                 StudentName = "李四",
@@ -278,7 +278,7 @@ namespace ExcelTemplate.Test
                 Sex = "女"
             };
 
-            var builder = render.RenderHintBuilder(data);
+            var builder = render.GetHintBuilder(data);
             //builder.Workbook.Save("Temp/styletest.xlsx");
             var sheet = builder.Workbook.GetSheetAt(0);
             var position = builder.For(a => a.StudentName).GetPosition();
@@ -312,7 +312,7 @@ namespace ExcelTemplate.Test
         [TestMethod]
         public void RenderMixtureStyleTest()
         {
-            var render = TemplateRender.Create(typeof(TestMixtureStyleModel));
+            var render = TemplateRender.FromType(typeof(TestMixtureStyleModel));
             var date = DateTime.Parse("2024-02-03");
             var model = new TestMixtureStyleModel()
             {
@@ -351,8 +351,8 @@ namespace ExcelTemplate.Test
 
             render.AddMapping("Scores_1st.Ranking", obj => ((int)obj) + 20);
 
-            var builder = render.RenderHintBuilder(model);
-            builder.Workbook.Save("Temp/TestMixtureStyle.xlsx");
+            var workbook = render.Render(model);
+            workbook.Save("Temp/TestMixtureStyle.xlsx");
         }
 
     }
