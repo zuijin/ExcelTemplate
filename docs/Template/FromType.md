@@ -72,7 +72,7 @@ internal class MixtureModel
 
 |  特性  | 描述 |
 |---|---|
-| **Title** | 在指定位置输出文本，这个特性本身不赖于任何字段，详见 [TitleAttribute](Attribute/Title.md) |
+| **Title** | 在指定位置输出文本，这个特性本身不赖于任何字段，详见 [TitleAttribute](../Attributes/Title.md) |
 | **Position** | 给字段设置一个位置值，表示将该字段的值输出到对应的位置 |
 | **Col** | 定义一个列，作用于数组类型的字段下，设置 Table 的 **表头文本** 和 **列顺序** |
 | **Merge** | 用于合并表头 |
