@@ -19,7 +19,7 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<!-- 设置 SolutionDir 属性为解决方案文件的绝对路径 -->
+		<!-- 设置 SolutionDir 属性为解决方案文件的绝对路径  -->
 		<SolutionDir>$(MSBuildThisFileDirectory)</SolutionDir>
 	</PropertyGroup>
 	<ItemGroup>
