@@ -1,17 +1,17 @@
-name: Publish NuGet Package # ActionÃû³Æ
+name: Publish NuGet Package # Actionåç§°
 
-# ÉèÖÃ´¥·¢Æ÷
-# ÒÔÏÂÊ¾ÀıÎªmaster·ÖÖ§£¬Directory.Build.propsÎÄ¼ş·¢Éú±ä¶¯ºó£¬
-# ´¥·¢±¾action
+# è®¾ç½®è§¦å‘å™¨
+# ä»¥ä¸‹ç¤ºä¾‹ä¸ºmasteråˆ†æ”¯ï¼ŒDirectory.Build.propsæ–‡ä»¶å‘ç”Ÿå˜åŠ¨åï¼Œ
+# è§¦å‘æœ¬action
 on:
   push:
     branches:
-      - master # ¼àÌıµÄ·ÖÖ§
-    paths: # ¼àÌıµÄÎÄ¼ş
+      - master # ç›‘å¬çš„åˆ†æ”¯
+    paths: # ç›‘å¬çš„æ–‡ä»¶
       - 'src/Directory.Build.props'
 
-# ÉèÖÃÔËĞĞ»·¾³¼°Ö´ĞĞ²½Öè
-# ×÷ÓÃ¼ûstep name
+# è®¾ç½®è¿è¡Œç¯å¢ƒåŠæ‰§è¡Œæ­¥éª¤
+# ä½œç”¨è§step name
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
@@ -39,6 +39,6 @@ jobs:
           cd ExcelTemplate
           dotnet pack ExcelTemplate.csproj --configuration Release --no-build
 
-      # ĞèÔÚgithub¿âÖĞÉèÖÃ${{ secrets.NUGET_API_KEY }}
+      # éœ€åœ¨githubåº“ä¸­è®¾ç½®${{ secrets.NUGET_API_KEY }}
       - name: Publish NuGet package
         run: dotnet nuget push **/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
