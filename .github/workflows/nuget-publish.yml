@@ -8,7 +8,7 @@ on:
     branches:
       - master # 监听的分支
     paths: # 监听的文件
-      - 'src/Directory.Build.props'
+      - 'Directory.Build.props'
 
 # 设置运行环境及执行步骤
 # 作用见step name
