@@ -4,6 +4,8 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>enable</Nullable>
     <AssemblyName>zuijin.ExcelTemplate</AssemblyName>
+    <RepositoryUrl Label="GitHub">https://github.com/zuijin/ExcelTemplate</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>
