@@ -9,7 +9,7 @@
 	<PropertyGroup>
 		<MajorVersion>1</MajorVersion>
 		<MinorVersion>0</MinorVersion>
-		<PatchVersion>1</PatchVersion>
+		<PatchVersion>2</PatchVersion>
 		<BuildNumber>$(MajorVersion).$(MinorVersion).$(PatchVersion)</BuildNumber>
 	</PropertyGroup>
 	<!-- Use the calculated version for the NuGet package -->
