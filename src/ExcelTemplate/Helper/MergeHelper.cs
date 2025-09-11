@@ -10,7 +10,8 @@ namespace ExcelTemplate.Helper
 
         public static List<TableHeaderBlock> MergeHeader(Position position, List<TypeRawHeader> headerBlocks, IETStyle headStyle)
         {
-            var rootNode = BuildNodeTree(headerBlocks);
+            var sortHeaders  = headerBlocks.OrderBy(a => a.Block.Position.Col).ToList(); // 按照列顺序排序
+            var rootNode = BuildNodeTree(sortHeaders);
             HorizontalMerge(rootNode);
             VerticalMerge(rootNode);
 
