@@ -10,6 +10,9 @@ namespace ExcelTemplate.Test.Model
 
         internal class ListItem
         {
+            [Col("列4", 3)]
+            public DateTime Field_4 { get; set; }
+
             [Col("列1", 0)]
             public int Field_1 { get; set; }
 
@@ -19,8 +22,7 @@ namespace ExcelTemplate.Test.Model
             [Col("列3", 2)]
             public string Field_3 { get; set; }
 
-            [Col("列4", 3)]
-            public DateTime Field_4 { get; set; }
+  
         }
     }
 }

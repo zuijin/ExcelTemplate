@@ -10,8 +10,31 @@ namespace ExcelTemplate.Helper
 
         public static List<TableHeaderBlock> MergeHeader(Position position, List<TypeRawHeader> headerBlocks, IETStyle headStyle)
         {
-            var sortHeaders  = headerBlocks.OrderBy(a => a.Block.Position.Col).ToList(); // 按照列顺序排序
-            var rootNode = BuildNodeTree(sortHeaders);
+            var sortHeaders = headerBlocks.OrderBy(a => a.Block.Position.Col).ToList(); // 按照列顺序排序
+            var fillHeaders = new List<TypeRawHeader>();
+
+            #region 对于表头不连续的情况，填充占位表头
+            TypeRawHeader preHeader = null;
+            foreach (var header in sortHeaders)
+            {
+                if (preHeader != null && (header.Block.Position.Col - preHeader.Block.Position.Col) > 1)
+                {
+                    for (var i = 1; i < (header.Block.Position.Col - preHeader.Block.Position.Col); i++)
+                    {
+                        fillHeaders.Add(new TypeRawHeader()
+                        {
+                            Block = new TableHeaderEmptyBlock() { Position = preHeader.Block.Position.GetOffset(0, i) },
+                            MergeTitles = new string[0]
+                        });
+                    }
+                }
+
+                fillHeaders.Add(header);
+                preHeader = header;
+            } 
+            #endregion
+
+            var rootNode = BuildNodeTree(fillHeaders);
             HorizontalMerge(rootNode);
             VerticalMerge(rootNode);
 
@@ -75,7 +98,8 @@ namespace ExcelTemplate.Helper
             for (var i = 1; i < node.Children.Count; i++)
             {
                 var currNode = node.Children[i];
-                if (currNode.Title == preNode.Title && currNode.Children.Any() && preNode.Children.Any()) //叶子节点不合并
+                if (currNode.Title == preNode.Title && currNode.Children.Any() && preNode.Children.Any() //叶子节点不合并
+                    && !(currNode.Block is TableHeaderEmptyBlock) && !(preNode.Block is TableHeaderEmptyBlock))
                 {
                     preNode.Children.AddRange(currNode.Children);
                     preNode.Width += currNode.Width;
@@ -135,43 +159,46 @@ namespace ExcelTemplate.Helper
         private static List<TableHeaderBlock> GetAllBlocks(HeaderNode node, Position position, IETStyle headStyle, int heightOffset = 0, int widthOffset = 0)
         {
             var blocks = new List<TableHeaderBlock>();
-            if (node.Width > 0 && node.Height > 0 && node.Children.Count > 0) //非根节点，非叶子节点
+            if (!(node.Block is TableHeaderEmptyBlock))
             {
-                var block = new TableHeaderBlock()
+                if (node.Width > 0 && node.Height > 0 && node.Children.Count > 0) //非根节点，非叶子节点
                 {
-                    Position = position.GetOffset(heightOffset, widthOffset),
-                    Text = node.Title,
-                    Style = headStyle,
-                };
+                    var block = new TableHeaderBlock()
+                    {
+                        Position = position.GetOffset(heightOffset, widthOffset),
+                        Text = node.Title,
+                        Style = headStyle,
+                    };
 
-                if (node.Width > 1 || node.Height > 1)
-                {
-                    block.MergeTo = block.Position.GetOffset(node.Height - 1, node.Width - 1);
+                    if (node.Width > 1 || node.Height > 1)
+                    {
+                        block.MergeTo = block.Position.GetOffset(node.Height - 1, node.Width - 1);
+                    }
+
+                    blocks.Add(block);
                 }
 
-                blocks.Add(block);
-            }
-
-            //重设位置信息
-            if (node.Block != null) //叶子节点
-            {
-                var tmp = node.Block;
-                tmp.Position = position.GetOffset(heightOffset, widthOffset);
-
-                if (node.Width > 1 || node.Height > 1)
+                //重设位置信息
+                if (node.Block != null) //叶子节点
                 {
-                    tmp.MergeTo = tmp.Position.GetOffset(node.Height - 1, node.Width - 1);
+                    var tmp = node.Block;
+                    tmp.Position = position.GetOffset(heightOffset, widthOffset);
+
+                    if (node.Width > 1 || node.Height > 1)
+                    {
+                        tmp.MergeTo = tmp.Position.GetOffset(node.Height - 1, node.Width - 1);
+                    }
+
+                    blocks.Add(tmp);
                 }
 
-                blocks.Add(tmp);
-            }
-
-            int totalWidth = 0;
-            foreach (var child in node.Children)
-            {
-                var childBlocks = GetAllBlocks(child, position, headStyle, heightOffset + node.Height, totalWidth + widthOffset);
-                blocks.AddRange(childBlocks);
-                totalWidth += child.Width;
+                int totalWidth = 0;
+                foreach (var child in node.Children)
+                {
+                    var childBlocks = GetAllBlocks(child, position, headStyle, heightOffset + node.Height, totalWidth + widthOffset);
+                    blocks.AddRange(childBlocks);
+                    totalWidth += child.Width;
+                }
             }
 
             return blocks;

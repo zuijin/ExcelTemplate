@@ -13,7 +13,7 @@ namespace ExcelTemplate.Helper
         /// <returns></returns>
         public static bool IsSimpleType(Type type)
         {
-            if (type == typeof(string) || type == typeof(DateTime))
+            if (type == typeof(string) || type == typeof(DateTime) || type == typeof(decimal))
                 return true;
 
             if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
