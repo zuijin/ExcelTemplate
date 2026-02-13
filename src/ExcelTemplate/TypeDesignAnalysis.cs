@@ -12,6 +12,8 @@ namespace ExcelTemplate
 {
     public class TypeDesignAnalysis
     {
+        const string DefaultStyleKey = "____default";
+
         /// <summary>
         /// 从类型中的字段特性（Attribute）定义，提取对应的模版设计信息
         /// </summary>
@@ -56,8 +58,13 @@ namespace ExcelTemplate
         private static Dictionary<string, IETStyle> GetStyleDic(Type type)
         {
             var styleDic = new Dictionary<string, IETStyle>();
-            var attrs = type.GetCustomAttributes<StyleDicAttribute>();
+            // 添加默认样式
+            if (!styleDic.ContainsKey(DefaultStyleKey))
+            {
+                styleDic.Add(DefaultStyleKey, new ETStyle());
+            }
 
+            var attrs = type.GetCustomAttributes<StyleDicAttribute>();
             foreach (var attr in attrs)
             {
                 var style = ETStyleUtil.ConvertStyle(attr);
@@ -143,6 +150,11 @@ namespace ExcelTemplate
                 {
                     style = ETStyleUtil.ConvertStyle(attr);
                 }
+            }
+
+            if (style == null)
+            {
+                style = dicStyle.GetValueOrDefault(DefaultStyleKey);
             }
 
             return style;

@@ -10,15 +10,15 @@ namespace ExcelTemplate.Style
         public bool IsHidden { get; set; }
         public bool IsLocked { get; set; }
         public bool IsQuotePrefixed { get; set; }
-        public NPOI.SS.UserModel.HorizontalAlignment Alignment { get; set; }
+        public HorizontalAlignment Alignment { get; set; }
         public bool WrapText { get; set; }
-        public NPOI.SS.UserModel.VerticalAlignment VerticalAlignment { get; set; }
+        public VerticalAlignment VerticalAlignment { get; set; }
         public short Rotation { get; set; }
         public short Indention { get; set; }
-        public BorderStyle BorderLeft { get; set; } = BorderStyle.Thin;
-        public BorderStyle BorderRight { get; set; } = BorderStyle.Thin;
-        public BorderStyle BorderTop { get; set; } = BorderStyle.Thin;
-        public BorderStyle BorderBottom { get; set; } = BorderStyle.Thin;
+        public BorderStyle BorderLeft { get; set; }
+        public BorderStyle BorderRight { get; set; }
+        public BorderStyle BorderTop { get; set; }
+        public BorderStyle BorderBottom { get; set; }
         public string LeftBorderColor { get; set; }
         public string RightBorderColor { get; set; }
         public string TopBorderColor { get; set; }
@@ -27,7 +27,7 @@ namespace ExcelTemplate.Style
         public string FillBackgroundColor { get; set; }
         public string FillForegroundColor { get; set; }
         public string BorderDiagonalColor { get; set; }
-        public BorderStyle BorderDiagonalLineStyle { get; set; } = BorderStyle.Thin;
+        public BorderStyle BorderDiagonalLineStyle { get; set; }
         public BorderDiagonal BorderDiagonal { get; set; }
 
         public object Clone()
