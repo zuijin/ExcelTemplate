@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -32,6 +32,13 @@ namespace ExcelTemplate.Hint
         internal Dictionary<string, Position> FieldPositionDic => _fieldPositionDic;
         internal Dictionary<object, int> ElemetIndexDic => _elemetIndexDic;
 
+        /// <summary>
+        /// 实例化提示信息生成器
+        /// </summary>
+        /// <param name="design">模版设计信息</param>
+        /// <param name="workbook">工作簿对象</param>
+        /// <param name="data">数据对象</param>
+        /// <param name="messages">已有的提示信息列表</param>
         public HintBuilder(TemplateDesign design, IWorkbook workbook, T data, List<CellHintMessage> messages)
         {
             _messages = new List<CellHintMessage>();
@@ -45,6 +52,9 @@ namespace ExcelTemplate.Hint
             InitDic();
         }
 
+        /// <summary>
+        /// 初始化字典
+        /// </summary>
         private void InitDic()
         {
             var current = _design.BlockSection;
@@ -110,6 +120,12 @@ namespace ExcelTemplate.Hint
             _messages.Add(new CellHintMessage(row, col, message));
         }
 
+        /// <summary>
+        /// 针对指定字段配置提示信息
+        /// </summary>
+        /// <typeparam name="TField">字段类型</typeparam>
+        /// <param name="expression">字段表达式</param>
+        /// <returns>字段提示表达式对象</returns>
         public FieldHintExp<T, TField> For<TField>(Expression<Func<T, TField>> expression)
         {
             return new FieldHintExp<T, TField>(this, expression);

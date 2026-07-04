@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -55,6 +55,11 @@ namespace ExcelTemplate
             return new TemplateDesign(TemplateDesignSourceType.Type, section);
         }
 
+        /// <summary>
+        /// 获取样式字典
+        /// </summary>
+        /// <param name="type">类型</param>
+        /// <returns>样式字典</returns>
         private static Dictionary<string, IETStyle> GetStyleDic(Type type)
         {
             var styleDic = new Dictionary<string, IETStyle>();
@@ -313,11 +318,22 @@ namespace ExcelTemplate
             }
         }
 
+        /// <summary>
+        /// 组合路径
+        /// </summary>
+        /// <param name="paths">路径片段数组</param>
+        /// <returns>组合后的路径</returns>
         private static string PathCombine(params string[] paths)
         {
             return string.Join(".", paths.Where(a => !string.IsNullOrWhiteSpace(a)));
         }
 
+        /// <summary>
+        /// 组合路径
+        /// </summary>
+        /// <param name="paths1">第一部分路径片段</param>
+        /// <param name="paths2">第二部分路径片段数组</param>
+        /// <returns>组合后的路径</returns>
         private static string PathCombine(IEnumerable<string> paths1, params string[] paths2)
         {
             List<string> paths = new List<string>();

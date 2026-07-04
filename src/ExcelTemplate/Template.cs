@@ -18,6 +18,10 @@ namespace ExcelTemplate
         TemplateCapture _capture;
         TemplateRender _render;
 
+        /// <summary>
+        /// 实例化一个 Excel 模版对象
+        /// </summary>
+        /// <param name="design">模版设计信息</param>
         public Template(TemplateDesign design)
         {
             _design = design;
@@ -25,18 +29,33 @@ namespace ExcelTemplate
             _render = new TemplateRender(_design);
         }
 
+        /// <summary>
+        /// 从类型中解析并创建模版对象
+        /// </summary>
+        /// <typeparam name="T">类型</typeparam>
+        /// <returns>模版对象</returns>
         public static Template FromType<T>()
         {
             var design = new TypeDesignAnalysis().DesignAnalysis(typeof(T));
             return new Template(design);
         }
 
+        /// <summary>
+        /// 从类型中解析并创建模版对象
+        /// </summary>
+        /// <param name="type">类型</param>
+        /// <returns>模版对象</returns>
         public static Template FromType(Type type)
         {
             var design = new TypeDesignAnalysis().DesignAnalysis(type);
             return new Template(design);
         }
 
+        /// <summary>
+        /// 从 Excel 文件中解析并创建模版对象
+        /// </summary>
+        /// <param name="excelFile">Excel 文件路径</param>
+        /// <returns>模版对象</returns>
         public static Template FromExcel(string excelFile)
         {
             var design = new ExcelDesignAnalysis().DesignAnalysis(excelFile);
@@ -76,6 +95,12 @@ namespace ExcelTemplate
             return _capture.GetHintBuilder<T>(stream);
         }
 
+        /// <summary>
+        /// 获取提示信息生成器
+        /// </summary>
+        /// <typeparam name="T">类型</typeparam>
+        /// <param name="fileName">文件路径</param>
+        /// <returns>提示信息生成器</returns>
         public HintBuilder<T> GetHintBuilder<T>(string fileName)
         {
             using var stream = File.OpenRead(fileName);

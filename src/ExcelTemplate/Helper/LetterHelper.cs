@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text.RegularExpressions;
 
 namespace ExcelTemplate.Helper
@@ -24,6 +24,11 @@ namespace ExcelTemplate.Helper
             return int.Parse(match.Groups[2].Value) - 1;
         }
 
+        /// <summary>
+        /// 解析列
+        /// </summary>
+        /// <param name="letter">字母</param>
+        /// <returns>列索引</returns>
         public static int ParseCol(string letter)
         {
             letter = letter?.ToUpper();
@@ -36,6 +41,12 @@ namespace ExcelTemplate.Helper
             return ConvertFromBase26(match.Groups[1].Value) - 1;
         }
 
+        /// <summary>
+        /// 获取行和列的字母表示
+        /// </summary>
+        /// <param name="row">行索引</param>
+        /// <param name="col">列索引</param>
+        /// <returns>字母表示</returns>
         public static string GetLetter(int row, int col)
         {
             var colLetter = ConvertToBase26(col + 1);
@@ -44,6 +55,11 @@ namespace ExcelTemplate.Helper
             return $"{colLetter}{rowLetter}";
         }
 
+        /// <summary>
+        /// 转换为26进制表示
+        /// </summary>
+        /// <param name="number">数字</param>
+        /// <returns>26进制表示的字符串</returns>
         public static string ConvertToBase26(int number)
         {
             if (number <= 0)
@@ -64,6 +80,11 @@ namespace ExcelTemplate.Helper
             return result;
         }
 
+        /// <summary>
+        /// 从26进制表示转换回数字
+        /// </summary>
+        /// <param name="letter">26进制表示的字符串</param>
+        /// <returns>数字</returns>
         public static int ConvertFromBase26(string letter)
         {
             if (string.IsNullOrEmpty(letter))

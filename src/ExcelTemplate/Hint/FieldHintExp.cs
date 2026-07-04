@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq.Expressions;
 using ExcelTemplate.Extensions;
 using ExcelTemplate.Model;
@@ -11,6 +11,11 @@ namespace ExcelTemplate.Hint
         private Expression _expression;
 
 
+        /// <summary>
+        /// 实例化字段提示表达式对象
+        /// </summary>
+        /// <param name="builder">提示信息生成器</param>
+        /// <param name="expression">表达式</param>
         public FieldHintExp(HintBuilder<T> builder, Expression expression)
         {
             _builder = builder;
@@ -37,6 +42,11 @@ namespace ExcelTemplate.Hint
             return _builder.FieldPositionDic[dataPath];
         }
 
+        /// <summary>
+        /// 访问表达式以获取字段路径
+        /// </summary>
+        /// <param name="exp">表达式</param>
+        /// <returns>字段路径</returns>
         private string Visit(Expression exp)
         {
             if (exp == null)

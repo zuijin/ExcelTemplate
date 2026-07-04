@@ -1,18 +1,16 @@
-﻿using ExcelTemplate.Exceptions;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using ExcelTemplate.Extensions;
 using ExcelTemplate.Helper;
 using ExcelTemplate.Hint;
 using ExcelTemplate.Model;
 using ExcelTemplate.Style;
 using NPOI.HSSF.UserModel;
-using NPOI.SS.Formula.Functions;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 
 namespace ExcelTemplate
 {
@@ -28,8 +26,9 @@ namespace ExcelTemplate
         Dictionary<string, Func<object, object>> _dicMappings;
 
         /// <summary>
-        /// 
+        /// 实例化数据渲染器
         /// </summary>
+        /// <param name="design">模版设计信息</param>
         public TemplateRender(TemplateDesign design)
         {
             _design = design;
@@ -39,20 +38,32 @@ namespace ExcelTemplate
         }
 
         /// <summary>
-        /// 创建 TemplateWriter
+        /// 从类型创建数据渲染器
         /// </summary>
+        /// <param name="type">类型</param>
+        /// <returns>数据渲染器</returns>
         public static TemplateRender FromType(Type type)
         {
             var design = new TypeDesignAnalysis().DesignAnalysis(type);
             return new TemplateRender(design);
         }
 
+        /// <summary>
+        /// 从 Excel 文件创建数据渲染器
+        /// </summary>
+        /// <param name="excelFile">Excel 文件路径</param>
+        /// <returns>数据渲染器</returns>
         public static TemplateRender FromExcel(string excelFile)
         {
             var design = new ExcelDesignAnalysis().DesignAnalysis(excelFile);
             return new TemplateRender(design);
         }
 
+        /// <summary>
+        /// 创建对应类型的工作簿对象
+        /// </summary>
+        /// <param name="excelType">Excel 类型</param>
+        /// <returns>工作簿对象</returns>
         private static IWorkbook CreateWorkbook(ExcelType excelType)
         {
             IWorkbook workbook;
@@ -73,9 +84,11 @@ namespace ExcelTemplate
         }
 
         /// <summary>
-        /// 渲染数据
+        /// 渲染数据并返回工作簿对象
         /// </summary>
-        /// <returns></returns>
+        /// <param name="data">数据对象</param>
+        /// <param name="excelType">Excel 类型</param>
+        /// <returns>工作簿对象</returns>
         public IWorkbook Render(object data, ExcelType excelType = ExcelType.Xlsx)
         {
             var workbook = CreateWorkbook(excelType);
@@ -84,12 +97,22 @@ namespace ExcelTemplate
             return workbook;
         }
 
+        /// <summary>
+        /// 渲染数据到指定的数据流
+        /// </summary>
+        /// <param name="data">数据对象</param>
+        /// <param name="stream">数据流</param>
         public void Render(object data, Stream stream)
         {
             var workbook = WorkbookFactory.Create(stream);
             Render(data, workbook);
         }
 
+        /// <summary>
+        /// 渲染数据到指定的工作簿对象
+        /// </summary>
+        /// <param name="data">数据对象</param>
+        /// <param name="workbook">工作簿对象</param>
         public void Render(object data, IWorkbook workbook)
         {
             if (workbook.NumberOfSheets == 0)
@@ -101,12 +124,26 @@ namespace ExcelTemplate
             Write(designClone, workbook, data);
         }
 
+        /// <summary>
+        /// 获取提示信息生成器
+        /// </summary>
+        /// <typeparam name="T">类型</typeparam>
+        /// <param name="data">数据对象</param>
+        /// <param name="excelType">Excel 类型</param>
+        /// <returns>提示信息生成器</returns>
         public HintBuilder<T> GetHintBuilder<T>(T data, ExcelType excelType = ExcelType.Xlsx)
         {
             var workbook = CreateWorkbook(excelType);
             return GetHintBuilder<T>(data, workbook);
         }
 
+        /// <summary>
+        /// 获取提示信息生成器
+        /// </summary>
+        /// <typeparam name="T">类型</typeparam>
+        /// <param name="data">数据对象</param>
+        /// <param name="workbook">工作簿对象</param>
+        /// <returns>提示信息生成器</returns>
         public HintBuilder<T> GetHintBuilder<T>(T data, IWorkbook workbook)
         {
             if (workbook.NumberOfSheets == 0)

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
@@ -8,6 +8,10 @@
     <RepositoryType>git</RepositoryType>
     <AcceptNPOIOSMFLicense>true</AcceptNPOIOSMFLicense>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="C:\Data\Code\ExcelTemplate\src\README.md" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CompareNETObjects" Version="4.84.0" />

@@ -1,4 +1,4 @@
-﻿using ExcelTemplate.Extensions;
+using ExcelTemplate.Extensions;
 using KellermanSoftware.CompareNetObjects;
 using NPOI.SS.UserModel;
 using System;
@@ -9,6 +9,12 @@ namespace ExcelTemplate.Helper
 {
     public static class ObjectHelper
     {
+        /// <summary>
+        /// 设置对象字段值
+        /// </summary>
+        /// <param name="obj">对象</param>
+        /// <param name="fieldPath">字段路径</param>
+        /// <param name="val">值</param>
         public static void SetObjectValue(object obj, string fieldPath, object val)
         {
             if (val == null)
@@ -52,6 +58,12 @@ namespace ExcelTemplate.Helper
             }
         }
 
+        /// <summary>
+        /// 获取对象字段值
+        /// </summary>
+        /// <param name="obj">对象</param>
+        /// <param name="fieldPath">字段路径</param>
+        /// <returns>字段值</returns>
         public static object GetObjectValue(object obj, string fieldPath)
         {
             var currObj = obj;
@@ -86,6 +98,11 @@ namespace ExcelTemplate.Helper
             return null;
         }
 
+        /// <summary>
+        /// 向列表中添加元素
+        /// </summary>
+        /// <param name="list">列表对象</param>
+        /// <param name="item">元素对象</param>
         public static void AddItemToList(object list, object item)
         {
             if (list == null) throw new ArgumentNullException(nameof(list));
@@ -112,6 +129,12 @@ namespace ExcelTemplate.Helper
             addMethod.Invoke(list, new[] { item });
         }
 
+        /// <summary>
+        /// 比较两个对象是否相等
+        /// </summary>
+        /// <param name="obj1">对象1</param>
+        /// <param name="obj2">对象2</param>
+        /// <returns>是否相等</returns>
         public static bool Compare(object obj1, object obj2)
         {
             var compareLogic = new CompareLogic();

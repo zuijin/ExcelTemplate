@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -31,8 +31,9 @@ namespace ExcelTemplate
         public List<CellException> Exceptions { get => _exceptions; }
 
         /// <summary>
-        /// 
+        /// 实例化数据抓取器
         /// </summary>
+        /// <param name="design">模版设计信息</param>
         public TemplateCapture(TemplateDesign design)
         {
             _design = design;
@@ -43,38 +44,69 @@ namespace ExcelTemplate
         }
 
         /// <summary>
-        /// 创建
+        /// 从类型创建数据抓取器
         /// </summary>
+        /// <param name="type">类型</param>
+        /// <returns>数据抓取器</returns>
         public static TemplateCapture FromType(Type type)
         {
             var design = new TypeDesignAnalysis().DesignAnalysis(type);
             return new TemplateCapture(design);
         }
 
+        /// <summary>
+        /// 从 Excel 文件创建数据抓取器
+        /// </summary>
+        /// <param name="excelFile">Excel 文件路径</param>
+        /// <returns>数据抓取器</returns>
         public static TemplateCapture FromExcel(string excelFile)
         {
             var design = new ExcelDesignAnalysis().DesignAnalysis(excelFile);
             return new TemplateCapture(design);
         }
 
+        /// <summary>
+        /// 从数据流中抓取数据
+        /// </summary>
+        /// <typeparam name="T">目标类型</typeparam>
+        /// <param name="stream">数据流</param>
+        /// <returns>抓取的数据</returns>
         public T Capture<T>(Stream stream)
         {
             var workbook = WorkbookFactory.Create(stream);
             return Capture<T>(workbook);
         }
 
+        /// <summary>
+        /// 从工作簿中抓取数据
+        /// </summary>
+        /// <typeparam name="T">目标类型</typeparam>
+        /// <param name="workbook">工作簿对象</param>
+        /// <returns>抓取的数据</returns>
         public T Capture<T>(IWorkbook workbook)
         {
             var obj = (T)Capture(workbook, typeof(T));
             return obj;
         }
 
+        /// <summary>
+        /// 从数据流中抓取指定类型的数据
+        /// </summary>
+        /// <param name="stream">数据流</param>
+        /// <param name="type">目标类型</param>
+        /// <returns>抓取的数据对象</returns>
         public object Capture(Stream stream, Type type)
         {
             var workbook = WorkbookFactory.Create(stream);
             return Capture(workbook, type);
         }
 
+        /// <summary>
+        /// 从工作簿中抓取指定类型的数据
+        /// </summary>
+        /// <param name="workbook">工作簿对象</param>
+        /// <param name="type">目标类型</param>
+        /// <returns>抓取的数据对象</returns>
         public object Capture(IWorkbook workbook, Type type)
         {
             var designClone = (TemplateDesign)_design.Clone();
@@ -88,12 +120,24 @@ namespace ExcelTemplate
             return obj;
         }
 
+        /// <summary>
+        /// 从数据流中获取提示信息生成器
+        /// </summary>
+        /// <typeparam name="T">目标类型</typeparam>
+        /// <param name="stream">数据流</param>
+        /// <returns>提示信息生成器</returns>
         public HintBuilder<T> GetHintBuilder<T>(Stream stream)
         {
             var workbook = WorkbookFactory.Create(stream);
             return GetHintBuilder<T>(workbook);
         }
 
+        /// <summary>
+        /// 从工作簿中获取提示信息生成器
+        /// </summary>
+        /// <typeparam name="T">目标类型</typeparam>
+        /// <param name="workbook">工作簿对象</param>
+        /// <returns>提示信息生成器</returns>
         public HintBuilder<T> GetHintBuilder<T>(IWorkbook workbook)
         {
             var designClone = (TemplateDesign)_design.Clone();

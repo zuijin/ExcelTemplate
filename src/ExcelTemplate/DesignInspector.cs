@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -58,8 +58,8 @@ namespace ExcelTemplate
         /// <summary>
         /// 是否列表区块
         /// </summary>
-        /// <param name="page"></param>
-        /// <returns></returns>
+        /// <param name="section">区块段</param>
+        /// <returns>是否包含列表区块</returns>
         public static bool IsTableSection(BlockSection section)
         {
             return section.Blocks.Any(a => a is TableBlock);

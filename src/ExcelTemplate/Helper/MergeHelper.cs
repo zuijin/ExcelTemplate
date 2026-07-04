@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using ExcelTemplate.Model;
 using ExcelTemplate.Style;
@@ -8,6 +8,13 @@ namespace ExcelTemplate.Helper
     public static class MergeHelper
     {
 
+        /// <summary>
+        /// 合并表头
+        /// </summary>
+        /// <param name="position">位置</param>
+        /// <param name="headerBlocks">原始表头区块列表</param>
+        /// <param name="headStyle">表头样式</param>
+        /// <returns>合并后的表头区块列表</returns>
         public static List<TableHeaderBlock> MergeHeader(Position position, List<TypeRawHeader> headerBlocks, IETStyle headStyle)
         {
             var sortHeaders = headerBlocks.OrderBy(a => a.Block.Position.Col).ToList(); // 按照列顺序排序

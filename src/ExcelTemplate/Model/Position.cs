@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text.RegularExpressions;
 using ExcelTemplate.Helper;
 
@@ -12,12 +12,21 @@ namespace ExcelTemplate.Model
         int _col = 0;
         string _letter = "A1";
 
+        /// <summary>
+        /// 实例化位置对象
+        /// </summary>
+        /// <param name="row">行索引</param>
+        /// <param name="col">列索引</param>
         public Position(int row, int col)
         {
             this.Row = row;
             this.Col = col;
         }
 
+        /// <summary>
+        /// 实例化位置对象
+        /// </summary>
+        /// <param name="letter">字母表示的单元格位置</param>
         public Position(string letter)
         {
             this.Letter = letter;
@@ -55,6 +64,10 @@ namespace ExcelTemplate.Model
 
     public partial class Position
     {
+        /// <summary>
+        /// 设置字母表示的位置
+        /// </summary>
+        /// <param name="letter">字母表示的单元格位置</param>
         private void SetLetter(string letter)
         {
             if (!IsPositionLetter(letter)) throw new Exception("letter格式错误");
@@ -64,6 +77,11 @@ namespace ExcelTemplate.Model
             _row = LetterHelper.ParseRow(_letter);
         }
 
+        /// <summary>
+        /// 设置行和列索引
+        /// </summary>
+        /// <param name="row">行索引</param>
+        /// <param name="col">列索引</param>
         private void SetRowCol(int row, int col)
         {
             if (row < 0) throw new Exception("row不能小于0");
@@ -112,6 +130,12 @@ namespace ExcelTemplate.Model
             return Regex.IsMatch(letter, LETTER_FORMAT);
         }
 
+        /// <summary>
+        /// 尝试解析字母表示的位置
+        /// </summary>
+        /// <param name="letter">字母表示的位置</param>
+        /// <param name="pos">输出的位置对象</param>
+        /// <returns>是否解析成功</returns>
         public static bool TryParse(string letter, out Position? pos)
         {
             if (!IsPositionLetter(letter))
@@ -124,6 +148,10 @@ namespace ExcelTemplate.Model
             return true;
         }
 
+        /// <summary>
+        /// 转换为字符串表示
+        /// </summary>
+        /// <returns>字母表示的位置</returns>
         public override string ToString()
         {
             return this.Letter;

@@ -21,6 +21,11 @@ namespace ExcelTemplate
 
         private List<IETStyle> _uniqueStyles = new List<IETStyle>();
 
+        /// <summary>
+        /// 获取或映射单元格样式
+        /// </summary>
+        /// <param name="cell">单元格</param>
+        /// <returns>样式对象</returns>
         public IETStyle GetOrMapStyle(ICell cell)
         {
             var style = ETStyleUtil.ConvertStyle(cell.Sheet.Workbook, cell.CellStyle);
@@ -36,6 +41,11 @@ namespace ExcelTemplate
             return style;
         }
 
+        /// <summary>
+        /// 从 Excel 文件中提取对应的模版设计信息
+        /// </summary>
+        /// <param name="fileName">文件路径</param>
+        /// <returns>模版设计信息</returns>
         public TemplateDesign DesignAnalysis(string fileName)
         {
             if (string.IsNullOrWhiteSpace(fileName) || !File.Exists(fileName))
@@ -141,6 +151,10 @@ namespace ExcelTemplate
             return new TemplateDesign(TemplateDesignSourceType.File, firstSection);
         }
 
+        /// <summary>
+        /// 检查并构建表格区块
+        /// </summary>
+        /// <param name="root">根区块段</param>
         private void CheckAndBuildTable(BlockSection root)
         {
             var current = root;
@@ -168,6 +182,11 @@ namespace ExcelTemplate
             }
         }
 
+        /// <summary>
+        /// 获取表名
+        /// </summary>
+        /// <param name="fieldPath">字段路径</param>
+        /// <returns>表名</returns>
         private string GetTableName(string fieldPath)
         {
             return fieldPath.Substring(0, fieldPath.LastIndexOf('.'));
