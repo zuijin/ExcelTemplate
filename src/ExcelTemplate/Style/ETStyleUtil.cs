@@ -270,7 +270,7 @@ namespace ExcelTemplate.Style
         public static XSSFColor GetXSSFColor(string hexColor)
         {
             var (a, r, g, b) = HexToArgb(hexColor);
-            return new XSSFColor(new byte[] { a, r, g, b });
+            return new XSSFColor(new byte[] { a, r, g, b }, new NPOI.OOXML.XSSF.UserModel.DefaultIndexedColorMap());
         }
 
 

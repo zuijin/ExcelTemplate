@@ -30,6 +30,20 @@ namespace ExcelTemplate.Extensions
         }
 
         /// <summary>
+        /// 获取流数据
+        /// </summary>
+        /// <param name="workbook"></param>
+        /// <param name="filePath"></param>
+        public static Stream GetStream(this IWorkbook workbook)
+        {
+            var stream = new MemoryStream();
+            workbook.Write(stream);
+            stream.Seek(0, SeekOrigin.Begin);
+
+            return stream;
+        }
+
+        /// <summary>
         /// 获取单元格
         /// </summary>
         /// <param name="sheet"></param>
@@ -141,7 +155,7 @@ namespace ExcelTemplate.Extensions
                     break;
                 case CellType.Blank:
                 case CellType.Formula:
-                case CellType.Unknown:
+                case CellType._None:
                     break;
                 default:
                     val = cell.ToString();

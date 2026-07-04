@@ -1,4 +1,4 @@
-﻿using ExcelTemplate.Extensions;
+using ExcelTemplate.Extensions;
 using ExcelTemplate.Helper;
 using ExcelTemplate.Model;
 using ExcelTemplate.Style;
@@ -58,7 +58,7 @@ namespace ExcelTemplate
         {
             var workbook = WorkbookFactory.Create(stream);
             var sheet = workbook.GetSheetAt(0);
-            var rowEnumerator = sheet.GetRowEnumerator();
+            var rowEnumerator = sheet.GetEnumerator();
             var mergeInfos = sheet.MergedRegions;
             BlockSection firstSection = null;
             BlockSection currentSection = null;
