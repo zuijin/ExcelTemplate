@@ -1,11 +1,14 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace ExcelTemplate.Helper
 {
-    public class TypeHelper
+    public static class TypeHelper
     {
+        private static readonly ConcurrentDictionary<Type, bool> _collectionTypeCache = new ConcurrentDictionary<Type, bool>();
+
         /// <summary>
         /// 判断是否简单类型
         /// </summary>
@@ -16,8 +19,9 @@ namespace ExcelTemplate.Helper
             if (type == typeof(string) || type == typeof(DateTime) || type == typeof(decimal))
                 return true;
 
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
-                return IsSimpleType(type.GetGenericArguments()[0]);
+            var underlyingType = Nullable.GetUnderlyingType(type);
+            if (underlyingType != null)
+                return IsSimpleType(underlyingType);
 
             return (type.IsValueType && type.IsPrimitive) || type.IsEnum;
         }
@@ -29,30 +33,33 @@ namespace ExcelTemplate.Helper
         /// <returns></returns>
         public static bool IsCollectionType(Type type)
         {
-            if (type == typeof(string))
-                return false;
-
-            // 处理Nullable类型
-            var underlyingType = Nullable.GetUnderlyingType(type);
-            if (underlyingType != null)
-                type = underlyingType;
-
-            // 数组
-            if (type.IsArray)
-                return true;
-
-            // 检查IEnumerable<>接口
-            if (type.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
+            return _collectionTypeCache.GetOrAdd(type, t =>
             {
-                // 排除字典类型
-                if (typeof(System.Collections.IDictionary).IsAssignableFrom(type))
+                if (type == typeof(string))
                     return false;
 
-                return true;
-            }
+                // 处理Nullable类型
+                var underlyingType = Nullable.GetUnderlyingType(type);
+                if (underlyingType != null)
+                    type = underlyingType;
 
-            // 非泛型集合
-            return typeof(System.Collections.IEnumerable).IsAssignableFrom(type);
+                // 数组
+                if (type.IsArray)
+                    return true;
+
+                // 检查IEnumerable<>接口
+                if (type.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
+                {
+                    // 排除字典类型
+                    if (typeof(System.Collections.IDictionary).IsAssignableFrom(type))
+                        return false;
+
+                    return true;
+                }
+
+                // 非泛型集合
+                return typeof(System.Collections.IEnumerable).IsAssignableFrom(type);
+            });
         }
 
         /// <summary>
@@ -75,8 +82,7 @@ namespace ExcelTemplate.Helper
 
             // 处理实现了IEnumerable<T>的类型
             var enumerableInterface = collectionType.GetInterfaces()
-                .FirstOrDefault(i => i.IsGenericType &&
-                                   i.GetGenericTypeDefinition() == typeof(IEnumerable<>));
+                .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>));
 
             if (enumerableInterface != null)
             {

@@ -1,25 +1,21 @@
-using ExcelTemplate.Extensions;
-using ExcelTemplate.Helper;
-using ExcelTemplate.Model;
-using ExcelTemplate.Style;
-using NPOI.SS.UserModel;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using ExcelTemplate.Extensions;
+using ExcelTemplate.Model;
+using ExcelTemplate.Style;
+using NPOI.SS.UserModel;
 
 namespace ExcelTemplate
 {
     public class ExcelDesignAnalysis
     {
-        private const string VALUE_FIELD_FORMAT = @"^\${(([_a-zA-Z][_a-zA-Z0-9]*)(\.[_a-zA-Z][_a-zA-Z0-9]*)*)}$";
-        private const string VALUE_FIELD_PATH = @"^\${(.*)}$";
+        private static readonly Regex ValueFieldRegex = new Regex(@"^\${(([_a-zA-Z][_a-zA-Z0-9]*)(\.[_a-zA-Z][_a-zA-Z0-9]*)*)}$", RegexOptions.Compiled);
+        private static readonly Regex TBodyFieldRegex = new Regex(@"^\${#(([_a-zA-Z][_a-zA-Z0-9]*)(\.[_a-zA-Z][_a-zA-Z0-9]*)*)}$", RegexOptions.Compiled);
 
-        private const string TBODY_FIELD_FORMAT = @"^\${#(([_a-zA-Z][_a-zA-Z0-9]*)(\.[_a-zA-Z][_a-zA-Z0-9]*)*)}$";
-        private const string TBODY_FIELD_PATH = @"^\${#(.*)}$";
-
-        private List<IETStyle> _uniqueStyles = new List<IETStyle>();
+        private readonly Dictionary<IETStyle, IETStyle> _uniqueStyles = new Dictionary<IETStyle, IETStyle>();
 
         /// <summary>
         /// 获取或映射单元格样式
@@ -29,15 +25,12 @@ namespace ExcelTemplate
         public IETStyle GetOrMapStyle(ICell cell)
         {
             var style = ETStyleUtil.ConvertStyle(cell.Sheet.Workbook, cell.CellStyle);
-            foreach (var item in _uniqueStyles)
+            if (_uniqueStyles.TryGetValue(style, out var existingStyle))
             {
-                if (ObjectHelper.Compare(style, item))
-                {
-                    return item;
-                }
+                return existingStyle;
             }
 
-            _uniqueStyles.Add(style);
+            _uniqueStyles[style] = style;
             return style;
         }
 
@@ -89,22 +82,24 @@ namespace ExcelTemplate
                         var mergeTo = (merge == null) ? null : new Position(merge.LastRow, merge.LastColumn);
                         var style = GetOrMapStyle(cell);
                         var valueStr = val is string ? val.ToString().Replace(" ", "") : null;
+                        Match valueMatch = null;
+                        Match tbodyMatch = null;
 
-                        if (valueStr != null && Regex.IsMatch(valueStr, VALUE_FIELD_FORMAT))
+                        if (valueStr != null && (valueMatch = ValueFieldRegex.Match(valueStr)).Success)
                         {
                             blocks.Add(new ValueBlock()
                             {
-                                FieldPath = Regex.Match(valueStr, VALUE_FIELD_PATH).Groups[1].Value,
+                                FieldPath = valueMatch.Groups[1].Value,
                                 Position = position,
                                 Style = style,
                                 MergeTo = mergeTo,
                             });
                         }
-                        else if (valueStr != null && Regex.IsMatch(valueStr, TBODY_FIELD_FORMAT))
+                        else if (valueStr != null && (tbodyMatch = TBodyFieldRegex.Match(valueStr)).Success)
                         {
                             blocks.Add(new TableBodyBlock()
                             {
-                                FieldPath = Regex.Match(valueStr, TBODY_FIELD_PATH).Groups[1].Value,
+                                FieldPath = tbodyMatch.Groups[1].Value,
                                 Position = position,
                                 Style = style,
                                 MergeTo = mergeTo,

@@ -1,6 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using ExcelTemplate.Style;
+using System;
+using System.ComponentModel;
 
 namespace ExcelTemplate.Model
 {
@@ -48,10 +47,12 @@ namespace ExcelTemplate.Model
         /// <summary>
         /// 类型
         /// </summary>
+        [Description("类型")]
         Type = 1,
         /// <summary>
         /// Excel文件
         /// </summary>
+        [Description("Excel文件")]
         File = 2,
     }
 
@@ -60,14 +61,17 @@ namespace ExcelTemplate.Model
         /// <summary>
         /// 双向
         /// </summary>
+        [Description("双向")]
         TwoWay = 0,
         /// <summary>
         /// 只导入
         /// </summary>
+        [Description("只导入")]
         ImportOnly = 1,
         /// <summary>
         /// 只导出
         /// </summary>
+        [Description("只导出")]
         ExportOnly = 2,
     }
 }

@@ -38,8 +38,13 @@ namespace ExcelTemplate.Helper
 
                 fillHeaders.Add(header);
                 preHeader = header;
-            } 
+            }
             #endregion
+
+            if (!fillHeaders.Any())
+            {
+                return new List<TableHeaderBlock>();
+            }
 
             var rootNode = BuildNodeTree(fillHeaders);
             HorizontalMerge(rootNode);

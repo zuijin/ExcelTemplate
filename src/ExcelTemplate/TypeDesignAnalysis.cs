@@ -6,7 +6,6 @@ using ExcelTemplate.Attributes;
 using ExcelTemplate.Helper;
 using ExcelTemplate.Model;
 using ExcelTemplate.Style;
-using NPOI.OpenXmlFormats.Wordprocessing;
 
 namespace ExcelTemplate
 {
@@ -17,9 +16,8 @@ namespace ExcelTemplate
         /// <summary>
         /// 从类型中的字段特性（Attribute）定义，提取对应的模版设计信息
         /// </summary>
-        /// <param name="type"></param>
-        /// <param name="parents"></param>
-        /// <returns></returns>
+        /// <param name="type">模板类型</param>
+        /// <returns>模版设计信息</returns>
         /// <exception cref="Exception"></exception>
         public TemplateDesign DesignAnalysis(Type type)
         {

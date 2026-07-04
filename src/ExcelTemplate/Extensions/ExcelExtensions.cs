@@ -1,6 +1,5 @@
-﻿using System;
+using System;
 using System.IO;
-using System.Linq;
 using ExcelTemplate.Model;
 using ExcelTemplate.Style;
 using NPOI.SS.UserModel;
@@ -9,6 +8,12 @@ namespace ExcelTemplate.Extensions
 {
     public static class ExcelExtensions
     {
+        private static readonly System.Collections.Generic.HashSet<Type> NumericTypes = new System.Collections.Generic.HashSet<Type>
+        {
+            typeof(byte), typeof(float), typeof(int), typeof(long), typeof(double), typeof(decimal),
+            typeof(short), typeof(sbyte), typeof(ushort), typeof(uint), typeof(ulong),
+        };
+
         /// <summary>
         /// 写入文件
         /// </summary>
@@ -195,12 +200,6 @@ namespace ExcelTemplate.Extensions
                 return;
             }
 
-            var numericTypes = new[]
-            {
-                typeof(byte), typeof(float), typeof(int), typeof(long), typeof(double), typeof(decimal),
-                typeof(short), typeof(sbyte), typeof(ushort), typeof(uint), typeof(ulong),
-            };
-
             if (val is string)
             {
                 cell.SetCellValue((string)val);
@@ -231,7 +230,7 @@ namespace ExcelTemplate.Extensions
             {
                 cell.SetCellValue((bool)val);
             }
-            else if (numericTypes.Contains(val.GetType()))
+            else if (NumericTypes.Contains(val.GetType()))
             {
                 cell.SetCellValue(double.Parse(val.ToString()));
             }

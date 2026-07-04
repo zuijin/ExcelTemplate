@@ -2,14 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.AccessControl;
 using ExcelTemplate.Exceptions;
 using ExcelTemplate.Extensions;
 using ExcelTemplate.Helper;
 using ExcelTemplate.Hint;
 using ExcelTemplate.Model;
 using NPOI.SS.UserModel;
-using NPOI.Util;
 
 namespace ExcelTemplate
 {
@@ -27,7 +25,14 @@ namespace ExcelTemplate
         List<CellException> _exceptions;
         Dictionary<string, Func<object, object>> _dicMappings;
 
+        /// <summary>
+        /// 模版设计信息
+        /// </summary>
         public TemplateDesign Design { get => _design; }
+
+        /// <summary>
+        /// 解析过程中收集的异常信息
+        /// </summary>
         public List<CellException> Exceptions { get => _exceptions; }
 
         /// <summary>
@@ -239,11 +244,10 @@ namespace ExcelTemplate
                 {
                     if (!TypeHelper.IsSubclassOfRawGeneric(typeof(List<>), prop.PropertyType))
                     {
-                        throw new Exception($"只支持 List<T> 类型的集合，{table.TableName}");
+                        throw new NotSupportedException($"只支持 List<T> 类型的集合，{table.TableName}");
                     }
 
-                    int itemCount;
-                    var list = ReadOneList(sheet, table.Body, prop.PropertyType, out itemCount);
+                    var list = ReadOneList(sheet, table.Body, prop.PropertyType, out var itemCount);
                     var tableLastRow = table.Position.Row;
                     if (table.Header.Any())
                     {
@@ -274,11 +278,14 @@ namespace ExcelTemplate
         /// <returns></returns>
         private object ReadOneList(ISheet sheet, List<TableBodyBlock> blocks, Type listType, out int itemCount)
         {
-            object listObj = Activator.CreateInstance(listType);
-            Type elementType = listType.GenericTypeArguments[0];
+            var listObj = Activator.CreateInstance(listType);
+            var elementType = listType.GenericTypeArguments[0];
             var rowIndex = blocks.First().Position.Row;
             var beginCol = blocks.Min(a => a.Position.Col);
             var endCol = blocks.Max(a => a.Position.Col);
+
+            // 预计算 fieldPath 避免在循环内重复执行 Substring 开销
+            var fieldPaths = blocks.ToDictionary(b => b, b => b.FieldPath.Substring(b.FieldPath.IndexOf('.') + 1));
 
             itemCount = 0;
 
@@ -299,7 +306,7 @@ namespace ExcelTemplate
                     {
                         var rawVal = cell.GetValue();
                         var val = TryGetMappingValue(block.FieldPath, rawVal);
-                        var fieldPath = block.FieldPath.Substring(block.FieldPath.IndexOf('.') + 1);
+                        var fieldPath = fieldPaths[block];
                         ObjectHelper.SetObjectValue(obj, fieldPath, val);
                     }
                     catch (Exception ex)
@@ -344,7 +351,7 @@ namespace ExcelTemplate
                     continue;
                 }
 
-                if (!string.IsNullOrWhiteSpace(enumerator.Current.ToString()))
+                if (current.CellType != CellType.Blank && !string.IsNullOrWhiteSpace(current.ToString()))
                 {
                     return false;
                 }
@@ -394,7 +401,7 @@ namespace ExcelTemplate
                 offsetRow++;
                 if (offsetRow >= FIND_MAX_ROW)
                 {
-                    throw new Exception($"已查找达到{FIND_MAX_ROW}行，未找到下一个模版区块");
+                    throw new InvalidOperationException($"已查找达到{FIND_MAX_ROW}行，未找到下一个模版区块");
                 }
             }
         }
@@ -407,9 +414,12 @@ namespace ExcelTemplate
         /// <exception cref="Exception"></exception>
         public void AddMapping(string fieldPath, Func<object, object> mappingFunc)
         {
+            if (string.IsNullOrEmpty(fieldPath)) throw new ArgumentNullException(nameof(fieldPath));
+            if (mappingFunc == null) throw new ArgumentNullException(nameof(mappingFunc));
+
             if (_dicMappings.ContainsKey(fieldPath))
             {
-                throw new Exception($"字段 {fieldPath} 已添加过 Mapping 方法了");
+                throw new InvalidOperationException($"字段 {fieldPath} 已添加过 Mapping 方法了");
             }
 
             _dicMappings.Add(fieldPath, mappingFunc);
@@ -429,18 +439,6 @@ namespace ExcelTemplate
             }
 
             return rawVal;
-        }
-
-
-        /// <summary>
-        /// 判断是否可 null 类型
-        /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        private bool IsNullableType(Type type)
-        {
-            return !type.IsValueType
-                || type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
         }
     }
 }

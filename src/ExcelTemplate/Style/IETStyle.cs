@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using NPOI.SS.UserModel;
 
 namespace ExcelTemplate.Style
@@ -6,7 +6,7 @@ namespace ExcelTemplate.Style
     /// <summary>
     /// 全量样式，大部分字段跟NPOI的样式对应
     /// </summary>
-    public interface IETStyle : ICloneable
+    public interface IETStyle : ICloneable, IEquatable<IETStyle>
     {
         /// <summary>
         /// 单元格是否自动缩小以适应文本（当文本过长时）

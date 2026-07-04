@@ -1,4 +1,4 @@
-﻿using NPOI.SS.UserModel;
+using NPOI.SS.UserModel;
 
 namespace ExcelTemplate.Style
 {
@@ -29,6 +29,73 @@ namespace ExcelTemplate.Style
         public string BorderDiagonalColor { get; set; }
         public BorderStyle BorderDiagonalLineStyle { get; set; }
         public BorderDiagonal BorderDiagonal { get; set; }
+
+        public override bool Equals(object? obj)
+        {
+            return Equals(obj as IETStyle);
+        }
+
+        public bool Equals(IETStyle? other)
+        {
+            if (other == null) return false;
+            
+            return ShrinkToFit == other.ShrinkToFit &&
+                   DataFormat == other.DataFormat &&
+                   (Font == other.Font || (Font != null && Font.Equals(other.Font))) &&
+                   IsHidden == other.IsHidden &&
+                   IsLocked == other.IsLocked &&
+                   IsQuotePrefixed == other.IsQuotePrefixed &&
+                   Alignment == other.Alignment &&
+                   WrapText == other.WrapText &&
+                   VerticalAlignment == other.VerticalAlignment &&
+                   Rotation == other.Rotation &&
+                   Indention == other.Indention &&
+                   BorderLeft == other.BorderLeft &&
+                   BorderRight == other.BorderRight &&
+                   BorderTop == other.BorderTop &&
+                   BorderBottom == other.BorderBottom &&
+                   LeftBorderColor == other.LeftBorderColor &&
+                   RightBorderColor == other.RightBorderColor &&
+                   TopBorderColor == other.TopBorderColor &&
+                   BottomBorderColor == other.BottomBorderColor &&
+                   FillPattern == other.FillPattern &&
+                   FillBackgroundColor == other.FillBackgroundColor &&
+                   FillForegroundColor == other.FillForegroundColor &&
+                   BorderDiagonalColor == other.BorderDiagonalColor &&
+                   BorderDiagonalLineStyle == other.BorderDiagonalLineStyle &&
+                   BorderDiagonal == other.BorderDiagonal;
+        }
+
+        public override int GetHashCode()
+        {
+            var hash = new System.HashCode();
+            hash.Add(ShrinkToFit);
+            hash.Add(DataFormat);
+            hash.Add(Font);
+            hash.Add(IsHidden);
+            hash.Add(IsLocked);
+            hash.Add(IsQuotePrefixed);
+            hash.Add(Alignment);
+            hash.Add(WrapText);
+            hash.Add(VerticalAlignment);
+            hash.Add(Rotation);
+            hash.Add(Indention);
+            hash.Add(BorderLeft);
+            hash.Add(BorderRight);
+            hash.Add(BorderTop);
+            hash.Add(BorderBottom);
+            hash.Add(LeftBorderColor);
+            hash.Add(RightBorderColor);
+            hash.Add(TopBorderColor);
+            hash.Add(BottomBorderColor);
+            hash.Add(FillPattern);
+            hash.Add(FillBackgroundColor);
+            hash.Add(FillForegroundColor);
+            hash.Add(BorderDiagonalColor);
+            hash.Add(BorderDiagonalLineStyle);
+            hash.Add(BorderDiagonal);
+            return hash.ToHashCode();
+        }
 
         public object Clone()
         {

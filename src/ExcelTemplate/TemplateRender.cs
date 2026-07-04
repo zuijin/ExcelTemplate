@@ -19,11 +19,11 @@ namespace ExcelTemplate
     /// </summary>
     public class TemplateRender
     {
-        TemplateDesign _design;
-        Dictionary<IETStyle, ICellStyle> _dicStyles = new Dictionary<IETStyle, ICellStyle>();
+        readonly TemplateDesign _design;
+        readonly Dictionary<IETStyle, ICellStyle> _dicStyles = new Dictionary<IETStyle, ICellStyle>();
 
         public TemplateDesign Design { get => _design; }
-        Dictionary<string, Func<object, object>> _dicMappings;
+        readonly Dictionary<string, Func<object, object>> _dicMappings;
 
         /// <summary>
         /// 实例化数据渲染器
@@ -272,13 +272,12 @@ namespace ExcelTemplate
             }
 
             // 写入表体数据
-            if (listData != null && listData is IEnumerable list)
+            if (listData is IEnumerable list)
             {
                 int firstRow = table.Body.First().Position.Row;
                 int rowIndex = firstRow;
                 foreach (var item in list)
                 {
-                    var itemProps = item.GetType().GetProperties();
                     var row = sheet.GetOrCreateRow(rowIndex);
                     foreach (var body in table.Body)
                     {
@@ -299,15 +298,15 @@ namespace ExcelTemplate
         }
 
         int lastFormatId = -2;
-        Random _random = new Random();
+        readonly Random _random = new Random();
         private int GetNextFormatId()
         {
             var id = _random.Next(-1000, -2);
-            if (id == lastFormatId)
+            while (id == lastFormatId)
             {
-                return GetNextFormatId();
+                id = _random.Next(-1000, -2);
             }
-
+            lastFormatId = id;
             return id;
         }
 
@@ -347,8 +346,8 @@ namespace ExcelTemplate
         /// <summary>
         /// 设置单元格样式
         /// </summary>
-        /// <param name="cell"></param>
-        /// <param name="style"></param>
+        /// <param name="cell">单元格</param>
+        /// <param name="style">样式对象</param>
         private void SetStyle(ICell cell, IETStyle style)
         {
             if (style == null)
@@ -356,25 +355,10 @@ namespace ExcelTemplate
                 return;
             }
 
-            ICellStyle targetStyle;
-            if (!_dicStyles.TryGetValue(style, out targetStyle))
+            if (!_dicStyles.TryGetValue(style, out var targetStyle))
             {
-                foreach (var item in _dicStyles)
-                {
-                    if (ObjectHelper.Compare(style, item.Key))
-                    {
-                        _dicStyles.Add(style, item.Value);
-                        targetStyle = item.Value;
-                        break;
-                    }
-                }
-
-                if (targetStyle == null)
-                {
-                    var tmp = style.GetCellStyle(cell.Sheet.Workbook);
-                    _dicStyles.Add(style, tmp);
-                    targetStyle = tmp;
-                }
+                targetStyle = style.GetCellStyle(cell.Sheet.Workbook);
+                _dicStyles.Add(style, targetStyle);
             }
 
             cell.CellStyle = targetStyle;

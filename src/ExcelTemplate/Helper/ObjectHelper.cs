@@ -1,14 +1,37 @@
-using ExcelTemplate.Extensions;
 using KellermanSoftware.CompareNetObjects;
-using NPOI.SS.UserModel;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
+using System.Reflection;
 
 namespace ExcelTemplate.Helper
 {
     public static class ObjectHelper
     {
+        private static readonly ConcurrentDictionary<string, string[]> _pathCache = new ConcurrentDictionary<string, string[]>();
+        private static readonly ConcurrentDictionary<Type, Dictionary<string, PropertyInfo>> _propertyCache = new ConcurrentDictionary<Type, Dictionary<string, PropertyInfo>>();
+
+        private static string[] GetPathArrayCached(string fieldPath)
+        {
+            return _pathCache.GetOrAdd(fieldPath, p => p.Split('.'));
+        }
+
+        private static PropertyInfo GetPropertyCached(Type type, string propertyName)
+        {
+            var props = _propertyCache.GetOrAdd(type, t =>
+            {
+                var dict = new Dictionary<string, PropertyInfo>();
+                foreach (var p in t.GetProperties())
+                {
+                    dict[p.Name] = p;
+                }
+                return dict;
+            });
+
+            props.TryGetValue(propertyName, out var prop);
+            return prop;
+        }
+
         /// <summary>
         /// 设置对象字段值
         /// </summary>
@@ -23,20 +46,19 @@ namespace ExcelTemplate.Helper
             }
 
             var currObj = obj;
-            var fieldArr = fieldPath.Split('.');
+            var fieldArr = GetPathArrayCached(fieldPath);
 
             for (int i = 0; i < fieldArr.Length; i++)
             {
-                var props = currObj.GetType().GetProperties();
-                var prop = props.FirstOrDefault(a => a.Name == fieldArr[i]);
+                var prop = GetPropertyCached(currObj.GetType(), fieldArr[i]);
                 if (prop == null)
                 {
-                    throw new Exception($"类型 {obj.GetType().Name} 内找不到字段 {fieldPath}");
+                    throw new ArgumentException($"类型 {currObj.GetType().Name} 内找不到字段 {fieldArr[i]}");
                 }
 
                 if (!prop.CanWrite)
                 {
-                    throw new Exception($"字段 {fieldPath} 无法写入，请检查是否处于只读状态");
+                    throw new ArgumentException($"字段 {fieldArr[i]} 无法写入，请检查是否处于只读状态");
                 }
 
                 if (i < (fieldArr.Length - 1))
@@ -52,8 +74,10 @@ namespace ExcelTemplate.Helper
                 }
                 else
                 {
-                    val = Convert.ChangeType(val, prop.PropertyType);
-                    prop.SetValue(currObj, val);
+                    // 处理可空类型 (Nullable<T>)
+                    var targetType = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
+                    var convertedVal = Convert.ChangeType(val, targetType);
+                    prop.SetValue(currObj, convertedVal);
                 }
             }
         }
@@ -67,15 +91,14 @@ namespace ExcelTemplate.Helper
         public static object GetObjectValue(object obj, string fieldPath)
         {
             var currObj = obj;
-            var fieldArr = fieldPath.Split('.');
+            var fieldArr = GetPathArrayCached(fieldPath);
 
             for (int i = 0; i < fieldArr.Length; i++)
             {
-                var props = currObj.GetType().GetProperties();
-                var prop = props.FirstOrDefault(a => a.Name == fieldArr[i]);
+                var prop = GetPropertyCached(currObj.GetType(), fieldArr[i]);
                 if (prop == null)
                 {
-                    throw new Exception($"类型 {obj.GetType().Name} 内找不到字段 {fieldPath}");
+                    throw new ArgumentException($"类型 {currObj.GetType().Name} 内找不到字段 {fieldArr[i]}");
                 }
 
                 if (i < (fieldArr.Length - 1))
@@ -83,8 +106,7 @@ namespace ExcelTemplate.Helper
                     var tmp = prop.GetValue(currObj);
                     if (tmp == null)
                     {
-                        tmp = Activator.CreateInstance(prop.PropertyType);
-                        prop.SetValue(currObj, tmp);
+                        return null;
                     }
 
                     currObj = tmp;
@@ -107,7 +129,7 @@ namespace ExcelTemplate.Helper
         {
             if (list == null) throw new ArgumentNullException(nameof(list));
 
-            Type listType = list.GetType();
+            var listType = list.GetType();
 
             // 检查是否是List<T>
             if (!listType.IsGenericType || listType.GetGenericTypeDefinition() != typeof(List<>))
@@ -116,7 +138,7 @@ namespace ExcelTemplate.Helper
             }
 
             // 获取元素类型
-            Type elementType = listType.GetGenericArguments()[0];
+            var elementType = listType.GetGenericArguments()[0];
 
             // 检查item类型是否匹配
             if (item != null && !elementType.IsAssignableFrom(item.GetType()))
@@ -124,9 +146,11 @@ namespace ExcelTemplate.Helper
                 throw new ArgumentException($"无法将类型{item.GetType()}添加到List<{elementType}>");
             }
 
-            // 获取并调用Add方法
-            var addMethod = listType.GetMethod("Add");
-            addMethod.Invoke(list, new[] { item });
+            // 直接通过 IList 接口添加，避免反射 Invoke 性能损耗
+            if (list is System.Collections.IList iList)
+            {
+                iList.Add(item);
+            }
         }
 
         /// <summary>

@@ -14,7 +14,12 @@ namespace ExcelTemplate.Helper
         /// <exception cref="Exception"></exception>
         public static int ParseRow(string letter)
         {
-            letter = letter?.ToUpper();
+            if (string.IsNullOrWhiteSpace(letter))
+            {
+                throw new ArgumentException("Cell位置错误，请输入正确的 Letter 格式");
+            }
+
+            letter = letter.ToUpper();
             var match = Regex.Match(letter, LETTER_FORMAT);
             if (match.Groups.Count != 3)
             {
@@ -31,7 +36,12 @@ namespace ExcelTemplate.Helper
         /// <returns>列索引</returns>
         public static int ParseCol(string letter)
         {
-            letter = letter?.ToUpper();
+            if (string.IsNullOrWhiteSpace(letter))
+            {
+                throw new ArgumentException("Cell位置错误，请输入正确的 Letter 格式");
+            }
+
+            letter = letter.ToUpper();
             var match = Regex.Match(letter, LETTER_FORMAT);
             if (match.Groups.Count != 3)
             {
