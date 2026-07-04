@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
-using ExcelTemplate.Exceptions;
 using ExcelTemplate.Extensions;
 using ExcelTemplate.Helper;
 using ExcelTemplate.Model;
@@ -13,7 +12,6 @@ using ExcelTemplate.Style;
 using NPOI.SS.UserModel;
 using NPOI.Util;
 using NPOI.XSSF.UserModel;
-using NPOI.XWPF.UserModel;
 
 namespace ExcelTemplate.Hint
 {
@@ -201,15 +199,38 @@ namespace ExcelTemplate.Hint
         /// 生成提示文件
         /// </summary>
         /// <returns></returns>
-        public byte[] BuildFile()
+        public Stream BuildFile()
         {
-            using (var ms = new MemoryStream())
-            {
-                var book = BuildExcel();
-                book.Write(ms);
+            var ms = new MemoryStream();
+            var book = BuildExcel();
+            book.Write(ms);
 
-                return ms.ToArray();
-            }
+            ms.Seek(0, SeekOrigin.Begin);
+
+            return ms;
+        }
+
+        /// <summary>
+        /// 生成行提示
+        /// </summary>
+        /// <returns></returns>
+        public List<RowHintMessage> BuildRowMessages()
+        {
+            return _messages
+                .GroupBy(a => a.Position.Row)
+                .Select(a => new RowHintMessage(a.Key, string.Join("; ", a.Select(b => b.Message))))
+                .ToList();
+        }
+
+        /// <summary>
+        /// 获取原始提示
+        /// </summary>
+        /// <returns></returns>
+        public List<CellHintMessage> GetRawMessages()
+        {
+            return _messages
+                .Select(a => (CellHintMessage)a.Clone())
+                .ToList();
         }
     }
 }

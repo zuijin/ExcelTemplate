@@ -1,11 +1,9 @@
-using ExcelTemplate.Model;
 using System;
-using System.Collections.Generic;
-using System.Text;
+using ExcelTemplate.Model;
 
 namespace ExcelTemplate.Hint
 {
-    public class CellHintMessage
+    public class CellHintMessage : ICloneable
     {
         /// <summary>
         /// 实例化单元格提示信息
@@ -50,5 +48,13 @@ namespace ExcelTemplate.Hint
         /// 提示信息
         /// </summary>
         public string Message { get; set; }
+
+        public object Clone()
+        {
+            var obj = (CellHintMessage)this.MemberwiseClone();
+            obj.Position = (Position)this.Position.Clone();
+
+            return obj;
+        }
     }
 }
